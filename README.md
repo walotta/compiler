@@ -2,8 +2,7 @@
 
 `Homework for ACM Class, beginning at 2021.9.17`
 
-## 作业描述&&要求
-   * [<strong>Compiler-2021</strong>](#)
+   * [<strong>Compiler-2022</strong>](#)
       * [<strong>Grading-Policy</strong>](#grading-policy)
       * [<strong>About-the-course</strong>](#about-the-course)
       * [<strong>部分术语定义</strong>](#部分术语定义)
@@ -33,6 +32,7 @@
             * [<strong>9.1 函数定义</strong>](#91-函数定义)
             * [<strong>9.2 内建函数</strong>](#92-内建函数)
             * [<strong>9.3 函数返回值</strong>](#93-函数返回值)
+            * [<strong>9.4 Lambda表达式</strong>](#94-Lambda-表达式)
          * [<strong>10 表达式：</strong>](#10-表达式)
             * [<strong>10.1 单目表达式</strong>](#101-单目表达式)
             * [<strong>10.2 双目表达式</strong>](#102-双目表达式)
@@ -338,7 +338,7 @@ foo test(){ return this; }
 }
 ``````
 
-注意在Mx*中不支持lambda函数表达式，不支持匿名函数，没有方法声明函数的签名，也不支持在一个函数内嵌套申明另一个子函数或类。
+注意在Mx\*中没有方法声明函数的签名，也不支持在一个函数内嵌套申明另一个子函数或类。**Lambda 表达式与匿名函数在Codegen、Optimize阶段是未定义的。**
 
 #### **9.2 内建函数**
 
@@ -395,6 +395,49 @@ int main(){
 }
 ``````
 
+#### **9.4 Lambda 表达式：**
+
+Lambda表达式已经成为现代程序语言中非常重要的一个功能，它可以简化代码。例如如下的两种代码是等效的。
+
+``````Java
+Arrays.sort(array, new Comparator<String>() {
+    public int compare(String s1, String s2) {
+        return s1.compareTo(s2);
+    }
+});
+``````
+
+``````Java
+Arrays.sort(array, (s1, s2) -> {
+            return s1.compareTo(s2);
+        });
+``````
+
+为了让大家熟悉Lambda表达式，我们的编译器需要支持一个非常简单的Lambda表达式。**为了简化，Lambda表达式仅出现在semantic阶段，codegen与optimize阶段出现Lambda表达式是未定义的。Lambda表达式本身作为对象是未定义的。**
+
+同样为了简化，我们的Lambda表达式语法很单一，没有特别的语法糖。
+
+基本语法：`[&](Parameters) -> {Statements}`
+
+解释：`[&]`作为关键字符。其余定义同函数。如果参数为空，参数括号可以省略，调用括号不可以省略。
+
+作用域的解释：Parameters如果出现和全局域重名的变量，应当遵循作用域遮蔽原则。为了简化，Expressions和Statements默认可以访问顶层域的所有对象。
+
+在这里，我们借用C++中**省略返回值的形式**。你的编译器应该支持通过return语句分析返回值并判断，如果Lambda表达式函数体没有return语句，那么返回值为void。
+
+参数可以留空。
+
+Lambda表达式的调用同函数。
+
+例子：
+
+``````C
+int sum = [&](int a, int b) -> { return a + b; }(1, 2); // 正确
+int sum2 = [&]() -> { return sum; }(12); // 错误
+int sum3 = [&]() -> { return sum; }(); // 正确
+int foo = [&] -> {return 1;}(); // 正确
+``````
+
 ### **10 表达式：**
 
 #### **10.1 单目表达式**
@@ -423,11 +466,9 @@ int main(){
 
 或者同时声明多个变量和初始值：
 
-`<Type> <VariableIdentifier 1> = <Initial Expression 1>, <VariableIdentifier 2>, <VariableIdentifier 3> = <Initial Expression 3>`
+`<Type> <VariableIdentifier 1> = <Initial Expression 1>, <VariableIdentifier 2> = <Initial Expression 2>, <VariableIdentifier 3> = <Initial Expression 3>`
 
-变量在使用之前应当被赋值了，没有赋值的对象直接使用是未定义行为，在一行里对多个参量进行声明赋值是未定义行为。
-
-举例：`int a = 0, b = 0;` 这是未定义的。
+变量在使用之前应当被赋值了，没有赋值的对象直接使用是未定义行为。
 
 对于自定义类的对象声明如果没有进行`new`的实例化操作，默认为null，允许没有赋初值的对象（此时为`null`，保证仅出现在semantic检查阶段）。
 
@@ -584,7 +625,7 @@ for(;;) int a = 0;
 4. 数组对象的一个元素。
 5. 前置++/--的返回值 （e.g. (++(++x))++是合法的）（特别地：前缀/后缀加出现在等号左边是未定义的。）
 
-我们的Mx*要求至少支持上述五种类型的左值。更多的左值是未定义的（注意不是语法错误）。
+我们的Mx\*要求至少支持上述五种类型的左值。更多的左值是未定义的（注意不是语法错误）。
 
 ## 编译规则：
 
