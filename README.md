@@ -458,7 +458,7 @@ int foo = [&] -> {return 1;}(); // 正确
 
 此处的变量不是类成员变量，类成员变量的定义参阅类的定义。变量声明语句语法如下：
 
-`<Type 1> <VariableIdentifier 1>, <VariableIdentifier 2>;`
+`<Type> <VariableIdentifier 1>, <VariableIdentifier 2>;`
 
 或者
 
