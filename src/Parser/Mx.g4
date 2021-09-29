@@ -103,6 +103,11 @@ expersion
     |   expersion op=LogicAnd expersion
     |   expersion op=LogicOr expersion
     |   <assoc=right> expersion op=Equal expersion
+    |   lambda
+    ;
+
+lambda
+    :   '[''&'']''('(type Identifier (',' type Identifier)*)?')''{'statement*'}'
     ;
 
 constValue
