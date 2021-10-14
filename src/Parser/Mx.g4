@@ -27,8 +27,8 @@ varBlock
     ;
 
 retType
-    :   type
-    |   Void
+    :   type        #typeRet
+    |   Void        #voidRet
     ;
 
 singleVarBlock
@@ -36,8 +36,8 @@ singleVarBlock
     ;
 
 type
-    :   singleType
-    |   singleType ('[' ']')*
+    :   singleType              #single
+    |   singleType ('[' ']')*   #array
     ;
 
 singleType
@@ -52,62 +52,46 @@ statementBlock
     ;
 
 statement
-    :   statementBlock
-    |   varBlock
-    |   ifStatement
-    |   forStatement
-    |   whileStatement
-    |   Break';'
-    |   Continue';'
-    |   Return expersion?';'
-    |   expersion? ';'
-    ;
-
-ifStatement
-    :   If'('expersion')' trueStatement=statement (Else falseStatement=statement)?
-    ;
-
-forStatement
-    :   For'('initExp=expersion?';'finishExp=expersion?';'stepExp=expersion?')'statement
-    ;
-
-whileStatement
-    :   While'('finishExp=expersion')'statement
+    :   statementBlock                                                                          #stateBlock
+    |   varBlock                                                                                #varDefine
+    |   If'('expersion')' trueStatement=statement (Else falseStatement=statement)?              #if
+    |   For'('initExp=expersion?';'finishExp=expersion?';'stepExp=expersion?')'statement        #for
+    |   While'('finishExp=expersion')'statement                                                 #while
+    |   Break';'                                                                                #break
+    |   Continue';'                                                                             #continue
+    |   Return expersion?';'                                                                    #ret
+    |   expersion? ';'                                                                          #exp
     ;
 
 expersion
-    :   '('expersion')'
-    |   Identifier
-    |   constValue
-    |   New singleType
-    |   New singleType'('')'
-    |   New singleType'('expersion(','expersion)*')'
-    |   New singleType('['expersion']')+('['']')*
-    |   New singleType('['expersion']')+('['']')*('['expersion']')+
-    |   expersion'.'Identifier
-    |   array=expersion'['index=expersion']'
-    |   funcName=expersion'('(expersion(','expersion)*)?')'
-    |   expersion op=(SelfAdd|SelfSub)
-    |   <assoc=right> op=(SelfAdd|SelfSub) expersion
-    |   <assoc=right> op=(Add|Sub) expersion
-    |   <assoc=right> op=(LogicNot|BitNot) expersion
-    |   expersion op=(Mul|Div|Mod) expersion
-    |   expersion op=(Add|Sub) expersion
-    |   expersion op=(BitLeft|BitRight) expersion
-    |   expersion op=(SmallThan|BigThan) expersion
-    |   expersion op=(SmallEqual|BigEqual) expersion
-    |   expersion op=(IsEqual|IsNotEqual) expersion
-    |   expersion op=BitAnd expersion
-    |   expersion op=BitXor expersion
-    |   expersion op=BitOr expersion
-    |   expersion op=LogicAnd expersion
-    |   expersion op=LogicOr expersion
-    |   <assoc=right> expersion op=Equal expersion
-    |   lambda
-    ;
-
-lambda
-    :   '[''&'']''('(type Identifier (',' type Identifier)*)?')''{'statement*'}'
+    :   '('expersion')'                                                             #block
+    |   Identifier                                                                  #identifier
+    |   constValue                                                                  #const
+    |   New singleType                                                              #newVarNoValue
+    |   New singleType'('')'                                                        #newVarEmptyValue
+    |   New singleType'('expersion(','expersion)*')'                                #newVarWithValue
+    |   New singleType('['expersion']')+('['']')*                                   #newArray
+    |   New singleType('['expersion']')+('['']')*('['expersion']')+                 #newArrayErr
+    |   expersion'.'Identifier                                                      #classVar
+    |   array=expersion'['index=expersion']'                                        #arrayMember
+    |   funcName=expersion'('(expersion(','expersion)*)?')'                         #funcCall
+    |   expersion op=(SelfAdd|SelfSub)                                              #selfOpRight
+    |   <assoc=right> op=(SelfAdd|SelfSub) expersion                                #selfOpLeft
+    |   <assoc=right> op=(Add|Sub) expersion                                        #valuenceOp
+    |   <assoc=right> op=(LogicNot|BitNot) expersion                                #logicOp
+    |   expersion op=(Mul|Div|Mod) expersion                                        #multiplyDivide
+    |   expersion op=(Add|Sub) expersion                                            #addSub
+    |   expersion op=(BitLeft|BitRight) expersion                                   #bitMove
+    |   expersion op=(SmallThan|BigThan) expersion                                  #compareNoEqual
+    |   expersion op=(SmallEqual|BigEqual) expersion                                #compareEqual
+    |   expersion op=(IsEqual|IsNotEqual) expersion                                 #equalJudge
+    |   expersion op=BitAnd expersion                                               #bitAnd
+    |   expersion op=BitXor expersion                                               #bitXor
+    |   expersion op=BitOr expersion                                                #bitOr
+    |   expersion op=LogicAnd expersion                                             #logicAnd
+    |   expersion op=LogicOr expersion                                              #logicOr
+    |   <assoc=right> expersion op=Equal expersion                                  #assign
+    |   '[''&'']''('(type Identifier (',' type Identifier)*)?')''{'statement*'}'    #lambdaExp
     ;
 
 constValue
