@@ -1,5 +1,10 @@
+import AST.RootNode;
+import Frontend.ASTBuilder;
+import Parser.MxLexer;
+import Parser.MxParser;
+import Util.MxErrorListener;
 import Util.error.error;
-import Util.position;
+import Util.Scope.globalScope;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -24,6 +29,18 @@ public class Main {
             }
         }
         try {
+            RootNode ASTRoot;
+            globalScope gScope = new globalScope();
+
+            MxLexer lexer=new MxLexer(CharStreams.fromStream(System.in));
+            lexer.removeErrorListeners();
+            lexer.addErrorListener(new MxErrorListener());
+            MxParser parser=new MxParser(new CommonTokenStream(lexer));
+            parser.removeErrorListeners();
+            parser.addErrorListener(new MxErrorListener());
+            ParseTree parseTreeRoot = parser.program();
+            ASTBuilder astBuilder = new ASTBuilder();
+
             if(runSemantic){
                 //run semantic checker
                 System.err.println("now run semantic");

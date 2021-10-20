@@ -47,19 +47,11 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitVarBlock(MxParser.VarBlockContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code typeRet}
-	 * labeled alternative in {@link MxParser#retType}.
+	 * Visit a parse tree produced by {@link MxParser#retType}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitTypeRet(MxParser.TypeRetContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code voidRet}
-	 * labeled alternative in {@link MxParser#retType}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitVoidRet(MxParser.VoidRetContext ctx);
+	T visitRetType(MxParser.RetTypeContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MxParser#singleVarBlock}.
 	 * @param ctx the parse tree
@@ -67,19 +59,11 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSingleVarBlock(MxParser.SingleVarBlockContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code single}
-	 * labeled alternative in {@link MxParser#type}.
+	 * Visit a parse tree produced by {@link MxParser#type}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSingle(MxParser.SingleContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code array}
-	 * labeled alternative in {@link MxParser#type}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitArray(MxParser.ArrayContext ctx);
+	T visitType(MxParser.TypeContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MxParser#singleType}.
 	 * @param ctx the parse tree
@@ -142,211 +126,106 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitContinue(MxParser.ContinueContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code ret}
+	 * Visit a parse tree produced by the {@code retStatement}
 	 * labeled alternative in {@link MxParser#statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRet(MxParser.RetContext ctx);
+	T visitRetStatement(MxParser.RetStatementContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code exp}
+	 * Visit a parse tree produced by the {@code expStatement}
 	 * labeled alternative in {@link MxParser#statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitExp(MxParser.ExpContext ctx);
+	T visitExpStatement(MxParser.ExpStatementContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code newVarEmptyValue}
-	 * labeled alternative in {@link MxParser#expersion}.
+	 * Visit a parse tree produced by the {@code classMember}
+	 * labeled alternative in {@link MxParser#experssion}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitNewVarEmptyValue(MxParser.NewVarEmptyValueContext ctx);
+	T visitClassMember(MxParser.ClassMemberContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code newVarNoValue}
-	 * labeled alternative in {@link MxParser#expersion}.
+	 * Visit a parse tree produced by the {@code atomExpr}
+	 * labeled alternative in {@link MxParser#experssion}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitNewVarNoValue(MxParser.NewVarNoValueContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code const}
-	 * labeled alternative in {@link MxParser#expersion}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitConst(MxParser.ConstContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code bitOr}
-	 * labeled alternative in {@link MxParser#expersion}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBitOr(MxParser.BitOrContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code logicOr}
-	 * labeled alternative in {@link MxParser#expersion}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLogicOr(MxParser.LogicOrContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code compareEqual}
-	 * labeled alternative in {@link MxParser#expersion}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCompareEqual(MxParser.CompareEqualContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code classVar}
-	 * labeled alternative in {@link MxParser#expersion}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitClassVar(MxParser.ClassVarContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code logicAnd}
-	 * labeled alternative in {@link MxParser#expersion}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLogicAnd(MxParser.LogicAndContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code newArrayErr}
-	 * labeled alternative in {@link MxParser#expersion}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNewArrayErr(MxParser.NewArrayErrContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code valuenceOp}
-	 * labeled alternative in {@link MxParser#expersion}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitValuenceOp(MxParser.ValuenceOpContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code block}
-	 * labeled alternative in {@link MxParser#expersion}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBlock(MxParser.BlockContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code identifier}
-	 * labeled alternative in {@link MxParser#expersion}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIdentifier(MxParser.IdentifierContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code selfOpLeft}
-	 * labeled alternative in {@link MxParser#expersion}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSelfOpLeft(MxParser.SelfOpLeftContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code selfOpRight}
-	 * labeled alternative in {@link MxParser#expersion}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSelfOpRight(MxParser.SelfOpRightContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code bitMove}
-	 * labeled alternative in {@link MxParser#expersion}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBitMove(MxParser.BitMoveContext ctx);
+	T visitAtomExpr(MxParser.AtomExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code newArray}
-	 * labeled alternative in {@link MxParser#expersion}.
+	 * labeled alternative in {@link MxParser#experssion}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitNewArray(MxParser.NewArrayContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code addSub}
-	 * labeled alternative in {@link MxParser#expersion}.
+	 * Visit a parse tree produced by the {@code binaryExpr}
+	 * labeled alternative in {@link MxParser#experssion}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitAddSub(MxParser.AddSubContext ctx);
+	T visitBinaryExpr(MxParser.BinaryExprContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code equalJudge}
-	 * labeled alternative in {@link MxParser#expersion}.
+	 * Visit a parse tree produced by the {@code newInitObject}
+	 * labeled alternative in {@link MxParser#experssion}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitEqualJudge(MxParser.EqualJudgeContext ctx);
+	T visitNewInitObject(MxParser.NewInitObjectContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code newVarWithValue}
-	 * labeled alternative in {@link MxParser#expersion}.
+	 * Visit a parse tree produced by the {@code postFixIncDec}
+	 * labeled alternative in {@link MxParser#experssion}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitNewVarWithValue(MxParser.NewVarWithValueContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code multiplyDivide}
-	 * labeled alternative in {@link MxParser#expersion}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMultiplyDivide(MxParser.MultiplyDivideContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code bitAnd}
-	 * labeled alternative in {@link MxParser#expersion}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBitAnd(MxParser.BitAndContext ctx);
+	T visitPostFixIncDec(MxParser.PostFixIncDecContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code arrayMember}
-	 * labeled alternative in {@link MxParser#expersion}.
+	 * labeled alternative in {@link MxParser#experssion}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitArrayMember(MxParser.ArrayMemberContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code compareNoEqual}
-	 * labeled alternative in {@link MxParser#expersion}.
+	 * Visit a parse tree produced by the {@code unaryExpr}
+	 * labeled alternative in {@link MxParser#experssion}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitCompareNoEqual(MxParser.CompareNoEqualContext ctx);
+	T visitUnaryExpr(MxParser.UnaryExprContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code bitXor}
-	 * labeled alternative in {@link MxParser#expersion}.
+	 * Visit a parse tree produced by the {@code newArrayErr}
+	 * labeled alternative in {@link MxParser#experssion}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitBitXor(MxParser.BitXorContext ctx);
+	T visitNewArrayErr(MxParser.NewArrayErrContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code newObject}
+	 * labeled alternative in {@link MxParser#experssion}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNewObject(MxParser.NewObjectContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code lambdaExp}
-	 * labeled alternative in {@link MxParser#expersion}.
+	 * labeled alternative in {@link MxParser#experssion}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitLambdaExp(MxParser.LambdaExpContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code logicOp}
-	 * labeled alternative in {@link MxParser#expersion}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLogicOp(MxParser.LogicOpContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code funcCall}
-	 * labeled alternative in {@link MxParser#expersion}.
+	 * labeled alternative in {@link MxParser#experssion}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitFuncCall(MxParser.FuncCallContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code assign}
-	 * labeled alternative in {@link MxParser#expersion}.
+	 * labeled alternative in {@link MxParser#experssion}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
