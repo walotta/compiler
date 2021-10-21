@@ -79,19 +79,19 @@ experssion
     |   <assoc=right> op=(SelfAdd|SelfSub) experssion                                 #unaryExpr
     |   <assoc=right> op=(Add|Sub) experssion                                         #unaryExpr
     |   <assoc=right> op=(LogicNot|BitNot) experssion                                 #unaryExpr
-    |   experssion op=(Mul|Div|Mod) experssion                                        #binaryExpr
-    |   experssion op=(Add|Sub) experssion                                            #binaryExpr
-    |   experssion op=(BitLeft|BitRight) experssion                                   #binaryExpr
-    |   experssion op=(SmallThan|BigThan) experssion                                  #binaryExpr
-    |   experssion op=(SmallEqual|BigEqual) experssion                                #binaryExpr
-    |   experssion op=(IsEqual|IsNotEqual) experssion                                 #binaryExpr
-    |   experssion op=BitAnd experssion                                               #binaryExpr
-    |   experssion op=BitXor experssion                                               #binaryExpr
-    |   experssion op=BitOr experssion                                                #binaryExpr
-    |   experssion op=LogicAnd experssion                                             #binaryExpr
-    |   experssion op=LogicOr experssion                                              #binaryExpr
-    |   <assoc=right> experssion op=Equal experssion                                  #assign
-    |   '[''&'']''('(type Identifier (',' type Identifier)*)?')''{'statement*'}'      #lambdaExpr
+    |   left=experssion op=(Mul|Div|Mod) right=experssion                             #binaryExpr
+    |   left=experssion op=(Add|Sub) right=experssion                                 #binaryExpr
+    |   left=experssion op=(BitLeft|BitRight) right=experssion                        #binaryExpr
+    |   left=experssion op=(SmallThan|BigThan) right=experssion                       #binaryExpr
+    |   left=experssion op=(SmallEqual|BigEqual) right=experssion                     #binaryExpr
+    |   left=experssion op=(IsEqual|IsNotEqual) right=experssion                      #binaryExpr
+    |   left=experssion op=BitAnd right=experssion                                    #binaryExpr
+    |   left=experssion op=BitXor right=experssion                                    #binaryExpr
+    |   left=experssion op=BitOr right=experssion                                     #binaryExpr
+    |   left=experssion op=LogicAnd right=experssion                                  #binaryExpr
+    |   left=experssion op=LogicOr right=experssion                                   #binaryExpr
+    |   <assoc=right> left=experssion op=Equal right=experssion                       #assign
+    |   '[''&'']''('(type Identifier (',' type Identifier)*)?')'statementBlock        #lambdaExpr
     ;
 
 constValue
