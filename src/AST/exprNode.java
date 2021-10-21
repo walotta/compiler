@@ -5,7 +5,9 @@ import Util.position;
 
 public class exprNode extends ASTNode{
     public Type type;
-    public boolean isAssignable=false;
+    public boolean isAssignable;
+
+    public boolean isConst=false;
 
     public exprNode(position pos, boolean isAssignable){
         super(pos);

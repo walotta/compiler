@@ -3,6 +3,7 @@ package Frontend;
 import AST.*;
 import Parser.MxBaseVisitor;
 import Parser.MxParser;
+import Util.error.semanticError;
 import Util.position;
 
 import java.util.ArrayList;
@@ -249,12 +250,20 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitAtomExpr(MxParser.AtomExprContext ctx){
-        //todo
+
+        if(ctx.experssion()!=null){
+            return visit(ctx.experssion());
+        }else if(ctx.Identifier()!=null){
+            return new varNode(new position(ctx),ctx.Identifier().getText());
+        }else if(ctx.constValue()!=null){
+            return visit(ctx.constValue());
+        }else return null;
     }
 
     @Override
     public ASTNode visitNewArrayErr(MxParser.NewArrayErrContext ctx){
-        //todo
+
+        throw new semanticError("[ASTBuilder][error new array] mistake way of array new", new position(ctx));
     }
 
     @Override
@@ -312,4 +321,23 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
         //todo
     }
 
+    @Override
+    public ASTNode visitConstValue(MxParser.ConstValueContext ctx){
+
+        if(ctx.This()!=null){
+            return new thisExprNode(new position(ctx));
+        }else if(ctx.True()!=null){
+            return new boolConstNode(new position(ctx),true);
+        }else if(ctx.False()!=null){
+            return new boolConstNode(new position(ctx),false);
+        }else if(ctx.Null()!=null){
+            return new nullConstNode(new position(ctx));
+        }else if(ctx.IntegerConstant()!=null){
+            return new intConstNode(new position(ctx),Integer.parseInt(ctx.IntegerConstant().getText()));
+        }else if(ctx.StringConstant()!=null){
+            return new stringConstNode(new position(ctx),ctx.StringConstant().getText());
+        }else{
+            return null;
+        }
+    }
 }
