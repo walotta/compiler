@@ -13,7 +13,7 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
     public ASTNode visitProgram(MxParser.ProgramContext ctx){
         ArrayList<ASTNode> tmp=new ArrayList<ASTNode>();
         for (var item:ctx.programBlock()){
-            tmp.add((ASTNode) visit(item));
+            tmp.add(visit(item));
         }
         return new programNode(new position(ctx), tmp);
     }
@@ -362,7 +362,7 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitBinaryExpr(MxParser.BinaryExprContext ctx){
-        //todo
+
         exprNode leftExpr,rightExpr;
         leftExpr=(exprNode) visit(ctx.left);
         rightExpr=(exprNode) visit(ctx.right);

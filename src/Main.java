@@ -1,5 +1,6 @@
-import AST.RootNode;
+import AST.*;
 import Frontend.ASTBuilder;
+import Frontend.SymbolCollector;
 import Parser.MxLexer;
 import Parser.MxParser;
 import Util.MxErrorListener;
@@ -29,7 +30,7 @@ public class Main {
             }
         }
         try {
-            RootNode ASTRoot;
+            programNode ASTRoot;
             globalScope gScope = new globalScope();
 
             MxLexer lexer=new MxLexer(CharStreams.fromStream(System.in));
@@ -40,15 +41,17 @@ public class Main {
             parser.addErrorListener(new MxErrorListener());
             ParseTree parseTreeRoot = parser.program();
             ASTBuilder astBuilder = new ASTBuilder();
+            ASTRoot=(programNode) astBuilder.visit(parseTreeRoot);
 
             if(runSemantic){
                 //run semantic checker
-                System.err.println("now run semantic");
+                System.err.println("running semantic ...");
+                new SymbolCollector(gScope).visit(ASTRoot);
             }
             if(onlySemantic)return;
 
             //run build program
-            System.err.println("now build codegen");
+            System.err.println("building codegen ...");
         }catch (error errorPoint) {
             System.err.println(errorPoint.toString());
             throw new RuntimeException();
