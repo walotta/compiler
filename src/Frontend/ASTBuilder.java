@@ -32,7 +32,7 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitClassBlock(MxParser.ClassBlockContext ctx){
-        //todo
+
         String className;
         ArrayList<funcBlockNode> funcList=new ArrayList<funcBlockNode>();
         ArrayList<varBlockNode> varLists=new ArrayList<varBlockNode>();
@@ -158,47 +158,93 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitStatementBlock(MxParser.StatementBlockContext ctx){
-        //todo
+
+        ArrayList<statementNode> statementList=new ArrayList<statementNode>();
+
+        for(var item:ctx.statement()){
+            statementList.add((statementNode) visit(item));
+        }
+
+        return new statementBlockNode(new position(ctx),statementList);
     }
 
     @Override
-    public ASTNode visitVarDefine(MxParser.VarBlockContext ctx){
-        //todo
+    public ASTNode visitStateBlock(MxParser.StateBlockContext ctx){
+
+        return visit(ctx.statementBlock());
+    }
+
+    @Override
+    public ASTNode visitVarDefine(MxParser.VarDefineContext ctx){
+
+        return visit(ctx.varBlock());
     }
 
     @Override
     public ASTNode visitIf(MxParser.IfContext ctx){
-        //todo
+
+        exprNode condition;
+        statementNode trueState,falseState;
+
+        condition=(exprNode) visit(ctx.experssion());
+        trueState=(statementNode) visit(ctx.trueStatement);
+        if(ctx.falseStatement==null){
+            falseState=null;
+        }else{
+            falseState=(statementNode) visit(ctx.falseStatement);
+        }
+
+        return new ifNode(new position(ctx),condition,trueState,falseState);
     }
 
     @Override
     public ASTNode visitFor(MxParser.ForContext ctx){
-        //todo
+
+        exprNode initExp,finishExp,stepExp;
+        statementNode runStatement;
+
+        initExp=(ctx.initExp==null)?null:(exprNode) visit(ctx.initExp);
+        finishExp=(ctx.finishExp==null)?null:(exprNode) visit(ctx.finishExp);
+        stepExp=(ctx.stepExp==null)?null:(exprNode) visit(ctx.stepExp);
+        runStatement=(statementNode) visit(ctx.statement());
+
+        return new forNode(new position(ctx),initExp,finishExp,stepExp,runStatement);
     }
 
     @Override
     public ASTNode visitWhile(MxParser.WhileContext ctx){
-        //todo
+
+        return new whileNode(new position(ctx),(exprNode) visit(ctx.finishExp),(statementNode) visit(ctx.statement()));
     }
 
     @Override
     public ASTNode visitBreak(MxParser.BreakContext ctx){
-        //todo
+
+        return new breakNode(new position(ctx));
     }
 
     @Override
     public ASTNode visitContinue(MxParser.ContinueContext ctx){
-        //todo
+
+        return new continueNode(new position(ctx));
     }
 
     @Override
     public ASTNode visitRetStatement(MxParser.RetStatementContext ctx){
-        //todo
+
+        return new retNode(new position(ctx),(ctx.experssion()==null)?null:(exprNode) visit(ctx.experssion()));
     }
 
     @Override
     public ASTNode visitExpStatement(MxParser.ExpStatementContext ctx){
-        //todo
+
+        return new exprStatementNode(new position(ctx),(exprNode) visit(ctx.experssion()));
+    }
+
+    @Override
+    public ASTNode visitEmptyStatement(MxParser.EmptyStatementContext ctx){
+
+        return new emptyStatementNode(new position(ctx));
     }
 
     @Override
@@ -262,7 +308,7 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
     }
 
     @Override
-    public ASTNode visitLambdaExp(MxParser.LambdaExpContext ctx){
+    public ASTNode visitLambdaExpr(MxParser.LambdaExprContext ctx){
         //todo
     }
 

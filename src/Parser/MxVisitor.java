@@ -140,6 +140,13 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitExpStatement(MxParser.ExpStatementContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code emptyStatement}
+	 * labeled alternative in {@link MxParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEmptyStatement(MxParser.EmptyStatementContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code classMember}
 	 * labeled alternative in {@link MxParser#experssion}.
 	 * @param ctx the parse tree
@@ -203,19 +210,19 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitNewArrayErr(MxParser.NewArrayErrContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code lambdaExpr}
+	 * labeled alternative in {@link MxParser#experssion}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLambdaExpr(MxParser.LambdaExprContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code newObject}
 	 * labeled alternative in {@link MxParser#experssion}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitNewObject(MxParser.NewObjectContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code lambdaExp}
-	 * labeled alternative in {@link MxParser#experssion}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLambdaExp(MxParser.LambdaExpContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code funcCall}
 	 * labeled alternative in {@link MxParser#experssion}.

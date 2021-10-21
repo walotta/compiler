@@ -8,9 +8,9 @@ public class statementBlockNode extends statementNode {
 
     public ArrayList<statementNode> statementList;
 
-    public statementBlockNode(position pos){
+    public statementBlockNode(position pos,ArrayList<statementNode> statementList){
         super(pos);
-        this.statementList=null;
+        this.statementList=statementList;
     }
 
 }

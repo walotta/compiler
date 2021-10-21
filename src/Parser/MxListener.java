@@ -226,6 +226,18 @@ public interface MxListener extends ParseTreeListener {
 	 */
 	void exitExpStatement(MxParser.ExpStatementContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code emptyStatement}
+	 * labeled alternative in {@link MxParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterEmptyStatement(MxParser.EmptyStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code emptyStatement}
+	 * labeled alternative in {@link MxParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitEmptyStatement(MxParser.EmptyStatementContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code classMember}
 	 * labeled alternative in {@link MxParser#experssion}.
 	 * @param ctx the parse tree
@@ -334,6 +346,18 @@ public interface MxListener extends ParseTreeListener {
 	 */
 	void exitNewArrayErr(MxParser.NewArrayErrContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code lambdaExpr}
+	 * labeled alternative in {@link MxParser#experssion}.
+	 * @param ctx the parse tree
+	 */
+	void enterLambdaExpr(MxParser.LambdaExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code lambdaExpr}
+	 * labeled alternative in {@link MxParser#experssion}.
+	 * @param ctx the parse tree
+	 */
+	void exitLambdaExpr(MxParser.LambdaExprContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code newObject}
 	 * labeled alternative in {@link MxParser#experssion}.
 	 * @param ctx the parse tree
@@ -345,18 +369,6 @@ public interface MxListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitNewObject(MxParser.NewObjectContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code lambdaExp}
-	 * labeled alternative in {@link MxParser#experssion}.
-	 * @param ctx the parse tree
-	 */
-	void enterLambdaExp(MxParser.LambdaExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code lambdaExp}
-	 * labeled alternative in {@link MxParser#experssion}.
-	 * @param ctx the parse tree
-	 */
-	void exitLambdaExp(MxParser.LambdaExpContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code funcCall}
 	 * labeled alternative in {@link MxParser#experssion}.

@@ -60,7 +60,8 @@ statement
     |   Break';'                                                                                #break
     |   Continue';'                                                                             #continue
     |   Return experssion?';'                                                                   #retStatement
-    |   experssion? ';'                                                                         #expStatement
+    |   experssion ';'                                                                          #expStatement
+    |   ';'                                                                                     #emptyStatement
     ;
 
 experssion
@@ -90,7 +91,7 @@ experssion
     |   experssion op=LogicAnd experssion                                             #binaryExpr
     |   experssion op=LogicOr experssion                                              #binaryExpr
     |   <assoc=right> experssion op=Equal experssion                                  #assign
-    |   '[''&'']''('(type Identifier (',' type Identifier)*)?')''{'statement*'}'      #lambdaExp
+    |   '[''&'']''('(type Identifier (',' type Identifier)*)?')''{'statement*'}'      #lambdaExpr
     ;
 
 constValue

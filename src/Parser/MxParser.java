@@ -951,6 +951,22 @@ public class MxParser extends Parser {
 			super.copyFrom(ctx);
 		}
 	}
+	public static class EmptyStatementContext extends StatementContext {
+		public EmptyStatementContext(StatementContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MxListener ) ((MxListener)listener).enterEmptyStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MxListener ) ((MxListener)listener).exitEmptyStatement(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MxVisitor ) return ((MxVisitor<? extends T>)visitor).visitEmptyStatement(this);
+			else return visitor.visitChildren(this);
+		}
+	}
 	public static class BreakContext extends StatementContext {
 		public TerminalNode Break() { return getToken(MxParser.Break, 0); }
 		public BreakContext(StatementContext ctx) { copyFrom(ctx); }
@@ -1158,7 +1174,7 @@ public class MxParser extends Parser {
 		try {
 			setState(179);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,20,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,19,_ctx) ) {
 			case 1:
 				_localctx = new StateBlockContext(_localctx);
 				enterOuterAlt(_localctx, 1);
@@ -1311,16 +1327,16 @@ public class MxParser extends Parser {
 				_localctx = new ExpStatementContext(_localctx);
 				enterOuterAlt(_localctx, 9);
 				{
+				setState(175);
+				experssion(0);
 				setState(176);
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << New) | (1L << This) | (1L << True) | (1L << False) | (1L << Null) | (1L << Identifier) | (1L << IntegerConstant) | (1L << StringConstant) | (1L << SelfAdd) | (1L << SelfSub) | (1L << Add) | (1L << Sub) | (1L << LogicNot) | (1L << BitNot) | (1L << LeftParen) | (1L << LeftBracket))) != 0)) {
-					{
-					setState(175);
-					experssion(0);
-					}
+				match(T__0);
 				}
-
+				break;
+			case 10:
+				_localctx = new EmptyStatementContext(_localctx);
+				enterOuterAlt(_localctx, 10);
+				{
 				setState(178);
 				match(T__0);
 				}
@@ -1605,27 +1621,7 @@ public class MxParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class NewObjectContext extends ExperssionContext {
-		public TerminalNode New() { return getToken(MxParser.New, 0); }
-		public SingleTypeContext singleType() {
-			return getRuleContext(SingleTypeContext.class,0);
-		}
-		public NewObjectContext(ExperssionContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MxListener ) ((MxListener)listener).enterNewObject(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MxListener ) ((MxListener)listener).exitNewObject(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MxVisitor ) return ((MxVisitor<? extends T>)visitor).visitNewObject(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	public static class LambdaExpContext extends ExperssionContext {
+	public static class LambdaExprContext extends ExperssionContext {
 		public TerminalNode LeftBracket() { return getToken(MxParser.LeftBracket, 0); }
 		public TerminalNode BitAnd() { return getToken(MxParser.BitAnd, 0); }
 		public TerminalNode RightBracket() { return getToken(MxParser.RightBracket, 0); }
@@ -1649,18 +1645,38 @@ public class MxParser extends Parser {
 		public StatementContext statement(int i) {
 			return getRuleContext(StatementContext.class,i);
 		}
-		public LambdaExpContext(ExperssionContext ctx) { copyFrom(ctx); }
+		public LambdaExprContext(ExperssionContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MxListener ) ((MxListener)listener).enterLambdaExp(this);
+			if ( listener instanceof MxListener ) ((MxListener)listener).enterLambdaExpr(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MxListener ) ((MxListener)listener).exitLambdaExp(this);
+			if ( listener instanceof MxListener ) ((MxListener)listener).exitLambdaExpr(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MxVisitor ) return ((MxVisitor<? extends T>)visitor).visitLambdaExp(this);
+			if ( visitor instanceof MxVisitor ) return ((MxVisitor<? extends T>)visitor).visitLambdaExpr(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class NewObjectContext extends ExperssionContext {
+		public TerminalNode New() { return getToken(MxParser.New, 0); }
+		public SingleTypeContext singleType() {
+			return getRuleContext(SingleTypeContext.class,0);
+		}
+		public NewObjectContext(ExperssionContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MxListener ) ((MxListener)listener).enterNewObject(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MxListener ) ((MxListener)listener).exitNewObject(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MxVisitor ) return ((MxVisitor<? extends T>)visitor).visitNewObject(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1732,7 +1748,7 @@ public class MxParser extends Parser {
 			{
 			setState(279);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,31,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,30,_ctx) ) {
 			case 1:
 				{
 				_localctx = new AtomExprContext(_localctx);
@@ -1796,11 +1812,11 @@ public class MxParser extends Parser {
 					}
 					setState(196); 
 					_errHandler.sync(this);
-					_alt = getInterpreter().adaptivePredict(_input,21,_ctx);
+					_alt = getInterpreter().adaptivePredict(_input,20,_ctx);
 				} while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER );
 				setState(202);
 				_errHandler.sync(this);
-				_alt = getInterpreter().adaptivePredict(_input,22,_ctx);
+				_alt = getInterpreter().adaptivePredict(_input,21,_ctx);
 				while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 					if ( _alt==1 ) {
 						{
@@ -1814,7 +1830,7 @@ public class MxParser extends Parser {
 					}
 					setState(204);
 					_errHandler.sync(this);
-					_alt = getInterpreter().adaptivePredict(_input,22,_ctx);
+					_alt = getInterpreter().adaptivePredict(_input,21,_ctx);
 				}
 				setState(209); 
 				_errHandler.sync(this);
@@ -1838,7 +1854,7 @@ public class MxParser extends Parser {
 					}
 					setState(211); 
 					_errHandler.sync(this);
-					_alt = getInterpreter().adaptivePredict(_input,23,_ctx);
+					_alt = getInterpreter().adaptivePredict(_input,22,_ctx);
 				} while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER );
 				}
 				break;
@@ -1873,11 +1889,11 @@ public class MxParser extends Parser {
 					}
 					setState(221); 
 					_errHandler.sync(this);
-					_alt = getInterpreter().adaptivePredict(_input,24,_ctx);
+					_alt = getInterpreter().adaptivePredict(_input,23,_ctx);
 				} while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER );
 				setState(227);
 				_errHandler.sync(this);
-				_alt = getInterpreter().adaptivePredict(_input,25,_ctx);
+				_alt = getInterpreter().adaptivePredict(_input,24,_ctx);
 				while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 					if ( _alt==1 ) {
 						{
@@ -1891,7 +1907,7 @@ public class MxParser extends Parser {
 					}
 					setState(229);
 					_errHandler.sync(this);
-					_alt = getInterpreter().adaptivePredict(_input,25,_ctx);
+					_alt = getInterpreter().adaptivePredict(_input,24,_ctx);
 				}
 				}
 				break;
@@ -2009,7 +2025,7 @@ public class MxParser extends Parser {
 				break;
 			case 11:
 				{
-				_localctx = new LambdaExpContext(_localctx);
+				_localctx = new LambdaExprContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
 				setState(253);
@@ -2076,7 +2092,7 @@ public class MxParser extends Parser {
 			_ctx.stop = _input.LT(-1);
 			setState(342);
 			_errHandler.sync(this);
-			_alt = getInterpreter().adaptivePredict(_input,35,_ctx);
+			_alt = getInterpreter().adaptivePredict(_input,34,_ctx);
 			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					if ( _parseListeners!=null ) triggerExitRuleEvent();
@@ -2084,7 +2100,7 @@ public class MxParser extends Parser {
 					{
 					setState(340);
 					_errHandler.sync(this);
-					switch ( getInterpreter().adaptivePredict(_input,34,_ctx) ) {
+					switch ( getInterpreter().adaptivePredict(_input,33,_ctx) ) {
 					case 1:
 						{
 						_localctx = new BinaryExprContext(new ExperssionContext(_parentctx, _parentState));
@@ -2373,7 +2389,7 @@ public class MxParser extends Parser {
 				}
 				setState(344);
 				_errHandler.sync(this);
-				_alt = getInterpreter().adaptivePredict(_input,35,_ctx);
+				_alt = getInterpreter().adaptivePredict(_input,34,_ctx);
 			}
 			}
 		}
@@ -2502,10 +2518,10 @@ public class MxParser extends Parser {
 		"\f\f\16\f\u0085\13\f\3\f\3\f\3\r\3\r\3\r\3\r\3\r\3\r\3\r\3\r\3\r\5\r\u0092"+
 		"\n\r\3\r\3\r\3\r\5\r\u0097\n\r\3\r\3\r\5\r\u009b\n\r\3\r\3\r\5\r\u009f"+
 		"\n\r\3\r\3\r\3\r\3\r\3\r\3\r\3\r\3\r\3\r\3\r\3\r\3\r\3\r\3\r\5\r\u00af"+
-		"\n\r\3\r\3\r\5\r\u00b3\n\r\3\r\5\r\u00b6\n\r\3\16\3\16\3\16\3\16\3\16"+
-		"\3\16\3\16\3\16\3\16\3\16\3\16\3\16\3\16\6\16\u00c5\n\16\r\16\16\16\u00c6"+
-		"\3\16\3\16\7\16\u00cb\n\16\f\16\16\16\u00ce\13\16\3\16\3\16\3\16\3\16"+
-		"\6\16\u00d4\n\16\r\16\16\16\u00d5\3\16\3\16\3\16\3\16\3\16\3\16\6\16\u00de"+
+		"\n\r\3\r\3\r\3\r\3\r\3\r\5\r\u00b6\n\r\3\16\3\16\3\16\3\16\3\16\3\16\3"+
+		"\16\3\16\3\16\3\16\3\16\3\16\3\16\6\16\u00c5\n\16\r\16\16\16\u00c6\3\16"+
+		"\3\16\7\16\u00cb\n\16\f\16\16\16\u00ce\13\16\3\16\3\16\3\16\3\16\6\16"+
+		"\u00d4\n\16\r\16\16\16\u00d5\3\16\3\16\3\16\3\16\3\16\3\16\6\16\u00de"+
 		"\n\16\r\16\16\16\u00df\3\16\3\16\7\16\u00e4\n\16\f\16\16\16\u00e7\13\16"+
 		"\3\16\3\16\3\16\3\16\3\16\3\16\7\16\u00ef\n\16\f\16\16\16\u00f2\13\16"+
 		"\5\16\u00f4\n\16\3\16\3\16\3\16\3\16\3\16\3\16\3\16\3\16\3\16\3\16\3\16"+
@@ -2555,10 +2571,10 @@ public class MxParser extends Parser {
 		"\3\2\2\2\u00a8\u00a9\7\13\2\2\u00a9\u00b6\7\3\2\2\u00aa\u00ab\7\f\2\2"+
 		"\u00ab\u00b6\7\3\2\2\u00ac\u00ae\7\r\2\2\u00ad\u00af\5\32\16\2\u00ae\u00ad"+
 		"\3\2\2\2\u00ae\u00af\3\2\2\2\u00af\u00b0\3\2\2\2\u00b0\u00b6\7\3\2\2\u00b1"+
-		"\u00b3\5\32\16\2\u00b2\u00b1\3\2\2\2\u00b2\u00b3\3\2\2\2\u00b3\u00b4\3"+
-		"\2\2\2\u00b4\u00b6\7\3\2\2\u00b5\u0088\3\2\2\2\u00b5\u0089\3\2\2\2\u00b5"+
-		"\u008a\3\2\2\2\u00b5\u0093\3\2\2\2\u00b5\u00a2\3\2\2\2\u00b5\u00a8\3\2"+
-		"\2\2\u00b5\u00aa\3\2\2\2\u00b5\u00ac\3\2\2\2\u00b5\u00b2\3\2\2\2\u00b6"+
+		"\u00b2\5\32\16\2\u00b2\u00b3\7\3\2\2\u00b3\u00b6\3\2\2\2\u00b4\u00b6\7"+
+		"\3\2\2\u00b5\u0088\3\2\2\2\u00b5\u0089\3\2\2\2\u00b5\u008a\3\2\2\2\u00b5"+
+		"\u0093\3\2\2\2\u00b5\u00a2\3\2\2\2\u00b5\u00a8\3\2\2\2\u00b5\u00aa\3\2"+
+		"\2\2\u00b5\u00ac\3\2\2\2\u00b5\u00b1\3\2\2\2\u00b5\u00b4\3\2\2\2\u00b6"+
 		"\31\3\2\2\2\u00b7\u00b8\b\16\1\2\u00b8\u00b9\7\65\2\2\u00b9\u00ba\5\32"+
 		"\16\2\u00ba\u00bb\7\66\2\2\u00bb\u011a\3\2\2\2\u00bc\u011a\7\27\2\2\u00bd"+
 		"\u011a\5\34\17\2\u00be\u00bf\7\22\2\2\u00bf\u00c4\5\24\13\2\u00c0\u00c1"+
@@ -2618,9 +2634,9 @@ public class MxParser extends Parser {
 		"\2\2\u0156\u013f\3\2\2\2\u0156\u0142\3\2\2\2\u0156\u0147\3\2\2\2\u0156"+
 		"\u0154\3\2\2\2\u0157\u015a\3\2\2\2\u0158\u0156\3\2\2\2\u0158\u0159\3\2"+
 		"\2\2\u0159\33\3\2\2\2\u015a\u0158\3\2\2\2\u015b\u015c\t\13\2\2\u015c\35"+
-		"\3\2\2\2&!)\61\63CFVYdkpx{\u0083\u0091\u0096\u009a\u009e\u00ae\u00b2\u00b5"+
-		"\u00c6\u00cc\u00d5\u00df\u00e5\u00f0\u00f3\u010b\u010e\u0115\u0119\u014e"+
-		"\u0151\u0156\u0158";
+		"\3\2\2\2%!)\61\63CFVYdkpx{\u0083\u0091\u0096\u009a\u009e\u00ae\u00b5\u00c6"+
+		"\u00cc\u00d5\u00df\u00e5\u00f0\u00f3\u010b\u010e\u0115\u0119\u014e\u0151"+
+		"\u0156\u0158";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {
