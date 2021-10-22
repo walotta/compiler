@@ -156,4 +156,7 @@ public class TypeFilter implements ASTVisitor {
     @Override
     public void visit(lambdaExprNode it) {}
 
+    @Override
+    public void visit(buildFuncBlockNode it) {}
+
 }
