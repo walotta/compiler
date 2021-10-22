@@ -5,6 +5,7 @@ public interface ASTVisitor {
 
     void visit(funcBlockNode it);
     void visit(classBlockNode it);
+    void visit(buildFuncBlockNode it);
     void visit(singleVarBlockNode it);
     void visit(varBlockNode it);
 
