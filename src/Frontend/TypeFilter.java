@@ -16,6 +16,7 @@ import java.util.zip.CRC32;
 public class TypeFilter implements ASTVisitor {
     private globalScope gScope;
     private Scope currentScope = null;
+    boolean collectClassMember=false;
 
     public TypeFilter(globalScope gScope) {
         this.gScope = gScope;
@@ -47,24 +48,42 @@ public class TypeFilter implements ASTVisitor {
         classType cl=gScope.getType(it.className);
         currentScope=cl.scope;
         it.funcList.forEach(item->item.accept(this));
+        collectClassMember=true;
+        it.varLists.forEach(item->item.accept(this));
+        collectClassMember=false;
         currentScope=currentScope.parentScope;
     }
 
     @Override
     public void visit(singleVarBlockNode it) {
         varEntity v=new varEntity(it.VarName, gScope.generateType(it.type),false );
-        if(v.type.type== Type.types.Void)
-            throw new semanticError("[typeFilter][paras declare] paras type can be void",it.pos);
-        if(currentScope instanceof funcScope){
+        if(collectClassMember){
+            v.isMember=true;
             it.var=v;
-            ((funcScope)currentScope).addParas(v, it.pos);
+            if(it.var.type.type== Type.types.Void)
+                throw new semanticError("[typeFilter][class member var declare] varType is void",it.pos);
+            if(it.expr!=null){
+                it.expr.accept(this);
+                if(it.expr.type!=it.var.type&&it.var.type.type!= Type.types.Null)
+                    throw new semanticError("[typeFilter][class member var declare] varType and initExpr type is different",it.pos);
+            }
+            currentScope.defineVar(it.VarName,v,it.pos);
         }else{
-            throw new compilerError("[typeFilter][single variable declare] scope is not funcScope",it.pos);
+            if(v.type.type== Type.types.Void)
+                throw new semanticError("[typeFilter][paras declare] paras type can be void",it.pos);
+            if(currentScope instanceof funcScope){
+                it.var=v;
+                ((funcScope)currentScope).addParas(v, it.pos);
+            }else{
+                throw new compilerError("[typeFilter][single variable declare] scope is not funcScope",it.pos);
+            }
         }
     }
 
     @Override
-    public void visit(varBlockNode it) {}
+    public void visit(varBlockNode it) {
+        it.varList.forEach(item->item.accept(this));
+    }
 
     @Override
     public void visit(statementBlockNode it) {}
