@@ -148,4 +148,7 @@ public class SymbolCollector implements ASTVisitor {
     @Override
     public void visit(lambdaExprNode it) {}
 
+    @Override
+    public void visit(buildFuncBlockNode it) {}
+
 }
