@@ -10,4 +10,8 @@ public class boolConstNode extends constExprNode{
         this.value=value;
     }
 
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }

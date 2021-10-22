@@ -12,4 +12,8 @@ public class arrayMemberExprNode extends exprNode{
         this.index=index;
     }
 
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }

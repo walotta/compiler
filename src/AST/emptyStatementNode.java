@@ -8,4 +8,8 @@ public class emptyStatementNode extends statementNode{
         super(pos);
     }
 
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }

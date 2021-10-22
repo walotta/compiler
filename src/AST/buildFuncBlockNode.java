@@ -10,4 +10,9 @@ public class buildFuncBlockNode extends funcBlockNode{
         super(pos,null,funcName,paras,funcStatementLists);
     }
 
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

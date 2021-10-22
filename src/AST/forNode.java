@@ -14,4 +14,9 @@ public class forNode extends statementNode{
         this.runStatement=runStatement;
     }
 
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

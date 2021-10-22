@@ -15,4 +15,8 @@ public class newArrayExprNode extends exprNode{
         this.ExprList=dimExprList;
     }
 
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }

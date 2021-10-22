@@ -17,4 +17,9 @@ public class funcBlockNode extends ASTNode{
         this.paras=paras;
         this.funcStatementLists=funcStatementLists;
     }
+
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }

@@ -13,4 +13,9 @@ public class varBlockNode extends ASTNode{
         this.type=type;
         this.varList=varList;
     }
+
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }

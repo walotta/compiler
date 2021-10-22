@@ -25,4 +25,9 @@ public class binaryExprNode extends exprNode{
         this.rightExp=rightExp;
     }
 
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

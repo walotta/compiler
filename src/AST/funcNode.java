@@ -9,4 +9,9 @@ public class funcNode extends exprNode{
         super(pos,false);
         this.funcName=funcName;
     }
+
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }

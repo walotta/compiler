@@ -8,4 +8,8 @@ public class nullConstNode extends constExprNode{
         super(pos);
     }
 
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }

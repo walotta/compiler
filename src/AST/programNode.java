@@ -12,4 +12,9 @@ public class programNode extends ASTNode {
         super(pos);
         this.decls=decls;
     }
+
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }

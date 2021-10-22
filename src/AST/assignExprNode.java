@@ -11,4 +11,9 @@ public class assignExprNode extends exprNode{
         this.rightExpr=rightExpr;
     }
 
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

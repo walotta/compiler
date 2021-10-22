@@ -8,4 +8,9 @@ public class continueNode extends statementNode{
         super(pos);
     }
 
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

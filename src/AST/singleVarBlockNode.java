@@ -13,4 +13,8 @@ public class singleVarBlockNode extends ASTNode{
         this.expr=expr;
     }
 
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }

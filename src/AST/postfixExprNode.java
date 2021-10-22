@@ -15,4 +15,9 @@ public class postfixExprNode extends exprNode{
         this.calExp=calExp;
         this.op=op;
     }
+
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }

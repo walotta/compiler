@@ -13,5 +13,8 @@ public class ifNode extends statementNode{
         this.falseStatement=falseStatement;
     }
 
-
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }

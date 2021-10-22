@@ -13,4 +13,8 @@ public class statementBlockNode extends statementNode {
         this.statementList=statementList;
     }
 
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }

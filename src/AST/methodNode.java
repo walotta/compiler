@@ -11,4 +11,9 @@ public class methodNode extends exprNode{
         this.father=father;
         this.methodName=methodName;
     }
+
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }

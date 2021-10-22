@@ -14,4 +14,8 @@ public class lambdaExprNode extends exprNode{
         this.funcStatementLists=funcStatementLists;
     }
 
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }

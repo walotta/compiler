@@ -10,4 +10,8 @@ public class newObjectExprNode extends exprNode{
         this.objectType=objectType;
     }
 
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }

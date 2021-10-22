@@ -8,4 +8,8 @@ public class thisExprNode extends exprNode{
         super(pos,false);
     }
 
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }

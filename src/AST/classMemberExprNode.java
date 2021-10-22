@@ -11,4 +11,9 @@ public class classMemberExprNode extends exprNode{
         this.fatherExpr=fatherExpr;
         this.memberName=memberName;
     }
+
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }

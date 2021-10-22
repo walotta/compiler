@@ -10,5 +10,8 @@ public class retNode extends statementNode{
         super(pos);
         this.returnExp=returnExp;
     }
-
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }

@@ -17,4 +17,9 @@ public class classBlockNode extends ASTNode{
         this.varLists=varLists;
         this.buildFuncList=buildFuncList;
     }
+
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }

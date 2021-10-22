@@ -10,4 +10,9 @@ public class varNode extends exprNode{
         super(pos,true);
         this.name=name;
     }
+
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }

@@ -14,4 +14,9 @@ public class newInitObjectExprNode extends exprNode{
         this.objectType=objectType;
         this.exprList=exprList;
     }
+
+    @Override
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
 }
