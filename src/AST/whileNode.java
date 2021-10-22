@@ -3,8 +3,8 @@ package AST;
 import Util.position;
 
 public class whileNode extends statementNode{
-    exprNode finishExp;
-    statementNode runStatement;
+    public exprNode finishExp;
+    public statementNode runStatement;
 
     public whileNode(position pos,exprNode finishExp,statementNode runStatement){
         super(pos);
