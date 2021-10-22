@@ -1,5 +1,6 @@
 package AST;
 
+import Util.Type.funcType;
 import Util.position;
 
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ public class funcBlockNode extends ASTNode{
     public String funcName;
     public ArrayList<singleVarBlockNode> paras;
     public statementBlockNode funcStatementLists;
+    public funcType func;
 
     public funcBlockNode(position pos, typeNode retType, String funcName, ArrayList<singleVarBlockNode> paras, statementBlockNode funcStatementLists){
         super(pos);
@@ -16,6 +18,7 @@ public class funcBlockNode extends ASTNode{
         this.funcName=funcName;
         this.paras=paras;
         this.funcStatementLists=funcStatementLists;
+        this.func=null;
     }
 
     @Override

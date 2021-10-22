@@ -122,7 +122,7 @@ public class globalScope extends Scope {
         }
     }
 
-    public Type getType(String name,position pos){
+    public Type getType(String name){
         return classes.getOrDefault(name, null);
     }
 }

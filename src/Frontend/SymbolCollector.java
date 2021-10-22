@@ -17,212 +17,135 @@ public class SymbolCollector implements ASTVisitor {
 
     @Override
     public void visit(programNode it) {
-        //todo
 
+        currentScope=gScope;
+        it.programBlockList.forEach(item->item.accept(this));
     }
 
     @Override
     public void visit(funcBlockNode it) {
-        //todo
 
+        funcType func=new funcType(it.funcName);
+        if(gScope==currentScope && gScope.getType(it.funcName)!=null){
+            throw new semanticError("[symbolCollector][function declare] same funcName",it.pos);
+        }else{
+            it.func=func;
+            currentScope.defineFunc(it.funcName,func,it.pos);
+        }
     }
 
     @Override
     public void visit(classBlockNode it) {
-        //todo
 
+        if(currentScope!=gScope)
+            throw new semanticError("[symbolCollector][class declare] cannot declare class nested",it.pos);
+        classType cl=new classType(it.className);
+        currentScope=new Scope(currentScope);
+        it.funcList.forEach(item->item.accept(this));
+        cl.scope=currentScope;
+        currentScope=currentScope.parentScope;
+        if(gScope.getType(it.className)!=null)
+            throw new semanticError("[symbolCollector][class declare] same className with other class",it.pos);
+        if(gScope.getFunc(it.className,false)!=null)
+            throw new semanticError("[symbolCollector][class declare] same className with function",it.pos);
+
+        gScope.defineClass(it.className,cl,it.pos);
     }
 
     @Override
-    public void visit(singleVarBlockNode it) {
-        //todo
-
-    }
+    public void visit(singleVarBlockNode it) {}
 
     @Override
-    public void visit(varBlockNode it) {
-        //todo
-
-    }
+    public void visit(varBlockNode it) {}
 
     @Override
-    public void visit(statementBlockNode it) {
-        //todo
-
-    }
+    public void visit(statementBlockNode it) {}
 
     @Override
-    public void visit(breakNode it) {
-        //todo
-
-    }
+    public void visit(breakNode it) {}
 
     @Override
-    public void visit(continueNode it) {
-        //todo
-
-    }
+    public void visit(continueNode it) {}
 
     @Override
-    public void visit(exprStatementNode it) {
-        //todo
-
-    }
+    public void visit(exprStatementNode it) {}
 
     @Override
-    public void visit(forNode it) {
-        //todo
-
-    }
+    public void visit(forNode it) {}
 
     @Override
-    public void visit(ifNode it) {
-        //todo
-
-    }
+    public void visit(ifNode it) {}
 
     @Override
-    public void visit(retNode it) {
-        //todo
-
-    }
+    public void visit(retNode it) {}
 
     @Override
-    public void visit(whileNode it) {
-        //todo
-
-    }
+    public void visit(whileNode it) {}
 
     @Override
-    public void visit(emptyStatementNode it) {
-        //todo
-
-    }
+    public void visit(emptyStatementNode it) {}
 
     @Override
-    public void visit(binaryExprNode it) {
-        //todo
-
-    }
+    public void visit(binaryExprNode it) {}
 
     @Override
-    public void visit(unaryExprNode it) {
-        //todo
-
-    }
+    public void visit(unaryExprNode it) {}
 
     @Override
-    public void visit(newArrayExprNode it) {
-        //todo
-
-    }
+    public void visit(newArrayExprNode it) {}
 
     @Override
-    public void visit(newInitObjectExprNode it) {
-        //todo
-
-    }
+    public void visit(newInitObjectExprNode it) {}
 
     @Override
-    public void visit(newObjectExprNode it) {
-        //todo
-
-    }
+    public void visit(newObjectExprNode it) {}
 
     @Override
-    public void visit(postfixExprNode it) {
-        //todo
-
-    }
+    public void visit(postfixExprNode it) {}
 
     @Override
-    public void visit(funcCallExprNode it) {
-        //todo
-
-    }
+    public void visit(funcCallExprNode it) {}
 
     @Override
-    public void visit(assignExprNode it) {
-        //todo
-
-    }
+    public void visit(assignExprNode it) {}
 
     @Override
-    public void visit(classMemberExprNode it) {
-        //todo
-
-    }
+    public void visit(classMemberExprNode it) {}
 
     @Override
-    public void visit(arrayMemberExprNode it) {
-        //todo
-
-    }
+    public void visit(arrayMemberExprNode it) {}
 
     @Override
-    public void visit(thisExprNode it) {
-        //todo
-
-    }
+    public void visit(thisExprNode it) {}
 
     @Override
-    public void visit(intConstNode it) {
-        //todo
-
-    }
+    public void visit(intConstNode it) {}
 
     @Override
-    public void visit(boolConstNode it) {
-        //todo
-
-    }
+    public void visit(boolConstNode it) {}
 
     @Override
-    public void visit(nullConstNode it) {
-        //todo
-
-    }
+    public void visit(nullConstNode it) {}
 
     @Override
-    public void visit(stringConstNode it) {
-        //todo
-
-    }
+    public void visit(stringConstNode it) {}
 
     @Override
-    public void visit(singleTypeNode it) {
-        //todo
-
-    }
+    public void visit(singleTypeNode it) {}
 
     @Override
-    public void visit(typeNode it) {
-        //todo
-
-    }
+    public void visit(typeNode it) {}
 
     @Override
-    public void visit(varNode it) {
-        //todo
-
-    }
+    public void visit(varNode it) {}
 
     @Override
-    public void visit(funcNode it) {
-        //todo
-
-    }
+    public void visit(funcNode it) {}
 
     @Override
-    public void visit(methodNode it) {
-        //todo
-
-    }
+    public void visit(methodNode it) {}
 
     @Override
-    public void visit(lambdaExprNode it) {
-        //todo
-
-    }
+    public void visit(lambdaExprNode it) {}
 
 }

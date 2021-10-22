@@ -6,11 +6,11 @@ import Util.position;
 import java.util.ArrayList;
 
 public class programNode extends ASTNode {
-    public ArrayList<ASTNode> decls;
+    public ArrayList<ASTNode> programBlockList;
 
-    public programNode(position pos, ArrayList<ASTNode> decls){
+    public programNode(position pos, ArrayList<ASTNode> programBlockList){
         super(pos);
-        this.decls=decls;
+        this.programBlockList=programBlockList;
     }
 
     @Override
