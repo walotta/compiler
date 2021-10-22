@@ -1,5 +1,6 @@
 package Util.Scope;
 
+import AST.typeNode;
 import Util.Scope.Scope;
 import Util.Type.*;
 import Util.error.semanticError;
@@ -122,7 +123,18 @@ public class globalScope extends Scope {
         }
     }
 
-    public Type getType(String name){
+    public Type generateType(typeNode node){
+        Type tmp=getType(node.typeName);
+        if(tmp==null)
+            throw new semanticError("[globalScope][generate type]typeName not find",node.pos);
+        if(node.dim!=0){
+            return new arrayType(tmp,node.dim);
+        }else{
+            return tmp;
+        }
+    }
+
+    public classType getType(String name){
         return classes.getOrDefault(name, null);
     }
 }
