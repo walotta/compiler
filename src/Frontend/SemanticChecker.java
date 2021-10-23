@@ -14,7 +14,7 @@ import Util.varEntity;
 
 import java.util.Stack;
 
-class SemanticChecker implements ASTVisitor{
+public class SemanticChecker implements ASTVisitor{
 
     private Scope currentScope;
     private globalScope gScope;

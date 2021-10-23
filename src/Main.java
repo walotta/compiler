@@ -1,5 +1,6 @@
 import AST.*;
 import Frontend.ASTBuilder;
+import Frontend.SemanticChecker;
 import Frontend.SymbolCollector;
 import Frontend.TypeFilter;
 import Parser.MxLexer;
@@ -49,6 +50,7 @@ public class Main {
                 System.err.println("running semantic ...");
                 new SymbolCollector(gScope).visit(ASTRoot);
                 new TypeFilter(gScope).visit(ASTRoot);
+                new SemanticChecker(gScope).visit(ASTRoot);
             }
             if(onlySemantic)return;
 
