@@ -68,7 +68,7 @@ experssion
     :   '('experssion')'                                                              #atomExpr
     |   Identifier                                                                    #atomExpr
     |   constValue                                                                    #atomExpr
-    |   New singleType('['experssion']')+('['']')*('['experssion']')+                 #newArrayErr
+    |   New singleType('['experssion']')+('['']')+('['experssion']')+                 #newArrayErr
     |   New singleType('['experssion']')+('['']')*                                    #newArray
     |   New singleType'('(experssion(','experssion)*)?')'                             #newInitObject
     |   New singleType                                                                #newObject

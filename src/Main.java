@@ -12,6 +12,8 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import java.io.FileInputStream;
+
 public class Main {
 
     public static void main(String[] args) throws Exception {
@@ -21,7 +23,7 @@ public class Main {
             for(String item:args){
                 if(item.contains("-semantic=")){
                     String opt=item.substring(10);
-                    System.err.println(opt);
+                    // System.err.println(opt);
                     if(opt.equals("skip")){
                         runSemantic=false;
                     }else if(opt.equals("only")){
@@ -31,11 +33,15 @@ public class Main {
                 }
             }
         }
+
+        var input=System.in;
+        //var input=new FileInputStream("testcases/sema/basic-package/basic-3.mx");
+
         try {
             programNode ASTRoot;
             globalScope gScope = new globalScope();
 
-            MxLexer lexer=new MxLexer(CharStreams.fromStream(System.in));
+            MxLexer lexer=new MxLexer(CharStreams.fromStream(input));
             lexer.removeErrorListeners();
             lexer.addErrorListener(new MxErrorListener());
             MxParser parser=new MxParser(new CommonTokenStream(lexer));

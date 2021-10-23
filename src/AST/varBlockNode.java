@@ -4,7 +4,7 @@ import Util.position;
 
 import java.util.ArrayList;
 
-public class varBlockNode extends ASTNode{
+public class varBlockNode extends statementNode{
     public typeNode type;
     public ArrayList<singleVarBlockNode> varList;
 

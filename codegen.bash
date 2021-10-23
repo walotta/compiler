@@ -1,3 +1,3 @@
 set ff=UNIX
 set -e
-java -cp ./runContain Main
+java -cp ./lib/antlr-4.9-complete.jar:./runContain Main

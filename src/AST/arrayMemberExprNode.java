@@ -3,8 +3,8 @@ package AST;
 import Util.position;
 
 public class arrayMemberExprNode extends exprNode{
-    exprNode arrayFather;
-    exprNode index;
+    public exprNode arrayFather;
+    public exprNode index;
 
     public arrayMemberExprNode(position pos,exprNode arrayFather,exprNode index){
         super(pos,arrayFather.isAssignable);
