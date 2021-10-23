@@ -314,8 +314,8 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
         exprNode funcExpr=(exprNode) visit(ctx.funcName);
         ArrayList<exprNode> paras=new ArrayList<exprNode>();
 
-        for (var item:ctx.experssion()){
-            paras.add((exprNode) visit(item));
+        for (int i=1;i<ctx.experssion().size();i++){
+            paras.add((exprNode) visit(ctx.experssion(i)));
         }
 
         if(funcExpr instanceof varNode){

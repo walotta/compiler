@@ -56,7 +56,7 @@ public class SemanticChecker implements ASTVisitor{
             hasRet=true;
             if(it.func.retType.type!=Type.types.Int)
                 errorThrower("[main function declare] main function ret is not int",it);
-            if(it.paras.isEmpty())
+            if(!it.paras.isEmpty())
                 errorThrower("[main function declare] main function cannot have paras",it);
         }
         if((retType.type!=Type.types.Void)&&!hasRet)
