@@ -507,7 +507,7 @@ public class SemanticChecker implements ASTVisitor{
 
     @Override
     public void visit(lambdaExprNode it) {
-        //todo
+
         funcType func=new funcType(null);
         func.scope=new funcScope(currentScope);
         it.type=func;
