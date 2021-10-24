@@ -66,10 +66,13 @@ public class SemanticChecker implements ASTVisitor{
 
         classType cl=gScope.getType(it.className);
         if(cl==null)
-            throw new compilerError("[SemanticChecker][class define] find no fit class in gScope",it.pos);
+            errorThrower("[class define] find no fit class in gScope",it);
         currentClass=cl;
         currentScope=cl.scope;
         it.funcList.forEach(item->item.accept(this));
+        if(it.buildFuncList.size()>1)
+            errorThrower("[class define] have multi-constructor",it);
+        it.buildFuncList.forEach(item->item.accept(this));
         currentClass=null;
         currentScope=currentScope.parentScope;
     }
