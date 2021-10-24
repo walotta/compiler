@@ -22,7 +22,7 @@ public class SemanticChecker implements ASTVisitor{
     private Stack<ASTNode> loop=new Stack<>();
     private boolean hasRet=false;
     private Type retType;
-    private boolean inLambda=false;
+    private int inLambda=0;
     private boolean lambdaParas=false;
     private Type lambdaRetType=null;
 
@@ -193,7 +193,7 @@ public class SemanticChecker implements ASTVisitor{
     @Override
     public void visit(retNode it) {
 
-        if(inLambda){
+        if(inLambda!=0){
             if(it.returnExp!=null){
                 it.returnExp.accept(this);
                 lambdaRetType=it.returnExp.type;
@@ -372,6 +372,8 @@ public class SemanticChecker implements ASTVisitor{
             it.type=func.retType;
         }else{
             it.type=((funcType)it.funcName.type).retType;
+            if(!it.paras.isEmpty())
+                it.paras.forEach(item->item.accept(this));
             if(((funcType)it.funcName.type).scope.paras.size()!=it.paras.size())
                 errorThrower("[func call] lambda paras size not fit",it);
             for(int i=0;i<it.paras.size();i++){
@@ -513,14 +515,15 @@ public class SemanticChecker implements ASTVisitor{
         lambdaParas=true;
         it.paras.forEach(item->item.accept(this));
         lambdaParas=false;
-        inLambda=true;
+        inLambda++;
         lambdaRetType=null;
         it.funcStatementLists.accept(this);
-        inLambda=false;
+        inLambda--;
         if(lambdaRetType==null)
             ((funcType)it.type).retType=gScope.getType("void");
         else
             ((funcType)it.type).retType=lambdaRetType;
         currentScope=currentScope.parentScope;
+        lambdaRetType=null;
     }
 }
