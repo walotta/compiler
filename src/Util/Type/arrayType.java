@@ -1,12 +1,12 @@
 package Util.Type;
 
 public class arrayType extends Type{
-    public Type type;
+    public Type arrayType;
     public int dim;
 
-    public arrayType(Type type,int dim){
+    public arrayType(Type arrayType, int dim){
         super(types.Array);
-        this.type=type;
+        this.arrayType = arrayType;
         this.dim=dim;
     }
 

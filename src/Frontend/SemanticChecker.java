@@ -2,7 +2,6 @@ package Frontend;
 
 import AST.*;
 import Util.Scope.Scope;
-import Util.Scope.funcScope;
 import Util.Scope.globalScope;
 import Util.Type.Type;
 import Util.Type.arrayType;
@@ -10,7 +9,6 @@ import Util.Type.classType;
 import Util.Type.funcType;
 import Util.error.compilerError;
 import Util.error.semanticError;
-import Util.position;
 import Util.varEntity;
 
 import java.util.Stack;
@@ -97,7 +95,7 @@ public class SemanticChecker implements ASTVisitor{
             errorThrower("[single var declare] varType is void",it);
         if(it.expr!=null){
             it.expr.accept(this);
-            if(it.expr.type!=it.var.type&&it.var.type.type!= Type.types.Null)
+            if(it.expr.type.type!=it.var.type.type&&it.var.type.type!= Type.types.Null)
                 errorThrower("[single var declare] varType and initExpr type is different",it);
         }
         currentScope.defineVar(it.VarName,it.var,it.pos);
@@ -388,11 +386,11 @@ public class SemanticChecker implements ASTVisitor{
         if(it.index.type.type!= Type.types.Int)
             errorThrower("[array member] index is not Int",it.index);
         if(it.arrayFather.type.dim()>1)
-            it.type=new arrayType(it.arrayFather.type,(it.arrayFather.type).dim()-1);
+            it.type=new arrayType(((arrayType)it.arrayFather.type).arrayType,(it.arrayFather.type).dim()-1);
         else if(it.arrayFather.type.dim()<1)
             errorThrower("[array member] not a array",it.arrayFather);
         else
-            it.type=((arrayType)it.arrayFather.type).type;
+            it.type=((arrayType)it.arrayFather.type).arrayType;
     }
 
     @Override
