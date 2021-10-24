@@ -2,6 +2,7 @@ package Frontend;
 
 import AST.*;
 import Util.Scope.Scope;
+import Util.Scope.funcScope;
 import Util.Scope.globalScope;
 import Util.Type.classType;
 import Util.Type.funcType;
@@ -42,6 +43,7 @@ public class SymbolCollector implements ASTVisitor {
         classType cl=new classType(it.className);
         currentScope=new Scope(currentScope);
         it.funcList.forEach(item->item.accept(this));
+        it.buildFuncList.forEach(item->item.accept(this));
         cl.scope=currentScope;
         currentScope=currentScope.parentScope;
         if(gScope.getType(it.className)!=null)
@@ -149,6 +151,11 @@ public class SymbolCollector implements ASTVisitor {
     public void visit(lambdaExprNode it) {}
 
     @Override
-    public void visit(buildFuncBlockNode it) {}
+    public void visit(buildFuncBlockNode it) {
+        funcType func=new funcType(it.funcName);
+        func.scope=new funcScope(currentScope);
+        it.func=func;
+        currentScope.defineFunc(it.funcName,func,it.pos);
+    }
 
 }

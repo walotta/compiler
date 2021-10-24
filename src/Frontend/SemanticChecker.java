@@ -80,7 +80,7 @@ public class SemanticChecker implements ASTVisitor{
     @Override
     public void visit(buildFuncBlockNode it) {
 
-        if(it.funcName.equals(currentClass.className)){
+        if(!it.funcName.equals(currentClass.className)){
             errorThrower("[constructor declare] funcName not fit className",it);
         }
         retType=null;
@@ -438,6 +438,8 @@ public class SemanticChecker implements ASTVisitor{
     public void visit(varNode it) {
 
         it.var=currentScope.getVar(it.name,true);
+        if(it.var==null)
+            errorThrower("[var] find no match var",it);
         it.type=it.var.type;
     }
 

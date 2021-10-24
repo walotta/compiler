@@ -51,6 +51,7 @@ public class TypeFilter implements ASTVisitor {
         collectClassMember=true;
         it.varLists.forEach(item->item.accept(this));
         collectClassMember=false;
+        cl.scope=currentScope;
         currentScope=currentScope.parentScope;
     }
 
