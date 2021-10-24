@@ -470,7 +470,7 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
         statementBlockNode funcStatementBlock;
 
         for(int i = 0; i < ctx.type().size(); i++){
-            singleVarBlockNode tmp=new singleVarBlockNode(new position(ctx),ctx.Identifier(i+1).getText(),null);
+            singleVarBlockNode tmp=new singleVarBlockNode(new position(ctx),ctx.Identifier(i).getText(),null);
             tmp.type=(typeNode) visit(ctx.type(i));
             paras.add(tmp);
         }
