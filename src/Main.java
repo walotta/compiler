@@ -35,7 +35,7 @@ public class Main {
         }
 
         var input=System.in;
-        //var input=new FileInputStream("testcases/sema/lambda-package/lambda-8.mx");
+        //var input=new FileInputStream("testcases/sema/lambda-package/lambda-2.mx");
 
         try {
             programNode ASTRoot;

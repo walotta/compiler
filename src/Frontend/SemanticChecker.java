@@ -372,6 +372,15 @@ public class SemanticChecker implements ASTVisitor{
             it.type=func.retType;
         }else{
             it.type=((funcType)it.funcName.type).retType;
+            if(((funcType)it.funcName.type).scope.paras.size()!=it.paras.size())
+                errorThrower("[func call] lambda paras size not fit",it);
+            for(int i=0;i<it.paras.size();i++){
+                if(it.paras.get(i).type.type== Type.types.Null)continue;
+                if(it.paras.get(i).type.type!=((funcType)it.funcName.type).scope.paras.get(i).type.type)
+                    errorThrower("[func call] paras type not fit",it);
+                if(it.paras.get(i).type.dim()!=((funcType)it.funcName.type).scope.paras.get(i).type.dim())
+                    errorThrower("[func call] paras dim not fit",it);
+            }
         }
     }
 
