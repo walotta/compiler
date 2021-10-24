@@ -95,7 +95,7 @@ public class SemanticChecker implements ASTVisitor{
             errorThrower("[single var declare] varType is void",it);
         if(it.expr!=null){
             it.expr.accept(this);
-            if(it.expr.type.type!=it.var.type.type&&it.var.type.type!= Type.types.Null)
+            if(it.expr.type.type!=it.var.type.type&&it.expr.type.type!= Type.types.Null)
                 errorThrower("[single var declare] varType and initExpr type is different",it);
         }
         currentScope.defineVar(it.VarName,it.var,it.pos);
