@@ -91,7 +91,7 @@ experssion
     |   left=experssion op=LogicAnd right=experssion                                  #binaryExpr
     |   left=experssion op=LogicOr right=experssion                                   #binaryExpr
     |   <assoc=right> left=experssion op=Equal right=experssion                       #assign
-    |   '[''&'']''('(type Identifier (',' type Identifier)*)?')'statementBlock        #lambdaExpr
+    |   '[''&'']''('(type Identifier (',' type Identifier)*)?')''-''>'statementBlock  #lambdaExpr
     ;
 
 constValue

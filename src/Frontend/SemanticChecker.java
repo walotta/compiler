@@ -2,6 +2,7 @@ package Frontend;
 
 import AST.*;
 import Util.Scope.Scope;
+import Util.Scope.funcScope;
 import Util.Scope.globalScope;
 import Util.Type.Type;
 import Util.Type.arrayType;
@@ -21,6 +22,9 @@ public class SemanticChecker implements ASTVisitor{
     private Stack<ASTNode> loop=new Stack<>();
     private boolean hasRet=false;
     private Type retType;
+    private boolean inLambda=false;
+    private boolean lambdaParas=false;
+    private Type lambdaRetType=null;
 
     public SemanticChecker(globalScope gScope){
         this.gScope=gScope;
@@ -93,15 +97,27 @@ public class SemanticChecker implements ASTVisitor{
     @Override
     public void visit(singleVarBlockNode it) {
 
-        it.var=new varEntity(it.VarName,gScope.generateType(it.type),currentScope==gScope);
-        if(it.var.type.type== Type.types.Void)
-            errorThrower("[single var declare] varType is void",it);
-        if(it.expr!=null){
-            it.expr.accept(this);
-            if(it.expr.type.type!=it.var.type.type&&it.expr.type.type!= Type.types.Null)
-                errorThrower("[single var declare] varType and initExpr type is different",it);
+        if(lambdaParas){
+            varEntity v=new varEntity(it.VarName,gScope.generateType(it.type),false);
+            if(v.type.type== Type.types.Void)
+                errorThrower("[lambda paras declare] paras type can be void",it);
+            if(currentScope instanceof funcScope){
+                it.var=v;
+                ((funcScope)currentScope).addParas(v, it.pos);
+            }else{
+                throw new compilerError("[semanticChecker][single variable declare] scope is not lambda funcScope",it.pos);
+            }
+        }else{
+            it.var=new varEntity(it.VarName,gScope.generateType(it.type),currentScope==gScope);
+            if(it.var.type.type== Type.types.Void)
+                errorThrower("[single var declare] varType is void",it);
+            if(it.expr!=null){
+                it.expr.accept(this);
+                if(it.expr.type.type!=it.var.type.type&&it.expr.type.type!= Type.types.Null)
+                    errorThrower("[single var declare] varType and initExpr type is different",it);
+            }
+            currentScope.defineVar(it.VarName,it.var,it.pos);
         }
-        currentScope.defineVar(it.VarName,it.var,it.pos);
     }
 
     @Override
@@ -177,19 +193,26 @@ public class SemanticChecker implements ASTVisitor{
     @Override
     public void visit(retNode it) {
 
-        hasRet=true;
-        if(it.returnExp==null){
-            if(!(retType==null||retType.type==Type.types.Void)){
-                errorThrower("[func return] has return type but return nothing",it);
+        if(inLambda){
+            if(it.returnExp!=null){
+                it.returnExp.accept(this);
+                lambdaRetType=it.returnExp.type;
             }
         }else{
-            it.returnExp.accept(this);
-            if(retType==null)
-                errorThrower("[func return] constructor cannot has return",it);
-            if(it.returnExp.type.type!=retType.type&&it.returnExp.type.type!=Type.types.Null)
-                errorThrower("[func return] return type error",it);
-            if(it.returnExp.type.dim()!=retType.dim())
-                errorThrower("[func return] return dim not fit",it);
+            hasRet=true;
+            if(it.returnExp==null){
+                if(!(retType==null||retType.type==Type.types.Void)){
+                    errorThrower("[func return] has return type but return nothing",it);
+                }
+            }else{
+                it.returnExp.accept(this);
+                if(retType==null)
+                    errorThrower("[func return] constructor cannot has return",it);
+                if(it.returnExp.type.type!=retType.type&&it.returnExp.type.type!=Type.types.Null)
+                    errorThrower("[func return] return type error",it);
+                if(it.returnExp.type.dim()!=retType.dim())
+                    errorThrower("[func return] return dim not fit",it);
+            }
         }
     }
 
@@ -331,21 +354,25 @@ public class SemanticChecker implements ASTVisitor{
     public void visit(funcCallExprNode it) {
 
         it.funcName.accept(this);
-        if(!(it.funcName.type instanceof funcType))
-            errorThrower("[func call] be called is not function",it);
-        if(!it.paras.isEmpty())
-            it.paras.forEach(item->item.accept(this));
-        funcType func=(funcType) it.funcName.type;
-        if(func.scope.paras.size()!=it.paras.size())
-            errorThrower("[func call] paras size not fit",it);
-        for(int i=0;i<it.paras.size();i++){
-            if(it.paras.get(i).type.type== Type.types.Null)continue;
-            if(it.paras.get(i).type.type!=func.scope.paras.get(i).type.type)
-                errorThrower("[func call] paras type not fit",it);
-            if(it.paras.get(i).type.dim()!=func.scope.paras.get(i).type.dim())
-                errorThrower("[func call] paras dim not fit",it);
+        if(!(it.funcName instanceof lambdaExprNode)){
+            if(!(it.funcName.type instanceof funcType))
+                errorThrower("[func call] be called is not function",it);
+            if(!it.paras.isEmpty())
+                it.paras.forEach(item->item.accept(this));
+            funcType func=(funcType) it.funcName.type;
+            if(func.scope.paras.size()!=it.paras.size())
+                errorThrower("[func call] paras size not fit",it);
+            for(int i=0;i<it.paras.size();i++){
+                if(it.paras.get(i).type.type== Type.types.Null)continue;
+                if(it.paras.get(i).type.type!=func.scope.paras.get(i).type.type)
+                    errorThrower("[func call] paras type not fit",it);
+                if(it.paras.get(i).type.dim()!=func.scope.paras.get(i).type.dim())
+                    errorThrower("[func call] paras dim not fit",it);
+            }
+            it.type=func.retType;
+        }else{
+            it.type=((funcType)it.funcName.type).retType;
         }
-        it.type=func.retType;
     }
 
     @Override
@@ -470,6 +497,21 @@ public class SemanticChecker implements ASTVisitor{
     @Override
     public void visit(lambdaExprNode it) {
         //todo
-
+        funcType func=new funcType(null);
+        func.scope=new funcScope(currentScope);
+        it.type=func;
+        currentScope=((funcType)it.type).scope;
+        lambdaParas=true;
+        it.paras.forEach(item->item.accept(this));
+        lambdaParas=false;
+        inLambda=true;
+        lambdaRetType=null;
+        it.funcStatementLists.accept(this);
+        inLambda=false;
+        if(lambdaRetType==null)
+            ((funcType)it.type).retType=gScope.getType("void");
+        else
+            ((funcType)it.type).retType=lambdaRetType;
+        currentScope=currentScope.parentScope;
     }
 }
