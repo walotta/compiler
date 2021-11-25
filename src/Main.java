@@ -1,4 +1,7 @@
 import AST.*;
+import Backend.IRBuilder;
+import Backend.IRPrinter;
+import MIR.Module;
 import Frontend.ASTBuilder;
 import Frontend.SemanticChecker;
 import Frontend.SymbolCollector;
@@ -13,23 +16,22 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.FileInputStream;
+import java.io.PrintStream;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
         boolean onlySemantic=false;
-        boolean runSemantic=true;
+        boolean printIR=false;
+        String IRFileName="src.ll";
         if(args.length!=0){
             for(String item:args){
-                if(item.contains("-semantic=")){
-                    String opt=item.substring(10);
-                    // System.err.println(opt);
-                    if(opt.equals("skip")){
-                        runSemantic=false;
-                    }else if(opt.equals("only")){
-                        runSemantic=true;
-                        onlySemantic=true;
-                    }
+                if(item.equals("-semantic")){
+                    onlySemantic=true;
+                }else if(item.contains("-emit-llvm")){
+                    printIR=true;
+                    if(item.charAt(10)=='=')
+                        IRFileName=item.substring(11);
                 }
             }
         }
@@ -41,6 +43,7 @@ public class Main {
             programNode ASTRoot;
             globalScope gScope = new globalScope();
 
+            //antlr analyze
             MxLexer lexer=new MxLexer(CharStreams.fromStream(input));
             lexer.removeErrorListeners();
             lexer.addErrorListener(new MxErrorListener());
@@ -48,17 +51,21 @@ public class Main {
             parser.removeErrorListeners();
             parser.addErrorListener(new MxErrorListener());
             ParseTree parseTreeRoot = parser.program();
+
+            //build ast
             ASTBuilder astBuilder = new ASTBuilder();
             ASTRoot=(programNode) astBuilder.visit(parseTreeRoot);
 
-            if(runSemantic){
-                //run semantic checker
-                System.err.println("running semantic ...");
-                new SymbolCollector(gScope).visit(ASTRoot);
-                new TypeFilter(gScope).visit(ASTRoot);
-                new SemanticChecker(gScope).visit(ASTRoot);
-            }
+            //run semantic checker
+            new SymbolCollector(gScope).visit(ASTRoot);
+            new TypeFilter(gScope).visit(ASTRoot);
+            new SemanticChecker(gScope).visit(ASTRoot);
             if(onlySemantic)return;
+
+            //run IRBuilder
+            Module module=new IRBuilder().run(ASTRoot);
+            if(printIR)
+                new IRPrinter(module,new PrintStream(IRFileName));
 
             //run build program
             System.err.println("building codegen ...");
