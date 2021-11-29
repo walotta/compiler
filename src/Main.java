@@ -1,6 +1,6 @@
 import AST.*;
-import Backend.IRBuilder;
-import Backend.IRPrinter;
+import MIR.IRBuilder;
+import MIR.IRPrinter;
 import MIR.Module;
 import Frontend.ASTBuilder;
 import Frontend.SemanticChecker;
@@ -16,7 +16,6 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.FileInputStream;
-import java.io.PrintStream;
 
 public class Main {
 
@@ -30,14 +29,14 @@ public class Main {
                     onlySemantic=true;
                 }else if(item.contains("-emit-llvm")){
                     printIR=true;
-                    if(item.charAt(10)=='=')
+                    if(item.length()>10&&item.charAt(10)=='=')
                         IRFileName=item.substring(11);
                 }
             }
         }
 
-        var input=System.in;
-        //var input=new FileInputStream("testcases/sema/lambda-package/lambda-4.mx");
+        //var input=System.in;
+        var input=new FileInputStream("src.mx");
 
         try {
             programNode ASTRoot;
@@ -65,7 +64,7 @@ public class Main {
             //run IRBuilder
             Module module=new IRBuilder().run(ASTRoot);
             if(printIR)
-                new IRPrinter(module,new PrintStream(IRFileName));
+                new IRPrinter(module,IRFileName);
 
             //run build program
             System.err.println("building codegen ...");

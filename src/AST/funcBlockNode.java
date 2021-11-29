@@ -1,5 +1,6 @@
 package AST;
 
+import MIR.Function;
 import Util.Type.funcType;
 import Util.position;
 
@@ -11,6 +12,8 @@ public class funcBlockNode extends ASTNode{
     public ArrayList<singleVarBlockNode> paras;
     public statementBlockNode funcStatementLists;
     public funcType func;
+    //IR
+    public Function funcIR;
 
     public funcBlockNode(position pos, typeNode retType, String funcName, ArrayList<singleVarBlockNode> paras, statementBlockNode funcStatementLists){
         super(pos);
