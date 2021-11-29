@@ -14,8 +14,10 @@ public class IRScopeBase {
         return id;
     }
 
-    public IRScopeBase(IRScopeBase parentsScope,int cnt){
+    public IRScopeBase(IRScopeBase parentsScope){
         this.parentsScope=parentsScope;
-        this.cnt=cnt;
+        if(parentsScope==null)
+            this.cnt=0;
+        else this.cnt=parentsScope.cnt;
     }
 }

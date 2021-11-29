@@ -1,10 +1,13 @@
 package MIR;
 
 import MIR.IRInstruction.allocaInst;
+import MIR.IRInstruction.loadInst;
+import MIR.IRInstruction.retInst;
 import MIR.IRInstruction.storeInst;
 import MIR.IRScope.IRScopeFunc;
 import MIR.IRtype.IRBaseType;
 import MIR.IRtype.IRPointerType;
+import MIR.IRtype.IRVoidType;
 import MIR.Operand.Register;
 import Util.Scope.Scope;
 
@@ -24,11 +27,14 @@ public class Function {
     public BasicBlock entranceBlock;
     public BasicBlock retBlock;
 
-    public void buildInit(IRScopeFunc scope){
-        BasicBlock entranceBlock=new BasicBlock(scope.regCnt());
-        retReg=new Register(scope.regCnt(),null,new IRPointerType(retType));
-        entranceBlock.instructions.add(new allocaInst(retReg));
-        entranceBlock.instructions.add(new storeInst(((IRPointerType)retReg.type).baseType.defaultValue(),retReg));
+    public void buildInit(IRScopeFunc scope,BasicBlock entranceBlock){
+        if(retType instanceof IRVoidType)
+            retReg=null;
+        else{
+            retReg=new Register(scope.regCnt(),null,new IRPointerType(retType));
+            entranceBlock.instructions.add(new allocaInst(retReg));
+            entranceBlock.instructions.add(new storeInst(((IRPointerType)retReg.type).baseType.defaultValue(),retReg));
+        }
         for (Register para : paras) {
             int varId = scope.regCnt();
             renameMap.put(para.identifier, varId);
@@ -37,13 +43,16 @@ public class Function {
             entranceBlock.instructions.add(new allocaInst(targetReg));
             entranceBlock.instructions.add(new storeInst(para, targetReg));
         }
-        Blocks.add(entranceBlock);
     }
 
-    public void buildRet(IRScopeFunc scope){
-        //todo
-        BasicBlock retBlock=new BasicBlock(scope.regCnt());
-
+    public void buildRet(IRScopeFunc scope,BasicBlock retBlock){
+        if(retReg==null)
+            retBlock.instructions.add(new retInst(null));
+        else{
+            Register loadRet=new Register(scope.regCnt(),null,((IRPointerType)retReg.type).baseType);
+            retBlock.instructions.add(new loadInst(loadRet,retReg));
+            retBlock.instructions.add(new retInst(loadRet));
+        }
     }
 
     public Function(String funcName,IRBaseType retType){
@@ -58,11 +67,13 @@ public class Function {
 
     @Override
     public String toString(){
-        StringBuilder builder = new StringBuilder();
-        StringJoiner argJoiner = new StringJoiner(",", "(", ")");
+        StringBuilder builder=new StringBuilder();
+        StringJoiner argJoiner=new StringJoiner(",", "(", ")");
         paras.forEach(item->argJoiner.add(item.type+" "+item));
         builder.append("define ").append(retType).append(" @").append(funcName).append(argJoiner).append("{\n");
-        Blocks.forEach(builder::append);
+        StringJoiner blockJoiner=new StringJoiner("\n");
+        Blocks.forEach(item->blockJoiner.add(item.toString()));
+        builder.append(blockJoiner);
         builder.append("\n}");
         return builder.toString();
     }

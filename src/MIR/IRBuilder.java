@@ -2,6 +2,7 @@ package MIR;
 
 import AST.*;
 import MIR.Function;
+import MIR.IRInstruction.jumpInst;
 import MIR.IRScope.IRScopeBase;
 import MIR.IRScope.IRScopeFunc;
 import MIR.IRtype.*;
@@ -14,6 +15,8 @@ import java.util.ArrayList;
 public class IRBuilder implements ASTVisitor {
     private Module module;
     private IRScopeBase currentScope;
+    private BasicBlock currentBlock;
+    private Function currentFunc;
 
     private IRBaseType transType(typeNode t){
         //todo class
@@ -49,7 +52,7 @@ public class IRBuilder implements ASTVisitor {
         it.programBlockList.forEach(item->{
             item.accept(this);
             if(item instanceof funcBlockNode){
-                //todo funcDecl
+                //funcDecl
                 module.functions.put(((funcBlockNode)item).funcName,((funcBlockNode)item).funcIR);
             }else if(item instanceof varBlockNode){
                 //todo varDecl
@@ -65,14 +68,23 @@ public class IRBuilder implements ASTVisitor {
     public void visit(funcBlockNode it){
         //todo
         currentScope=new IRScopeFunc(currentScope);
-        Function funcIR=new Function(it.funcName,transType(it.retType));
+        currentFunc=new Function(it.funcName,transType(it.retType));
         for(int i=0;i<it.paras.size();i++){
-            funcIR.paras.add(new Register(currentScope.regCnt(),it.paras.get(i).VarName,transType(it.paras.get(i).type)));
+            currentFunc.paras.add(new Register(currentScope.regCnt(),it.paras.get(i).VarName,transType(it.paras.get(i).type)));
         }
-        funcIR.buildInit((IRScopeFunc)currentScope);
+        currentBlock=new BasicBlock(currentScope.regCnt());
+        currentFunc.buildInit((IRScopeFunc)currentScope,currentBlock);
         visit(it.funcStatementLists);
-        funcIR.buildRet((IRScopeFunc)currentScope);
-        it.funcIR=funcIR;
+        BasicBlock retBlock=new BasicBlock(currentScope.regCnt());
+        currentBlock.instructions.add(new jumpInst(retBlock.id));
+        currentFunc.Blocks.add(currentBlock);
+        currentBlock=retBlock;
+        currentFunc.buildRet((IRScopeFunc)currentScope,retBlock);
+        currentFunc.Blocks.add(currentBlock);
+        currentBlock=null;
+        it.funcIR=currentFunc;
+        currentFunc=null;
+        currentScope=currentScope.parentsScope;
     }
 
     @Override
@@ -98,6 +110,7 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(statementBlockNode it){
         //todo
+        //currentScope=new IRScopeBase(currentScope);
     }
 
     @Override
