@@ -47,56 +47,66 @@ public class globalScope extends Scope {
         funcType buildInFunc;
 
         buildInFunc = new funcType("print");
+        buildInFunc.builtin=true;
         buildInFunc.scope=new funcScope(this);
         buildInFunc.addParas(new varEntity("str", stringType, false), new position(0,0));
         buildInFunc.retType=voidType;
         defineFunc("print", buildInFunc, new position(0,0));
 
         buildInFunc = new funcType("println");
+        buildInFunc.builtin=true;
         buildInFunc.scope=new funcScope(this);
         buildInFunc.addParas(new varEntity("str", stringType, false), new position(0,0));
         buildInFunc.retType=voidType;
         defineFunc("println", buildInFunc, new position(0,0));
 
         buildInFunc = new funcType("printInt");
+        buildInFunc.builtin=true;
         buildInFunc.scope=new funcScope(this);
         buildInFunc.addParas(new varEntity("n", intType, false), new position(0,0));
         buildInFunc.retType=voidType;
         defineFunc("printInt", buildInFunc, new position(0,0));
 
         buildInFunc = new funcType("printlnInt");
+        buildInFunc.builtin=true;
         buildInFunc.scope=new funcScope(this);
         buildInFunc.addParas(new varEntity("n", intType, false), new position(0,0));
         buildInFunc.retType=voidType;
         defineFunc("printlnInt", buildInFunc, new position(0,0));
 
         buildInFunc = new funcType("getString");
+        buildInFunc.builtin=true;
         buildInFunc.scope=new funcScope(this);
         buildInFunc.retType=stringType;
         defineFunc("getString", buildInFunc, new position(0,0));
 
         buildInFunc = new funcType("getInt");
+        buildInFunc.builtin=true;
         buildInFunc.scope=new funcScope(this);
         buildInFunc.retType=intType;
         defineFunc("getInt", buildInFunc, new position(0,0));
 
         buildInFunc = new funcType("toString");
+        buildInFunc.builtin=true;
         buildInFunc.scope=new funcScope(this);
         buildInFunc.addParas(new varEntity("i", intType, false), new position(0,0));
         buildInFunc.retType=stringType;
         defineFunc("toString", buildInFunc, new position(0,0));
 
         buildInFunc = new funcType("size");
+        buildInFunc.builtin=true;
         buildInFunc.scope=new funcScope(this);
         buildInFunc.retType=intType;
         defineFunc("size", buildInFunc, new position(0,0));
 
         buildInFunc = new funcType("length");
+        buildInFunc.builtin=true;
         buildInFunc.scope=new funcScope(this);
         buildInFunc.retType=intType;
         stringType.defineFunc("length", buildInFunc, new position(0,0));
 
         buildInFunc = new funcType("substring");
+        buildInFunc.builtin=true;
         buildInFunc.scope=new funcScope(this);
         buildInFunc.addParas(new varEntity("left", intType, false), new position(0,0));
         buildInFunc.addParas(new varEntity("right", intType, false), new position(0,0));
@@ -104,11 +114,13 @@ public class globalScope extends Scope {
         stringType.defineFunc("substring", buildInFunc, new position(0,0));
 
         buildInFunc = new funcType("parseInt");
+        buildInFunc.builtin=true;
         buildInFunc.scope=new funcScope(this);
         buildInFunc.retType=intType;
         stringType.defineFunc("parseInt", buildInFunc, new position(0,0));
 
         buildInFunc = new funcType("ord");
+        buildInFunc.builtin=true;
         buildInFunc.scope=new funcScope(this);
         buildInFunc.addParas(new varEntity("pos", intType, false), new position(0,0));
         buildInFunc.retType=intType;

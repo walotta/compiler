@@ -2,13 +2,22 @@ package MIR;
 
 import AST.*;
 import MIR.Function;
+import MIR.IRInstruction.callInst;
 import MIR.IRInstruction.jumpInst;
 import MIR.IRScope.IRScopeBase;
 import MIR.IRScope.IRScopeFunc;
 import MIR.IRtype.*;
 import MIR.Module;
+import MIR.Operand.IROperand;
+import MIR.Operand.IntConstant;
 import MIR.Operand.Register;
+import Util.Scope.globalScope;
+import Util.Type.Type;
+import Util.Type.arrayType;
+import Util.Type.classType;
+import Util.Type.funcType;
 import Util.error.compilerError;
+import Util.position;
 
 import java.util.ArrayList;
 
@@ -17,6 +26,7 @@ public class IRBuilder implements ASTVisitor {
     private IRScopeBase currentScope;
     private BasicBlock currentBlock;
     private Function currentFunc;
+    private IROperand calBack;
 
     private IRBaseType transType(typeNode t){
         //todo class
@@ -36,9 +46,10 @@ public class IRBuilder implements ASTVisitor {
         return irType;
     }
 
-    public IRBuilder(){
-        module=new Module();
+    public IRBuilder(globalScope gScope){
+        module=new Module(gScope);
         currentScope=null;
+        calBack=null;
     }
 
     public Module run(programNode it){
@@ -48,27 +59,16 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(programNode it){
-        //todo
         it.programBlockList.forEach(item->{
             item.accept(this);
-            if(item instanceof funcBlockNode){
-                //funcDecl
-                module.functions.put(((funcBlockNode)item).funcName,((funcBlockNode)item).funcIR);
-            }else if(item instanceof varBlockNode){
-                //todo varDecl
-
-            }else if(item instanceof classBlockNode){
-                //todo classDecl
-            }
         });
 
     }
 
     @Override
     public void visit(funcBlockNode it){
-        //todo
         currentScope=new IRScopeFunc(currentScope);
-        currentFunc=new Function(it.funcName,transType(it.retType));
+        currentFunc=module.functions.get(it.funcName);
         for(int i=0;i<it.paras.size();i++){
             currentFunc.paras.add(new Register(currentScope.regCnt(),it.paras.get(i).VarName,transType(it.paras.get(i).type)));
         }
@@ -82,7 +82,7 @@ public class IRBuilder implements ASTVisitor {
         currentFunc.buildRet((IRScopeFunc)currentScope,retBlock);
         currentFunc.Blocks.add(currentBlock);
         currentBlock=null;
-        it.funcIR=currentFunc;
+        module.functions.put(it.funcName,currentFunc);
         currentFunc=null;
         currentScope=currentScope.parentsScope;
     }
@@ -109,8 +109,12 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(statementBlockNode it){
-        //todo
-        //currentScope=new IRScopeBase(currentScope);
+        currentScope=new IRScopeBase(currentScope);
+
+        it.statementList.forEach(item->item.accept(this));
+
+        currentScope.parentsScope.copyCnt(currentScope);
+        currentScope=currentScope.parentsScope;
     }
 
     @Override
@@ -126,6 +130,7 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(exprStatementNode it){
         //todo
+        it.expr.accept(this);
     }
 
     @Override
@@ -185,7 +190,20 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(funcCallExprNode it){
-        //todo
+        Function toCall=module.functions.get(((funcNode)it.funcName).funcName);
+        Register retReg;
+        ArrayList<IROperand> parasExp=new ArrayList<>();
+        for(var para:it.paras){
+            para.accept(this);
+            parasExp.add(calBack);
+        }
+        if(toCall.retType instanceof IRVoidType)retReg=null;
+        else{
+            retReg=new Register(currentScope.regCnt(),null,toCall.retType);
+        }
+        callInst inst=new callInst(toCall,retReg,parasExp);
+        currentBlock.instructions.add(inst);
+        calBack=retReg;
     }
 
     @Override
@@ -211,6 +229,7 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(intConstNode it){
         //todo
+        calBack=new IntConstant(it.value);
     }
 
     @Override
@@ -255,7 +274,7 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(lambdaExprNode it){
-        //todo
+        throw new compilerError("cannot deal with lambda!",it.pos);
     }
     
 }

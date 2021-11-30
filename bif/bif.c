@@ -3,35 +3,35 @@
 #include<string.h>
 #include<stdbool.h>
 
-void _glb_print(char* str){
+void print(char* str){
     printf("%s",str);
 }
 
-void _glb_println(char* str){
+void println(char* str){
     printf("%s\n",str);
 }
 
-void _glb_printInt(int n){
+void printInt(int n){
     printf("%d",n);
 }
 
-void _glb_printlnInt(int n){
+void printlnInt(int n){
     printf("%d\n",n);
 }
 
-char* _glb_getString(){
+char* getString(){
     char* str=malloc(sizeof(char)*1024);
     scanf("%s",str);
     return str;
 }
 
-int _glb_getInt(){
+int getInt(){
     int n;
     scanf("%d",&n);
     return n;
 }
 
-char* _glb_toString(int i){
+char* toString(int i){
     char* str=malloc(sizeof(char)*16);
     sprintf(str,"%d",i);
     return str;

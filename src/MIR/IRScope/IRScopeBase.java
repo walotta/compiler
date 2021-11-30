@@ -14,6 +14,10 @@ public class IRScopeBase {
         return id;
     }
 
+    public void copyCnt(IRScopeBase o){
+        this.cnt=o.cnt;
+    }
+
     public IRScopeBase(IRScopeBase parentsScope){
         this.parentsScope=parentsScope;
         if(parentsScope==null)

@@ -9,7 +9,7 @@ target triple = "x86_64-apple-macosx11.0.0"
 @.str.3 = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
 
 ; Function Attrs: noinline nounwind optnone ssp uwtable
-define dso_local void @_glb_print(i8* %0) #0 {
+define dso_local void @print(i8* %0) #0 {
   %2 = alloca i8*, align 8
   store i8* %0, i8** %2, align 8
   %3 = load i8*, i8** %2, align 8
@@ -20,7 +20,7 @@ define dso_local void @_glb_print(i8* %0) #0 {
 declare i32 @printf(i8*, ...) #1
 
 ; Function Attrs: noinline nounwind optnone ssp uwtable
-define dso_local void @_glb_println(i8* %0) #0 {
+define dso_local void @println(i8* %0) #0 {
   %2 = alloca i8*, align 8
   store i8* %0, i8** %2, align 8
   %3 = load i8*, i8** %2, align 8
@@ -29,7 +29,7 @@ define dso_local void @_glb_println(i8* %0) #0 {
 }
 
 ; Function Attrs: noinline nounwind optnone ssp uwtable
-define dso_local void @_glb_printInt(i32 %0) #0 {
+define dso_local void @printInt(i32 %0) #0 {
   %2 = alloca i32, align 4
   store i32 %0, i32* %2, align 4
   %3 = load i32, i32* %2, align 4
@@ -38,7 +38,7 @@ define dso_local void @_glb_printInt(i32 %0) #0 {
 }
 
 ; Function Attrs: noinline nounwind optnone ssp uwtable
-define dso_local void @_glb_printlnInt(i32 %0) #0 {
+define dso_local void @printlnInt(i32 %0) #0 {
   %2 = alloca i32, align 4
   store i32 %0, i32* %2, align 4
   %3 = load i32, i32* %2, align 4
@@ -47,7 +47,7 @@ define dso_local void @_glb_printlnInt(i32 %0) #0 {
 }
 
 ; Function Attrs: noinline nounwind optnone ssp uwtable
-define dso_local i8* @_glb_getString() #0 {
+define dso_local i8* @getString() #0 {
   %1 = alloca i8*, align 8
   %2 = call i8* @malloc(i64 1024) #5
   store i8* %2, i8** %1, align 8
@@ -63,7 +63,7 @@ declare i8* @malloc(i64) #2
 declare i32 @scanf(i8*, ...) #1
 
 ; Function Attrs: noinline nounwind optnone ssp uwtable
-define dso_local i32 @_glb_getInt() #0 {
+define dso_local i32 @getInt() #0 {
   %1 = alloca i32, align 4
   %2 = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @.str.2, i64 0, i64 0), i32* %1)
   %3 = load i32, i32* %1, align 4
@@ -71,7 +71,7 @@ define dso_local i32 @_glb_getInt() #0 {
 }
 
 ; Function Attrs: noinline nounwind optnone ssp uwtable
-define dso_local i8* @_glb_toString(i32 %0) #0 {
+define dso_local i8* @toString(i32 %0) #0 {
   %2 = alloca i32, align 4
   %3 = alloca i8*, align 8
   store i32 %0, i32* %2, align 4

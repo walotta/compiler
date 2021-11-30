@@ -6,13 +6,13 @@ import java.io.PrintStream;
 public class IRPrinter {
     private void printHeader(PrintStream ps,String FileName){
         String declareText="""
-        declare void @_glb_print(i8*)
-        declare void @_glb_println(i8*)
-        declare void @_glb_printInt(i32)
-        declare void @_glb_printlnInt(i32)
-        declare i8* @_glb_getString()
-        declare i32 @_glb_getInt()
-        declare i8* @_glb_toString(i32)
+        declare void @print(i8*)
+        declare void @println(i8*)
+        declare void @printInt(i32)
+        declare void @printlnInt(i32)
+        declare i8* @getString()
+        declare i32 @getInt()
+        declare i8* @toString(i32)
         declare i32 @_str_length(i8*)
         declare i8* @_str_substring(i8*,i32,i32)
         declare i8* @_str_addstring(i8*,i8*)
@@ -48,9 +48,11 @@ public class IRPrinter {
         //todo print global
         //print func
         module.functions.forEach((funcName,funcIR)->{
-            ps.println("; Function Attrs: noinline norecurse optnone ssp uwtable mustprogress");
-            ps.println(funcIR);
-            ps.println();
+            if(!funcIR.isBuiltin){
+                ps.println("; Function Attrs: noinline norecurse optnone ssp uwtable mustprogress");
+                ps.println(funcIR);
+                ps.println();
+            }
         });
     }
 
