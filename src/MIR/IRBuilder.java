@@ -27,24 +27,7 @@ public class IRBuilder implements ASTVisitor {
     private Function currentFunc;
     private IROperand calBack;
     private LabelCounter labelCounter;
-
-    private IRBaseType transType(typeNode t){
-        //todo class
-        String typeName=t.typeName;
-        IRBaseType irType;
-        if(t.dim==0){
-            switch (typeName){
-                case "int"->{irType=new IRIntType();}
-                case "bool"->{irType=new IRBoolType();}
-                case "string"->{irType=new IRStringType();}
-                case "void"->{irType=new IRVoidType();}
-                default -> {throw new compilerError("class type trans",t.pos);}
-            }
-        }else{
-            irType=new IRPointerType(transType(new typeNode(t.pos,t.typeName,t.dim-1)));
-        }
-        return irType;
-    }
+    private final TransTypeToIR trans=new TransTypeToIR();
 
     public IRBuilder(globalScope gScope){
         module=new Module(gScope);
@@ -73,7 +56,7 @@ public class IRBuilder implements ASTVisitor {
         currentScope=new IRScopeFunc(currentScope);
         currentFunc=module.functions.get(it.funcName);
         for(int i=0;i<it.paras.size();i++){
-            currentFunc.paras.add(new Register(currentScope.regCnt(),it.paras.get(i).VarName,transType(it.paras.get(i).type)));
+            currentFunc.paras.add(new Register(currentScope.regCnt(),it.paras.get(i).VarName,trans.transType(it.paras.get(i).type)));
         }
         currentBlock=new BasicBlock(new Label(currentScope.regCnt()));
         currentFunc.buildInit((IRScopeFunc)currentScope,currentBlock);
@@ -105,7 +88,7 @@ public class IRBuilder implements ASTVisitor {
             calBack=null;
         else
             it.expr.accept(this);
-        IRBaseType irType=transType(it.type);
+        IRBaseType irType=trans.transType(it.type);
         Register reg=new Register(currentScope.regCnt(),it.VarName,new IRPointerType(irType));
         currentScope.renameTable.put(it.VarName,reg);
         currentBlock.pushInstruction(new allocaInst(reg));
@@ -215,7 +198,63 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(binaryExprNode it){
         //todo
+        IRBaseType irType=trans.transType(it.type);
+        switch (it.op){
+            case mul -> {
 
+            }
+            case div -> {
+
+            }
+            case mod -> {
+
+            }
+            case add -> {
+
+            }
+            case sub -> {
+
+            }
+            case bitLeft -> {
+
+            }
+            case bitRight -> {
+
+            }
+            case smallThan -> {
+
+            }
+            case bigThan -> {
+
+            }
+            case smallEqual -> {
+
+            }
+            case bigEqual -> {
+
+            }
+            case isEqual -> {
+
+            }
+            case isNotEqual -> {
+
+            }
+            case bitAnd -> {
+
+            }
+            case bitXor -> {
+
+            }
+            case bitOr -> {
+
+            }
+            case logicAnd -> {
+
+            }
+            case logicOr -> {
+
+            }
+        }
     }
 
     @Override
