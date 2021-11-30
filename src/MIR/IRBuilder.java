@@ -2,11 +2,10 @@ package MIR;
 
 import AST.*;
 import MIR.Function;
-import MIR.IRInstruction.callInst;
-import MIR.IRInstruction.jumpInst;
-import MIR.IRInstruction.storeInst;
+import MIR.IRInstruction.*;
 import MIR.IRScope.IRScopeBase;
 import MIR.IRScope.IRScopeFunc;
+import MIR.IRScope.IRScopeGlobal;
 import MIR.IRtype.*;
 import MIR.Module;
 import MIR.Operand.IROperand;
@@ -61,10 +60,12 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(programNode it){
+        currentScope=new IRScopeGlobal(currentScope);
+        ((IRScopeGlobal)currentScope).insertGlobalVar();
         it.programBlockList.forEach(item->{
+            if(item instanceof funcBlockNode || item instanceof classBlockNode)
             item.accept(this);
         });
-
     }
 
     @Override
@@ -100,12 +101,25 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(singleVarBlockNode it){
-        //todo
+        if(it.expr==null)
+            calBack=null;
+        else
+            it.expr.accept(this);
+        IRBaseType irType=transType(it.type);
+        Register reg=new Register(currentScope.regCnt(),it.VarName,new IRPointerType(irType));
+        currentScope.renameTable.put(it.VarName,reg);
+        currentBlock.instructions.add(new allocaInst(reg));
+        if(calBack==null)
+            currentBlock.instructions.add(new storeInst(irType.defaultValue(),reg));
+        else
+            currentBlock.instructions.add(new storeInst(calBack,reg));
     }
 
     @Override
     public void visit(varBlockNode it){
-        //todo
+        it.varList.forEach(v->{
+            v.accept(this);
+        });
     }
 
     @Override
@@ -262,7 +276,9 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(varNode it){
-        //todo
+        Register Addr=(Register) currentScope.queryRename(it.name);
+        calBack=new Register(currentScope.regCnt(),null,((IRPointerType)Addr.type).baseType);
+        currentBlock.instructions.add(new loadInst((Register) calBack,Addr));
     }
 
     @Override

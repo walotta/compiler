@@ -20,8 +20,6 @@ public class Function {
     public Register retReg;
     public final String retLabel="ret";
 
-    public HashMap<String, Integer> renameMap;
-    public LinkedHashMap<Integer,Register> varTable;
     public LinkedList<BasicBlock> Blocks;
 
     public BasicBlock genRetBlock(IRScopeBase scope){
@@ -50,9 +48,8 @@ public class Function {
         }
         for (Register para : paras) {
             int varId = scope.regCnt();
-            renameMap.put(para.identifier, varId);
             Register targetReg = new Register(varId, para.identifier, new IRPointerType(para.type));
-            varTable.put(varId, targetReg);
+            scope.renameTable.put(para.identifier, targetReg);
             entranceBlock.instructions.add(new allocaInst(targetReg));
             entranceBlock.instructions.add(new storeInst(para, targetReg));
         }
@@ -63,8 +60,6 @@ public class Function {
         this.retType=retType;
         this.isBuiltin=false;
         this.paras=new ArrayList<>();
-        this.renameMap=new HashMap<>();
-        this.varTable=new LinkedHashMap<>();
         this.Blocks=new LinkedList<>();
     }
 
