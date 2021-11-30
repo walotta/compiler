@@ -1,13 +1,14 @@
 package MIR.IRInstruction;
 
+import MIR.Operand.Label;
 import MIR.Operand.Register;
 
 public class brInst extends Instruction{
     Register cond;
-    int trueLabel;
-    int falseLabel;
+    Label trueLabel;
+    Label falseLabel;
 
-    public brInst(Register cond,int trueLabel,int falseLabel){
+    public brInst(Register cond,Label trueLabel,Label falseLabel){
         this.cond=cond;
         this.trueLabel=trueLabel;
         this.falseLabel=falseLabel;

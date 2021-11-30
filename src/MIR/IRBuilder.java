@@ -10,6 +10,7 @@ import MIR.IRtype.*;
 import MIR.Module;
 import MIR.Operand.IROperand;
 import MIR.Operand.IntConstant;
+import MIR.Operand.Label;
 import MIR.Operand.Register;
 import Util.Scope.globalScope;
 import Util.Type.Type;
@@ -72,17 +73,15 @@ public class IRBuilder implements ASTVisitor {
         for(int i=0;i<it.paras.size();i++){
             currentFunc.paras.add(new Register(currentScope.regCnt(),it.paras.get(i).VarName,transType(it.paras.get(i).type)));
         }
-        currentBlock=new BasicBlock(currentScope.regCnt());
+        currentBlock=new BasicBlock(new Label(currentScope.regCnt()));
         currentFunc.buildInit((IRScopeFunc)currentScope,currentBlock);
         visit(it.funcStatementLists);
-        BasicBlock retBlock=new BasicBlock(currentScope.regCnt());
-        currentBlock.instructions.add(new jumpInst(retBlock.id));
+        currentBlock.instructions.add(currentFunc.jumpToRet());
         currentFunc.Blocks.add(currentBlock);
-        currentBlock=retBlock;
-        currentFunc.buildRet((IRScopeFunc)currentScope,retBlock);
+        currentBlock=currentFunc.genRetBlock(currentScope);
         currentFunc.Blocks.add(currentBlock);
-        currentBlock=null;
         module.functions.put(it.funcName,currentFunc);
+        currentBlock=null;
         currentFunc=null;
         currentScope=currentScope.parentsScope;
     }

@@ -1,15 +1,17 @@
 package MIR.IRInstruction;
 
-public class jumpInst extends Instruction{
-    int target;
+import MIR.Operand.Label;
 
-    public jumpInst(int target){
+public class jumpInst extends Instruction{
+    Label target;
+
+    public jumpInst(Label target){
         this.target=target;
         this.blockFinish=true;
     }
 
     @Override
     public String toString() {
-        return "br label %"+target;
+        return "br label "+target;
     }
 }

@@ -1,13 +1,12 @@
 package MIR;
 
-import MIR.IRInstruction.allocaInst;
-import MIR.IRInstruction.loadInst;
-import MIR.IRInstruction.retInst;
-import MIR.IRInstruction.storeInst;
+import MIR.IRInstruction.*;
+import MIR.IRScope.IRScopeBase;
 import MIR.IRScope.IRScopeFunc;
 import MIR.IRtype.IRBaseType;
 import MIR.IRtype.IRPointerType;
 import MIR.IRtype.IRVoidType;
+import MIR.Operand.Label;
 import MIR.Operand.Register;
 import Util.Scope.Scope;
 
@@ -18,14 +17,28 @@ public class Function {
     public IRBaseType retType;
     public ArrayList<Register> paras;
     public boolean isBuiltin;
-    Register retReg;
+    public Register retReg;
+    public final String retLabel="ret";
 
     public HashMap<String, Integer> renameMap;
     public LinkedHashMap<Integer,Register> varTable;
     public LinkedList<BasicBlock> Blocks;
 
-    public BasicBlock entranceBlock;
-    public BasicBlock retBlock;
+    public BasicBlock genRetBlock(IRScopeBase scope){
+        BasicBlock retBlock=new BasicBlock(new Label(retLabel));
+        if(retReg==null)
+            retBlock.instructions.add(new retInst(null));
+        else{
+            Register loadRet=new Register(scope.regCnt(),null,((IRPointerType)retReg.type).baseType);
+            retBlock.instructions.add(new loadInst(loadRet,retReg));
+            retBlock.instructions.add(new retInst(loadRet));
+        }
+        return retBlock;
+    }
+
+    public jumpInst jumpToRet(){
+        return new jumpInst(new Label(retLabel));
+    }
 
     public void buildInit(IRScopeFunc scope,BasicBlock entranceBlock){
         if(retType instanceof IRVoidType)
@@ -42,16 +55,6 @@ public class Function {
             varTable.put(varId, targetReg);
             entranceBlock.instructions.add(new allocaInst(targetReg));
             entranceBlock.instructions.add(new storeInst(para, targetReg));
-        }
-    }
-
-    public void buildRet(IRScopeFunc scope,BasicBlock retBlock){
-        if(retReg==null)
-            retBlock.instructions.add(new retInst(null));
-        else{
-            Register loadRet=new Register(scope.regCnt(),null,((IRPointerType)retReg.type).baseType);
-            retBlock.instructions.add(new loadInst(loadRet,retReg));
-            retBlock.instructions.add(new retInst(loadRet));
         }
     }
 
