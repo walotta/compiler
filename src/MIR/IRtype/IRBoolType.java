@@ -6,7 +6,7 @@ import MIR.Operand.IROperand;
 public class IRBoolType extends IRBaseType{
     @Override
     public String toString(){
-        return "i8";
+        return "i1";
     }
 
     @Override
