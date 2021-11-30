@@ -50,7 +50,7 @@ public class IRScopeBase {
         }
         else{
             this.cnt=parentsScope.cnt;
-            this.stackLayer=parentsScope.stackLayer;
+            this.stackLayer=parentsScope.stackLayer+1;
         }
     }
 }

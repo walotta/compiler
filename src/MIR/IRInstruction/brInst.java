@@ -1,14 +1,15 @@
 package MIR.IRInstruction;
 
+import MIR.Operand.IROperand;
 import MIR.Operand.Label;
 import MIR.Operand.Register;
 
 public class brInst extends Instruction{
-    Register cond;
+    IROperand cond;
     Label trueLabel;
     Label falseLabel;
 
-    public brInst(Register cond,Label trueLabel,Label falseLabel){
+    public brInst(IROperand cond,Label trueLabel,Label falseLabel){
         this.cond=cond;
         this.trueLabel=trueLabel;
         this.falseLabel=falseLabel;
@@ -17,6 +18,9 @@ public class brInst extends Instruction{
 
     @Override
     public String toString() {
-        return "br i1 "+cond+", %"+trueLabel+", %"+falseLabel;
+        if(falseLabel!=null)
+            return "br i1 "+cond+", "+trueLabel.type+" "+trueLabel+", "+falseLabel.type+" "+falseLabel;
+        else
+            return "br i1 "+cond+", "+trueLabel.type+" "+trueLabel;
     }
 }

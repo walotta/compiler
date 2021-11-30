@@ -25,11 +25,11 @@ public class Function {
     public BasicBlock genRetBlock(IRScopeBase scope){
         BasicBlock retBlock=new BasicBlock(new Label(retLabel));
         if(retReg==null)
-            retBlock.instructions.add(new retInst(null));
+            retBlock.pushInstruction(new retInst(null));
         else{
             Register loadRet=new Register(scope.regCnt(),null,((IRPointerType)retReg.type).baseType);
-            retBlock.instructions.add(new loadInst(loadRet,retReg));
-            retBlock.instructions.add(new retInst(loadRet));
+            retBlock.pushInstruction(new loadInst(loadRet,retReg));
+            retBlock.pushInstruction(new retInst(loadRet));
         }
         return retBlock;
     }
@@ -43,15 +43,15 @@ public class Function {
             retReg=null;
         else{
             retReg=new Register(scope.regCnt(),null,new IRPointerType(retType));
-            entranceBlock.instructions.add(new allocaInst(retReg));
-            entranceBlock.instructions.add(new storeInst(((IRPointerType)retReg.type).baseType.defaultValue(),retReg));
+            entranceBlock.pushInstruction(new allocaInst(retReg));
+            entranceBlock.pushInstruction(new storeInst(((IRPointerType)retReg.type).baseType.defaultValue(),retReg));
         }
         for (Register para : paras) {
             int varId = scope.regCnt();
             Register targetReg = new Register(varId, para.identifier, new IRPointerType(para.type));
             scope.renameTable.put(para.identifier, targetReg);
-            entranceBlock.instructions.add(new allocaInst(targetReg));
-            entranceBlock.instructions.add(new storeInst(para, targetReg));
+            entranceBlock.pushInstruction(new allocaInst(targetReg));
+            entranceBlock.pushInstruction(new storeInst(para, targetReg));
         }
     }
 

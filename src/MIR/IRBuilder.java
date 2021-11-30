@@ -8,10 +8,7 @@ import MIR.IRScope.IRScopeFunc;
 import MIR.IRScope.IRScopeGlobal;
 import MIR.IRtype.*;
 import MIR.Module;
-import MIR.Operand.IROperand;
-import MIR.Operand.IntConstant;
-import MIR.Operand.Label;
-import MIR.Operand.Register;
+import MIR.Operand.*;
 import Util.Scope.globalScope;
 import Util.Type.Type;
 import Util.Type.arrayType;
@@ -21,6 +18,7 @@ import Util.error.compilerError;
 import Util.position;
 
 import java.util.ArrayList;
+import java.util.concurrent.TransferQueue;
 
 public class IRBuilder implements ASTVisitor {
     private Module module;
@@ -78,8 +76,8 @@ public class IRBuilder implements ASTVisitor {
         currentBlock=new BasicBlock(new Label(currentScope.regCnt()));
         currentFunc.buildInit((IRScopeFunc)currentScope,currentBlock);
         visit(it.funcStatementLists);
-        if(!currentBlock.instructions.getLast().blockFinish)
-            currentBlock.instructions.add(currentFunc.jumpToRet());
+        if(currentBlock.canInsert())
+            currentBlock.pushInstruction(currentFunc.jumpToRet());
         currentFunc.Blocks.add(currentBlock);
         currentBlock=currentFunc.genRetBlock(currentScope);
         currentFunc.Blocks.add(currentBlock);
@@ -108,11 +106,11 @@ public class IRBuilder implements ASTVisitor {
         IRBaseType irType=transType(it.type);
         Register reg=new Register(currentScope.regCnt(),it.VarName,new IRPointerType(irType));
         currentScope.renameTable.put(it.VarName,reg);
-        currentBlock.instructions.add(new allocaInst(reg));
+        currentBlock.pushInstruction(new allocaInst(reg));
         if(calBack==null)
-            currentBlock.instructions.add(new storeInst(irType.defaultValue(),reg));
+            currentBlock.pushInstruction(new storeInst(irType.defaultValue(),reg));
         else
-            currentBlock.instructions.add(new storeInst(calBack,reg));
+            currentBlock.pushInstruction(new storeInst(calBack,reg));
     }
 
     @Override
@@ -126,7 +124,10 @@ public class IRBuilder implements ASTVisitor {
     public void visit(statementBlockNode it){
         currentScope=new IRScopeBase(currentScope);
 
-        it.statementList.forEach(item->item.accept(this));
+        it.statementList.forEach(item-> {
+            if(currentBlock.canInsert())
+                item.accept(this);
+        });
 
         currentScope.parentsScope.copyCnt(currentScope);
         currentScope=currentScope.parentsScope;
@@ -155,14 +156,44 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(ifNode it){
-        //todo
+        it.condition.accept(this);
+        BasicBlock falseBlock=null;
+        Label trueLabel=new Label("ifTrueBlock."+currentScope.getLayer());
+        Label finalLabel=new Label("ifNextBlock."+currentScope.getLayer());
+        Label falseLabel=finalLabel;
+        BasicBlock trueBlock=new BasicBlock(trueLabel);
+        if(it.falseStatement!=null){
+            falseLabel=new Label("ifFalseBlock."+currentScope.getLayer());
+            falseBlock=new BasicBlock(falseLabel);
+        }
+        currentBlock.pushInstruction(new brInst(calBack,trueLabel,falseLabel));
+        currentFunc.Blocks.add(currentBlock);
+        currentBlock=trueBlock;
+        currentScope=new IRScopeBase(currentScope);
+        it.trueStatement.accept(this);
+        currentScope.parentsScope.copyCnt(currentScope);
+        currentScope=currentScope.parentsScope;
+        if(currentBlock.canInsert())
+            currentBlock.pushInstruction(new jumpInst(finalLabel));
+        currentFunc.Blocks.add(currentBlock);
+        if(falseBlock!=null){
+            currentBlock=falseBlock;
+            currentScope=new IRScopeBase(currentScope);
+            it.falseStatement.accept(this);
+            if(currentBlock.canInsert())
+                currentBlock.pushInstruction(new jumpInst(finalLabel));
+            currentFunc.Blocks.add(currentBlock);
+            currentScope.parentsScope.copyCnt(currentScope);
+            currentScope=currentScope.parentsScope;
+        }
+        currentBlock=new BasicBlock(finalLabel);
     }
 
     @Override
     public void visit(retNode it){
         it.returnExp.accept(this);
-        currentBlock.instructions.add(new storeInst(calBack,currentFunc.retReg));
-        currentBlock.instructions.add(currentFunc.jumpToRet());
+        currentBlock.pushInstruction(new storeInst(calBack,currentFunc.retReg));
+        currentBlock.pushInstruction(currentFunc.jumpToRet());
     }
 
     @Override
@@ -219,7 +250,7 @@ public class IRBuilder implements ASTVisitor {
             retReg=new Register(currentScope.regCnt(),null,toCall.retType);
         }
         callInst inst=new callInst(toCall,retReg,parasExp);
-        currentBlock.instructions.add(inst);
+        currentBlock.pushInstruction(inst);
         calBack=retReg;
     }
 
@@ -245,13 +276,12 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(intConstNode it){
-        //todo
         calBack=new IntConstant(it.value);
     }
 
     @Override
     public void visit(boolConstNode it){
-        //todo
+        calBack=new BoolConstant(it.value);
     }
 
     @Override
@@ -278,7 +308,7 @@ public class IRBuilder implements ASTVisitor {
     public void visit(varNode it){
         Register Addr=(Register) currentScope.queryRename(it.name);
         calBack=new Register(currentScope.regCnt(),null,((IRPointerType)Addr.type).baseType);
-        currentBlock.instructions.add(new loadInst((Register) calBack,Addr));
+        currentBlock.pushInstruction(new loadInst((Register) calBack,Addr));
     }
 
     @Override
