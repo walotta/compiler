@@ -26,6 +26,7 @@ public class IRBuilder implements ASTVisitor {
     private BasicBlock currentBlock;
     private Function currentFunc;
     private IROperand calBack;
+    private LabelCounter labelCounter;
 
     private IRBaseType transType(typeNode t){
         //todo class
@@ -49,6 +50,7 @@ public class IRBuilder implements ASTVisitor {
         module=new Module(gScope);
         currentScope=null;
         calBack=null;
+        labelCounter=new LabelCounter();
     }
 
     public Module run(programNode it){
@@ -157,18 +159,18 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(ifNode it){
         it.condition.accept(this);
-        BasicBlock falseBlock=null;
-        Label trueLabel=new Label("ifTrueBlock."+currentScope.getLayer());
-        Label finalLabel=new Label("ifNextBlock."+currentScope.getLayer());
+        int ifId=labelCounter.getCnt();
+        Label trueLabel=new Label("ifTrueBlock."+ifId);
+        Label finalLabel=new Label("ifNextBlock."+ifId);
         Label falseLabel=finalLabel;
-        BasicBlock trueBlock=new BasicBlock(trueLabel);
         if(it.falseStatement!=null){
-            falseLabel=new Label("ifFalseBlock."+currentScope.getLayer());
-            falseBlock=new BasicBlock(falseLabel);
+            falseLabel=new Label("ifFalseBlock."+ifId);
         }
         currentBlock.pushInstruction(new brInst(calBack,trueLabel,falseLabel));
         currentFunc.Blocks.add(currentBlock);
-        currentBlock=trueBlock;
+
+        //gen True Block
+        currentBlock=new BasicBlock(trueLabel);
         currentScope=new IRScopeBase(currentScope);
         it.trueStatement.accept(this);
         currentScope.parentsScope.copyCnt(currentScope);
@@ -176,8 +178,10 @@ public class IRBuilder implements ASTVisitor {
         if(currentBlock.canInsert())
             currentBlock.pushInstruction(new jumpInst(finalLabel));
         currentFunc.Blocks.add(currentBlock);
-        if(falseBlock!=null){
-            currentBlock=falseBlock;
+
+        //gen False Block
+        if(it.falseStatement!=null){
+            currentBlock=new BasicBlock(falseLabel);
             currentScope=new IRScopeBase(currentScope);
             it.falseStatement.accept(this);
             if(currentBlock.canInsert())
@@ -186,6 +190,8 @@ public class IRBuilder implements ASTVisitor {
             currentScope.parentsScope.copyCnt(currentScope);
             currentScope=currentScope.parentsScope;
         }
+
+        //gen Next Block
         currentBlock=new BasicBlock(finalLabel);
     }
 
@@ -209,6 +215,7 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(binaryExprNode it){
         //todo
+
     }
 
     @Override

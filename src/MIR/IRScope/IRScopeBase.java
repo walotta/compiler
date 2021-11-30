@@ -15,9 +15,10 @@ public class IRScopeBase {
 
     public LinkedHashMap<String, IROperand> renameTable;
 
-    public int getLayer(){
+    /*public int getLayer(){
+        //todo delete
         return stackLayer;
-    }
+    }*/
 
     public IROperand queryRename(String name){
         if(renameTable.containsKey(name))
