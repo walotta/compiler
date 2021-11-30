@@ -4,6 +4,7 @@ import AST.*;
 import MIR.Function;
 import MIR.IRInstruction.callInst;
 import MIR.IRInstruction.jumpInst;
+import MIR.IRInstruction.storeInst;
 import MIR.IRScope.IRScopeBase;
 import MIR.IRScope.IRScopeFunc;
 import MIR.IRtype.*;
@@ -76,7 +77,8 @@ public class IRBuilder implements ASTVisitor {
         currentBlock=new BasicBlock(new Label(currentScope.regCnt()));
         currentFunc.buildInit((IRScopeFunc)currentScope,currentBlock);
         visit(it.funcStatementLists);
-        currentBlock.instructions.add(currentFunc.jumpToRet());
+        if(!currentBlock.instructions.getLast().blockFinish)
+            currentBlock.instructions.add(currentFunc.jumpToRet());
         currentFunc.Blocks.add(currentBlock);
         currentBlock=currentFunc.genRetBlock(currentScope);
         currentFunc.Blocks.add(currentBlock);
@@ -144,7 +146,9 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(retNode it){
-        //todo
+        it.returnExp.accept(this);
+        currentBlock.instructions.add(new storeInst(calBack,currentFunc.retReg));
+        currentBlock.instructions.add(currentFunc.jumpToRet());
     }
 
     @Override

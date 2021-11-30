@@ -29,7 +29,7 @@ public class callInst extends Instruction{
         }
         StringJoiner argvJoiner=new StringJoiner(",","(",")");
         argvs.forEach(argv->{argvJoiner.add(argv.type+" "+argv);});
-        builder.append("call void @").append(toCall.funcName).append(argvJoiner);
+        builder.append("call ").append(toCall.retType).append(" @").append(toCall.funcName).append(argvJoiner);
         return builder.toString();
     }
 }
