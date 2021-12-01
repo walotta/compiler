@@ -18,6 +18,7 @@ import Util.error.compilerError;
 import Util.position;
 
 import java.util.ArrayList;
+import java.util.Stack;
 import java.util.concurrent.TransferQueue;
 
 public class IRBuilder implements ASTVisitor {
@@ -30,12 +31,16 @@ public class IRBuilder implements ASTVisitor {
     private final TransTypeToIR trans=new TransTypeToIR();
     private final position throwPos=new position(0,0);
     private boolean getLeftPointer=false;
+    private Stack<Label> continueStack;
+    private Stack<Label> breakStack;
 
     public IRBuilder(globalScope gScope){
         module=new Module(gScope);
         currentScope=null;
         calBack=null;
         labelCounter=new LabelCounter();
+        continueStack=new Stack<>();
+        breakStack=new Stack<>();
     }
 
     public Module run(programNode it){
@@ -122,11 +127,13 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(breakNode it){
         //todo
+        currentBlock.pushInstruction(new jumpInst(breakStack.peek()));
     }
 
     @Override
     public void visit(continueNode it){
         //todo
+        currentBlock.pushInstruction(new jumpInst(continueStack.peek()));
     }
 
     @Override
@@ -138,6 +145,42 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(forNode it){
         //todo
+        currentScope=new IRScopeBase(currentScope);
+
+        it.initExp.accept(this);
+        int forId=labelCounter.getCnt();
+        Label forCheckLabel=new Label("forCheck."+forId);
+        Label forStepLabel=new Label("forStep."+forId);
+        Label forRunLabel=new Label("forRun."+forId);
+        Label forNextLabel=new Label("forNext."+forId);
+        currentBlock.pushInstruction(new jumpInst(forCheckLabel));
+        currentFunc.Blocks.add(currentBlock);
+        currentBlock=new BasicBlock(forCheckLabel);
+        if(it.finishExp!=null) {
+            it.finishExp.accept(this);
+            IROperand cond=calBack;
+            currentBlock.pushInstruction(new brInst(cond,forRunLabel,forNextLabel));
+        }else{
+            currentBlock.pushInstruction(new jumpInst(forRunLabel));
+        }
+        currentFunc.Blocks.add(currentBlock);
+        currentBlock=new BasicBlock(forRunLabel);
+        continueStack.push(forStepLabel);
+        breakStack.push(forNextLabel);
+        it.runStatement.accept(this);
+        continueStack.pop();
+        breakStack.pop();
+        if(currentBlock.canInsert())
+            currentBlock.pushInstruction(new jumpInst(forStepLabel));
+        currentFunc.Blocks.add(currentBlock);
+        currentBlock=new BasicBlock(forStepLabel);
+        it.stepExp.accept(this);
+        currentBlock.pushInstruction(new jumpInst(forCheckLabel));
+        currentFunc.Blocks.add(currentBlock);
+        currentBlock=new BasicBlock(forNextLabel);
+
+        currentScope.parentsScope.copyCnt(currentScope);
+        currentScope=currentScope.parentsScope;
     }
 
     @Override
@@ -192,9 +235,7 @@ public class IRBuilder implements ASTVisitor {
     }
 
     @Override
-    public void visit(emptyStatementNode it){
-        //todo
-    }
+    public void visit(emptyStatementNode it){}
 
     @Override
     public void visit(binaryExprNode it){
@@ -234,8 +275,14 @@ public class IRBuilder implements ASTVisitor {
                 case bitAnd -> inst=new binaryInst(binaryInst.binaryType.and,left,right,target);
                 case bitXor -> inst=new binaryInst(binaryInst.binaryType.xor,left,right,target);
                 case bitOr -> inst=new binaryInst(binaryInst.binaryType.or,left,right,target);
-                case logicAnd -> throw new compilerError("logicAnd todo",throwPos);
-                case logicOr -> throw new compilerError("logicOr todo",throwPos);
+                case logicAnd -> {
+                    //todo short circuit
+                    inst=new binaryInst(binaryInst.binaryType.and,left,right,target);
+                }
+                case logicOr -> {
+                    //todo short circuit
+                    inst=new binaryInst(binaryInst.binaryType.or,left,right,target);
+                }
                 default -> throw new compilerError("forbidden binary for bool",throwPos);
             }
         }else if(calType instanceof IRStringType){
