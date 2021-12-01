@@ -29,6 +29,7 @@ public class IRBuilder implements ASTVisitor {
     private final LabelCounter labelCounter;
     private final TransTypeToIR trans=new TransTypeToIR();
     private final position throwPos=new position(0,0);
+    private boolean getLeftPointer=false;
 
     public IRBuilder(globalScope gScope){
         module=new Module(gScope);
@@ -293,6 +294,16 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(assignExprNode it){
         //todo
+        Register left;
+        IROperand right;
+        getLeftPointer=true;
+        it.leftExpr.accept(this);
+        getLeftPointer=false;
+        left=(Register) calBack;
+        it.rightExpr.accept(this);
+        right=calBack;
+        currentBlock.pushInstruction(new storeInst(right,left));
+        calBack=left;
     }
 
     @Override
@@ -343,8 +354,12 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(varNode it){
         Register Addr=(Register) currentScope.queryRename(it.name);
-        calBack=new Register(currentScope.regCnt(),null,((IRPointerType)Addr.type).baseType);
-        currentBlock.pushInstruction(new loadInst((Register) calBack,Addr));
+        if(getLeftPointer){
+            calBack=Addr;
+        }else{
+            calBack=new Register(currentScope.regCnt(),null,((IRPointerType)Addr.type).baseType);
+            currentBlock.pushInstruction(new loadInst((Register) calBack,Addr));
+        }
     }
 
     @Override
