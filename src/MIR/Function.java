@@ -66,7 +66,7 @@ public class Function {
     @Override
     public String toString(){
         StringBuilder builder=new StringBuilder();
-        StringJoiner argJoiner=new StringJoiner(",", "(", ")");
+        StringJoiner argJoiner=new StringJoiner(", ", "(", ")");
         paras.forEach(item->argJoiner.add(item.type+" "+item));
         builder.append("define ").append(retType).append(" @").append(funcName).append(argJoiner).append("{\n");
         StringJoiner blockJoiner=new StringJoiner("\n");
