@@ -1,28 +1,21 @@
 package MIR;
 
 import AST.*;
-import MIR.Function;
 import MIR.IRInstruction.*;
 import MIR.IRScope.IRScopeBase;
 import MIR.IRScope.IRScopeFunc;
 import MIR.IRScope.IRScopeGlobal;
 import MIR.IRtype.*;
-import MIR.Module;
 import MIR.Operand.*;
 import Util.Scope.globalScope;
-import Util.Type.Type;
-import Util.Type.arrayType;
-import Util.Type.classType;
-import Util.Type.funcType;
 import Util.error.compilerError;
 import Util.position;
 
 import java.util.ArrayList;
 import java.util.Stack;
-import java.util.concurrent.TransferQueue;
 
 public class IRBuilder implements ASTVisitor {
-    private Module module;
+    private final Module module;
     private IRScopeBase currentScope;
     private BasicBlock currentBlock;
     private Function currentFunc;
@@ -31,8 +24,8 @@ public class IRBuilder implements ASTVisitor {
     private final TransTypeToIR trans=new TransTypeToIR();
     private final position throwPos=new position(0,0);
     private boolean getLeftPointer=false;
-    private Stack<Label> continueStack;
-    private Stack<Label> breakStack;
+    private final Stack<Label> continueStack;
+    private final Stack<Label> breakStack;
 
     public IRBuilder(globalScope gScope){
         module=new Module(gScope);
@@ -312,14 +305,10 @@ public class IRBuilder implements ASTVisitor {
                 case bitAnd -> inst=new binaryInst(binaryInst.binaryType.and,left,right,target);
                 case bitXor -> inst=new binaryInst(binaryInst.binaryType.xor,left,right,target);
                 case bitOr -> inst=new binaryInst(binaryInst.binaryType.or,left,right,target);
-                case logicAnd -> {
-                    //todo short circuit
-                    inst=new binaryInst(binaryInst.binaryType.and,left,right,target);
-                }
-                case logicOr -> {
-                    //todo short circuit
-                    inst=new binaryInst(binaryInst.binaryType.or,left,right,target);
-                }
+                case logicAnd -> //todo short circuit
+                        inst=new binaryInst(binaryInst.binaryType.and,left,right,target);
+                case logicOr -> //todo short circuit
+                        inst=new binaryInst(binaryInst.binaryType.or,left,right,target);
                 default -> throw new compilerError("forbidden binary for bool",throwPos);
             }
         }else if(calType instanceof IRStringType){
