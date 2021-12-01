@@ -25,6 +25,8 @@ public class allocaInst extends Instruction{
         }else{
             ret=ret+"["+number+" x "+target.type+"]";
         }
+        if(target.identifier!=null)
+            ret=ret+"        ; "+target.identifier;
         return ret;
     }
 }
