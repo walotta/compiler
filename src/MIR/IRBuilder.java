@@ -147,7 +147,9 @@ public class IRBuilder implements ASTVisitor {
         //todo
         currentScope=new IRScopeBase(currentScope);
 
-        it.initExp.accept(this);
+        if(it.initExp!=null)
+            it.initExp.accept(this);
+
         int forId=labelCounter.getCnt();
         Label forCheckLabel=new Label("forCheck."+forId);
         Label forStepLabel=new Label("forStep."+forId);
@@ -155,6 +157,7 @@ public class IRBuilder implements ASTVisitor {
         Label forNextLabel=new Label("forNext."+forId);
         currentBlock.pushInstruction(new jumpInst(forCheckLabel));
         currentFunc.Blocks.add(currentBlock);
+
         currentBlock=new BasicBlock(forCheckLabel);
         if(it.finishExp!=null) {
             it.finishExp.accept(this);
@@ -164,19 +167,24 @@ public class IRBuilder implements ASTVisitor {
             currentBlock.pushInstruction(new jumpInst(forRunLabel));
         }
         currentFunc.Blocks.add(currentBlock);
+
         currentBlock=new BasicBlock(forRunLabel);
         continueStack.push(forStepLabel);
         breakStack.push(forNextLabel);
-        it.runStatement.accept(this);
+        if(it.runStatement!=null)
+            it.runStatement.accept(this);
         continueStack.pop();
         breakStack.pop();
         if(currentBlock.canInsert())
             currentBlock.pushInstruction(new jumpInst(forStepLabel));
         currentFunc.Blocks.add(currentBlock);
+
         currentBlock=new BasicBlock(forStepLabel);
-        it.stepExp.accept(this);
+        if(it.stepExp!=null)
+            it.stepExp.accept(this);
         currentBlock.pushInstruction(new jumpInst(forCheckLabel));
         currentFunc.Blocks.add(currentBlock);
+
         currentBlock=new BasicBlock(forNextLabel);
 
         currentScope.parentsScope.copyCnt(currentScope);
@@ -232,6 +240,35 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(whileNode it){
         //todo
+        currentScope=new IRScopeBase(currentScope);
+
+        int whileId=labelCounter.getCnt();
+        Label whileCheckLabel=new Label("whileCheck."+whileId);
+        Label whileRunLabel=new Label("whileRun."+whileId);
+        Label whileNextLabel=new Label("whileNext."+whileId);
+        currentBlock.pushInstruction(new jumpInst(whileCheckLabel));
+        currentFunc.Blocks.add(currentBlock);
+
+        currentBlock=new BasicBlock(whileCheckLabel);
+        it.finishExp.accept(this);
+        IROperand cond=calBack;
+        currentBlock.pushInstruction(new brInst(cond,whileRunLabel,whileNextLabel));
+        currentFunc.Blocks.add(currentBlock);
+
+        currentBlock=new BasicBlock(whileRunLabel);
+        continueStack.push(whileCheckLabel);
+        breakStack.push(whileNextLabel);
+        it.runStatement.accept(this);
+        breakStack.pop();
+        continueStack.pop();
+        if(currentBlock.canInsert())
+            currentBlock.pushInstruction(new jumpInst(whileCheckLabel));
+        currentFunc.Blocks.add(currentBlock);
+
+        currentBlock=new BasicBlock(whileNextLabel);
+
+        currentScope.parentsScope.copyCnt(currentScope);
+        currentScope=currentScope.parentsScope;
     }
 
     @Override
