@@ -26,8 +26,9 @@ public class IRBuilder implements ASTVisitor {
     private BasicBlock currentBlock;
     private Function currentFunc;
     private IROperand calBack;
-    private LabelCounter labelCounter;
+    private final LabelCounter labelCounter;
     private final TransTypeToIR trans=new TransTypeToIR();
+    private final position throwPos=new position(0,0);
 
     public IRBuilder(globalScope gScope){
         module=new Module(gScope);
@@ -100,9 +101,8 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(varBlockNode it){
-        it.varList.forEach(v->{
-            v.accept(this);
-        });
+        it.varList.forEach(v->
+                v.accept(this));
     }
 
     @Override
@@ -197,64 +197,54 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(binaryExprNode it){
-        //todo
         IRBaseType irType=trans.transType(it.type);
-        switch (it.op){
-            case mul -> {
-
+        IRBaseType calType=trans.transType(it.leftExp.type);
+        IROperand left,right;
+        it.leftExp.accept(this);
+        left=calBack;
+        it.rightExp.accept(this);
+        right=calBack;
+        Instruction inst;
+        Register target=new Register(currentScope.regCnt(),null,irType);
+        if(calType instanceof IRIntType){
+            switch (it.op){
+                case mul -> inst=new binaryInst(binaryInst.binaryType.mul,left,right,target);
+                case div -> inst=new binaryInst(binaryInst.binaryType.sdiv,left,right,target);
+                case mod -> inst=new binaryInst(binaryInst.binaryType.srem,left,right,target);
+                case add -> inst=new binaryInst(binaryInst.binaryType.add,left,right,target);
+                case sub -> inst=new binaryInst(binaryInst.binaryType.sub,left,right,target);
+                case bitLeft -> inst=new binaryInst(binaryInst.binaryType.shl,left,right,target);
+                case bitRight -> inst=new binaryInst(binaryInst.binaryType.ashr,left,right,target);
+                case smallThan -> inst=new compareInst(compareInst.compareType.slt,left,right,target);
+                case bigThan -> inst=new compareInst(compareInst.compareType.sgt,left,right,target);
+                case smallEqual -> inst=new compareInst(compareInst.compareType.sle,left,right,target);
+                case bigEqual -> inst=new compareInst(compareInst.compareType.sge,left,right,target);
+                case isEqual -> inst=new compareInst(compareInst.compareType.eq,left,right,target);
+                case isNotEqual -> inst=new compareInst(compareInst.compareType.ne,left,right,target);
+                case bitAnd -> inst=new binaryInst(binaryInst.binaryType.and,left,right,target);
+                case bitXor -> inst=new binaryInst(binaryInst.binaryType.xor,left,right,target);
+                case bitOr -> inst=new binaryInst(binaryInst.binaryType.or,left,right,target);
+                default -> throw new compilerError("forbidden binary for int",throwPos);
             }
-            case div -> {
-
+        }else if(calType instanceof IRBoolType){
+            switch (it.op){
+                case isEqual -> inst=new compareInst(compareInst.compareType.eq,left,right,target);
+                case isNotEqual -> inst=new compareInst(compareInst.compareType.ne,left,right,target);
+                case logicAnd -> throw new compilerError("logicAnd todo",throwPos);
+                case logicOr -> throw new compilerError("logicOr todo",throwPos);
+                default -> throw new compilerError("forbidden binary for bool",throwPos);
             }
-            case mod -> {
-
-            }
-            case add -> {
-
-            }
-            case sub -> {
-
-            }
-            case bitLeft -> {
-
-            }
-            case bitRight -> {
-
-            }
-            case smallThan -> {
-
-            }
-            case bigThan -> {
-
-            }
-            case smallEqual -> {
-
-            }
-            case bigEqual -> {
-
-            }
-            case isEqual -> {
-
-            }
-            case isNotEqual -> {
-
-            }
-            case bitAnd -> {
-
-            }
-            case bitXor -> {
-
-            }
-            case bitOr -> {
-
-            }
-            case logicAnd -> {
-
-            }
-            case logicOr -> {
-
-            }
+        }else if(calType instanceof IRStringType){
+            //todo
+            throw new compilerError("binary String todo",throwPos);
+        }else if(calType instanceof IRClassType){
+            //todo
+            throw new compilerError("binary Class todo",throwPos);
+        }else{
+            throw new compilerError("binary for forbidden type",throwPos);
         }
+        calBack=target;
+        currentBlock.pushInstruction(inst);
     }
 
     @Override
@@ -371,5 +361,5 @@ public class IRBuilder implements ASTVisitor {
     public void visit(lambdaExprNode it){
         throw new compilerError("cannot deal with lambda!",it.pos);
     }
-    
+
 }

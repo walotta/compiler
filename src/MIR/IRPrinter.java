@@ -26,6 +26,8 @@ public class IRPrinter {
         declare i1 @_str_ge(i8*,i8*)
         """;
         ps.println("; llvm-link "+FileName+" bif/bif.ll -S -o link.ll");
+        ps.println("target triple = \"x86_64-apple-macosx11.0.0\"");
+        ps.println();
         ps.println(declareText);
         ps.println("@llvm.global_ctors = appending global [1 x { i32, void ()*, i8* }] [{ i32, void ()*, i8* } { i32 65535, void ()* @_GLOBAL_INIT, i8* null }]");
         ps.println();
