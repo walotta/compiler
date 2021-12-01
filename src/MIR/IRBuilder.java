@@ -231,6 +231,9 @@ public class IRBuilder implements ASTVisitor {
             switch (it.op){
                 case isEqual -> inst=new compareInst(compareInst.compareType.eq,left,right,target);
                 case isNotEqual -> inst=new compareInst(compareInst.compareType.ne,left,right,target);
+                case bitAnd -> inst=new binaryInst(binaryInst.binaryType.and,left,right,target);
+                case bitXor -> inst=new binaryInst(binaryInst.binaryType.xor,left,right,target);
+                case bitOr -> inst=new binaryInst(binaryInst.binaryType.or,left,right,target);
                 case logicAnd -> throw new compilerError("logicAnd todo",throwPos);
                 case logicOr -> throw new compilerError("logicOr todo",throwPos);
                 default -> throw new compilerError("forbidden binary for bool",throwPos);
@@ -250,7 +253,72 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(unaryExprNode it){
-        //todo
+        Register source;
+        IROperand val;
+        boolean queryLeft=getLeftPointer;
+        if(it.op== unaryExprNode.opType.selfAdd || it.op== unaryExprNode.opType.selfSub){
+            getLeftPointer=true;
+            it.calExp.accept(this);
+            getLeftPointer=queryLeft;
+            source=(Register) calBack;
+            val=new Register(currentScope.regCnt(),null,trans.transType(it.type));
+            currentBlock.pushInstruction(new loadInst((Register) val,source));
+        }else{
+            getLeftPointer=false;
+            it.calExp.accept(this);
+            getLeftPointer=queryLeft;
+            source=null;
+            val=calBack;
+        }
+        switch (it.op){
+            case selfAdd -> {
+                Register ans=new Register(currentScope.regCnt(),null,trans.transType(it.type));
+                currentBlock.pushInstruction(new binaryInst(binaryInst.binaryType.add,val,new IntConstant(1),ans));
+                currentBlock.pushInstruction(new storeInst(ans,source));
+                if(getLeftPointer)
+                    calBack=source;
+                else
+                    calBack=ans;
+            }
+            case selfSub -> {
+                Register ans=new Register(currentScope.regCnt(),null,trans.transType(it.type));
+                currentBlock.pushInstruction(new binaryInst(binaryInst.binaryType.sub,val,new IntConstant(1),ans));
+                currentBlock.pushInstruction(new storeInst(ans,source));
+                if(getLeftPointer)
+                    calBack=source;
+                else
+                    calBack=ans;
+            }
+            case positive -> {
+                if(getLeftPointer)
+                    throw new compilerError("+ operation return no left value",throwPos);
+                calBack=val;
+            }
+            case negative -> {
+                if(getLeftPointer)
+                    throw new compilerError("- operation return no left value",throwPos);
+
+                Register ans=new Register(currentScope.regCnt(),null,trans.transType(it.type));
+                currentBlock.pushInstruction(new binaryInst(binaryInst.binaryType.sub,new IntConstant(0),val,ans));
+                calBack=ans;
+            }
+            case logicNot -> {
+                if(getLeftPointer)
+                    throw new compilerError("! operation return no left value",throwPos);
+
+                Register ans=new Register(currentScope.regCnt(),null,trans.transType(it.type));
+                currentBlock.pushInstruction(new binaryInst(binaryInst.binaryType.xor,new BoolConstant(true),val,ans));
+                calBack=ans;
+            }
+            case bitNot -> {
+                if(getLeftPointer)
+                    throw new compilerError("~ operation return no left value",throwPos);
+
+                Register ans=new Register(currentScope.regCnt(),null,trans.transType(it.type));
+                currentBlock.pushInstruction(new binaryInst(binaryInst.binaryType.xor,new IntConstant(-1),val,ans));
+                calBack=ans;
+            }
+        }
     }
 
     @Override
@@ -271,6 +339,20 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(postfixExprNode it){
         //todo
+        boolean queryLeft=getLeftPointer;
+        getLeftPointer=true;
+        it.calExp.accept(this);
+        getLeftPointer=queryLeft;
+        Register source=(Register) calBack;
+        calBack=new Register(currentScope.regCnt(),null,trans.transType(it.type));
+        currentBlock.pushInstruction(new loadInst((Register) calBack,source));
+
+        Register tmp=new Register(currentScope.regCnt(),null,trans.transType(it.type));
+        switch (it.op){
+            case selfAdd -> currentBlock.pushInstruction(new binaryInst(binaryInst.binaryType.add,calBack,new IntConstant(1),tmp));
+            case selfSub -> currentBlock.pushInstruction(new binaryInst(binaryInst.binaryType.sub,calBack,new IntConstant(1),tmp));
+        }
+        currentBlock.pushInstruction(new storeInst(tmp,source));
     }
 
     @Override
@@ -296,9 +378,10 @@ public class IRBuilder implements ASTVisitor {
         //todo
         Register left;
         IROperand right;
+        boolean queryLeft=getLeftPointer;
         getLeftPointer=true;
         it.leftExpr.accept(this);
-        getLeftPointer=false;
+        getLeftPointer=queryLeft;
         left=(Register) calBack;
         it.rightExpr.accept(this);
         right=calBack;
@@ -308,7 +391,7 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(classMemberExprNode it){
-        //todo
+        //todo care for left value access
     }
 
     @Override
@@ -333,7 +416,7 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(nullConstNode it){
-        //todo
+        calBack=new NullptrConstant(new IRPointerType(trans.transType(it.type)));
     }
 
     @Override
