@@ -21,7 +21,7 @@ public class IRBuilder implements ASTVisitor {
     private BasicBlock currentBlock;
     private Function currentFunc;
     private IROperand calBack;
-    private final LabelCounter labelCounter;
+    private final IRCounter IRCounter;
     private final TransTypeToIR trans=new TransTypeToIR();
     private final position throwPos=new position(0,0);
     private boolean getLeftPointer=false;
@@ -33,7 +33,7 @@ public class IRBuilder implements ASTVisitor {
         module=new Module();
         currentScope=null;
         calBack=null;
-        labelCounter=new LabelCounter();
+        IRCounter =new IRCounter();
         continueStack=new Stack<>();
         breakStack=new Stack<>();
     }
@@ -88,9 +88,7 @@ public class IRBuilder implements ASTVisitor {
         Function allInitFunc=new Function("_GLOBAL_INIT",new IRVoidType());
         allInitFunc.ExtendMsg="internal";
         BasicBlock initBlock=new BasicBlock(new Label("init"));
-        module.initFuncs.forEach(f->{
-            initBlock.pushInstruction(new callInst(f,null,new ArrayList<>()));
-        });
+        module.initFuncs.forEach(f-> initBlock.pushInstruction(new callInst(f,null,new ArrayList<>())));
         initBlock.pushInstruction(new retInst(null));
         allInitFunc.Blocks.add(initBlock);
         module.initFuncs.add(allInitFunc);
@@ -177,13 +175,11 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(breakNode it){
-        //todo
         currentBlock.pushInstruction(new jumpInst(breakStack.peek()));
     }
 
     @Override
     public void visit(continueNode it){
-        //todo
         currentBlock.pushInstruction(new jumpInst(continueStack.peek()));
     }
 
@@ -201,7 +197,7 @@ public class IRBuilder implements ASTVisitor {
         if(it.initExp!=null)
             it.initExp.accept(this);
 
-        int forId=labelCounter.getCnt();
+        int forId= IRCounter.getLabelCnt();
         Label forCheckLabel=new Label("forCheck."+forId);
         Label forStepLabel=new Label("forStep."+forId);
         Label forRunLabel=new Label("forRun."+forId);
@@ -245,7 +241,7 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(ifNode it){
         it.condition.accept(this);
-        int ifId=labelCounter.getCnt();
+        int ifId= IRCounter.getLabelCnt();
         Label trueLabel=new Label("ifTrueBlock."+ifId);
         Label finalLabel=new Label("ifNextBlock."+ifId);
         Label falseLabel=finalLabel;
@@ -293,7 +289,7 @@ public class IRBuilder implements ASTVisitor {
         //todo
         currentScope=new IRScopeBase(currentScope);
 
-        int whileId=labelCounter.getCnt();
+        int whileId= IRCounter.getLabelCnt();
         Label whileCheckLabel=new Label("whileCheck."+whileId);
         Label whileRunLabel=new Label("whileRun."+whileId);
         Label whileNextLabel=new Label("whileNext."+whileId);
@@ -552,7 +548,13 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(stringConstNode it){
-        //todo
+        if(module.stringConstTable.containsKey(it.value))
+            calBack=module.stringConstTable.get(it.value);
+        else{
+            StringConstant sc=new StringConstant(IRCounter.getStringConstCnt(),it.value);
+            module.stringConstTable.put(it.value,sc);
+            calBack=sc;
+        }
     }
 
     @Override

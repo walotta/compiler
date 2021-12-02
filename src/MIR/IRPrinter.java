@@ -41,10 +41,6 @@ public class IRPrinter {
     }
 
     private void printInitFunc(PrintStream ps, Module module){
-        module.globalVars.forEach((varName,gVar)->{
-            IRBaseType baseType=((IRPointerType)gVar.type).baseType;
-            ps.println(gVar+" = global "+baseType+" "+(baseType.defaultValue()));
-        });
         for(int i=0;i<module.initFuncs.size();i++){
             if(i!=module.initFuncs.size()-1)
                 ps.println("; Function Attrs: noinline norecurse optnone ssp uwtable mustprogress");
@@ -56,7 +52,17 @@ public class IRPrinter {
     }
 
     private void printModule(PrintStream ps,Module module){
-        //todo print global
+        //print global
+        module.globalVars.forEach((varName,gVar)->{
+            IRBaseType baseType=((IRPointerType)gVar.type).baseType;
+            ps.println(gVar+" = global "+baseType+" "+(baseType.defaultValue()));
+        });
+        ps.println();
+
+        //print string const
+        module.stringConstTable.forEach((stName,st)-> ps.println(st.define()));
+        ps.println();
+
         //print func
         module.functions.forEach((funcName,funcIR)->{
             if(!funcIR.isBuiltin){
@@ -70,8 +76,8 @@ public class IRPrinter {
     public IRPrinter(Module module, String FileName) throws FileNotFoundException {
         PrintStream ps=new PrintStream(FileName);
         printHeader(ps,FileName);
-        printInitFunc(ps,module);
         printModule(ps,module);
+        printInitFunc(ps,module);
         printTail(ps);
     }
 }
