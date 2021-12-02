@@ -41,12 +41,6 @@ public class IRPrinter {
     }
 
     private void printInitFunc(PrintStream ps, Module module){
-        /*ps.println("; Function Attrs: noinline ssp uwtable");
-        ps.println("define internal void @_GLOBAL_INIT(){");
-        //todo
-        ps.println("    ret void");
-        ps.println("}");
-        ps.println();*/
         module.globalVars.forEach((varName,gVar)->{
             IRBaseType baseType=((IRPointerType)gVar.type).baseType;
             ps.println(gVar+" = global "+baseType+" "+(baseType.defaultValue()));
