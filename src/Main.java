@@ -35,8 +35,8 @@ public class Main {
             }
         }
 
-        //var input=System.in;
-        var input=new FileInputStream("src.mx");
+        var input=System.in;
+        //var input=new FileInputStream("src.mx");
 
         try {
             programNode ASTRoot;
