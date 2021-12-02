@@ -12,6 +12,7 @@ import Util.error.compilerError;
 import Util.position;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Stack;
 
@@ -367,7 +368,37 @@ public class IRBuilder implements ASTVisitor {
             }
         }else if(calType instanceof IRStringType){
             //todo
-            throw new compilerError("binary String todo",throwPos);
+            switch (it.op){
+                case add -> {
+                    Function func=new Function("_str_addstring",new IRStringType());
+                    inst = new callInst(func,target,new ArrayList<>(Arrays.asList(left, right)));
+                }
+                case smallThan -> {
+                    Function func=new Function("_str_lt",new IRBoolType());
+                    inst = new callInst(func,target,new ArrayList<>(Arrays.asList(left, right)));
+                }
+                case bigThan -> {
+                    Function func=new Function("_str_gt",new IRBoolType());
+                    inst = new callInst(func,target,new ArrayList<>(Arrays.asList(left, right)));
+                }
+                case smallEqual -> {
+                    Function func=new Function("_str_le",new IRBoolType());
+                    inst = new callInst(func,target,new ArrayList<>(Arrays.asList(left, right)));
+                }
+                case bigEqual -> {
+                    Function func=new Function("_str_ge",new IRBoolType());
+                    inst = new callInst(func,target,new ArrayList<>(Arrays.asList(left, right)));
+                }
+                case isEqual -> {
+                    Function func=new Function("_str_eq",new IRBoolType());
+                    inst = new callInst(func,target,new ArrayList<>(Arrays.asList(left, right)));
+                }
+                case isNotEqual -> {
+                    Function func=new Function("_str_ne",new IRBoolType());
+                    inst = new callInst(func,target,new ArrayList<>(Arrays.asList(left, right)));
+                }
+                default -> throw new compilerError("forbidden binary for string",throwPos);
+            }
         }else if(calType instanceof IRClassType){
             //todo
             throw new compilerError("binary Class todo",throwPos);
