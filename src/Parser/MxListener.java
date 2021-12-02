@@ -1,4 +1,4 @@
-// Generated from /Users/wzj/Documents/code/compiler/src/Parser/Mx.g4 by ANTLR 4.9.1
+// Generated from /Users/wzj/Documents/code/compiler/src/Parser/Mx.g4 by ANTLR 4.9.2
 package Parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -117,6 +117,16 @@ public interface MxListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitStatementBlock(MxParser.StatementBlockContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MxParser#forInitExpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterForInitExpr(MxParser.ForInitExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MxParser#forInitExpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitForInitExpr(MxParser.ForInitExprContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code stateBlock}
 	 * labeled alternative in {@link MxParser#statement}.

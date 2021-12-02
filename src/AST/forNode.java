@@ -3,10 +3,11 @@ package AST;
 import Util.position;
 
 public class forNode extends statementNode{
-    public exprNode initExp,finishExp,stepExp;
+    public ASTNode initExp;
+    public exprNode finishExp,stepExp;
     public statementNode runStatement;
 
-    public forNode(position pos,exprNode initExp,exprNode finishExp,exprNode stepExp,statementNode runStatement){
+    public forNode(position pos,ASTNode initExp,exprNode finishExp,exprNode stepExp,statementNode runStatement){
         super(pos);
         this.initExp=initExp;
         this.finishExp=finishExp;

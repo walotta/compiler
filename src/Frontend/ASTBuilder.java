@@ -170,6 +170,17 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
     }
 
     @Override
+    public ASTNode visitForInitExpr(MxParser.ForInitExprContext ctx){
+        if(ctx.varBlock()!=null){
+            return visit(ctx.varBlock());
+        }else if(ctx.experssion()!=null){
+            return visit(ctx.experssion());
+        }else{
+            return null;
+        }
+    }
+
+    @Override
     public ASTNode visitStateBlock(MxParser.StateBlockContext ctx){
 
         return visit(ctx.statementBlock());
@@ -201,10 +212,11 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitFor(MxParser.ForContext ctx){
 
-        exprNode initExp,finishExp,stepExp;
+        ASTNode initExp;
+        exprNode finishExp,stepExp;
         statementNode runStatement;
 
-        initExp=(ctx.initExp==null)?null:(exprNode) visit(ctx.initExp);
+        initExp=visit(ctx.initExp);
         finishExp=(ctx.finishExp==null)?null:(exprNode) visit(ctx.finishExp);
         stepExp=(ctx.stepExp==null)?null:(exprNode) visit(ctx.stepExp);
         runStatement=(statementNode) visit(ctx.statement());

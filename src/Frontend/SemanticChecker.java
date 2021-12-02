@@ -161,14 +161,14 @@ public class SemanticChecker implements ASTVisitor{
     @Override
     public void visit(forNode it) {
 
+        currentScope=new Scope(currentScope);
+        if(it.initExp!=null)it.initExp.accept(this);
         if(it.finishExp!=null){
             it.finishExp.accept(this);
             if(it.finishExp.type.type!= Type.types.Bool)
                 errorThrower("[for statement] finishExpr need to be bool",it);
         }
-        if(it.initExp!=null)it.initExp.accept(this);
         if(it.stepExp!=null)it.stepExp.accept(this);
-        currentScope=new Scope(currentScope);
         loop.push(it);
         it.runStatement.accept(this);
         loop.pop();

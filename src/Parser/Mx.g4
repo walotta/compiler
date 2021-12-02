@@ -51,11 +51,15 @@ statementBlock
     :   '{' statement* '}'
     ;
 
+forInitExpr
+    :   (experssion?';'|varBlock)
+    ;
+
 statement
     :   statementBlock                                                                          #stateBlock
     |   varBlock                                                                                #varDefine
     |   If'('experssion')' trueStatement=statement (Else falseStatement=statement)?             #if
-    |   For'('initExp=experssion?';'finishExp=experssion?';'stepExp=experssion?')'statement     #for
+    |   For'('initExp=forInitExpr finishExp=experssion?';'stepExp=experssion?')'statement       #for
     |   While'('finishExp=experssion')'statement                                                #while
     |   Break';'                                                                                #break
     |   Continue';'                                                                             #continue
