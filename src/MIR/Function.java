@@ -19,6 +19,7 @@ public class Function {
     public boolean isBuiltin;
     public Register retReg;
     public final String retLabel="ret";
+    public String ExtendMsg=null;
 
     public LinkedList<BasicBlock> Blocks;
 
@@ -68,7 +69,10 @@ public class Function {
         StringBuilder builder=new StringBuilder();
         StringJoiner argJoiner=new StringJoiner(", ", "(", ")");
         paras.forEach(item->argJoiner.add(item.type+" "+item));
-        builder.append("define ").append(retType).append(" @").append(funcName).append(argJoiner).append("{\n");
+        builder.append("define ");
+        if(ExtendMsg!=null)
+            builder.append(ExtendMsg).append(" ");
+        builder.append(retType).append(" @").append(funcName).append(argJoiner).append("{\n");
         StringJoiner blockJoiner=new StringJoiner("\n");
         Blocks.forEach(item->blockJoiner.add(item.toString()));
         builder.append(blockJoiner);

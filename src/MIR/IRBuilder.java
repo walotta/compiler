@@ -12,6 +12,7 @@ import Util.error.compilerError;
 import Util.position;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Stack;
 
 public class IRBuilder implements ASTVisitor {
@@ -26,9 +27,10 @@ public class IRBuilder implements ASTVisitor {
     private boolean getLeftPointer=false;
     private final Stack<Label> continueStack;
     private final Stack<Label> breakStack;
+    private final LinkedHashMap<globalVariable,exprNode>toInit=new LinkedHashMap<>();
 
-    public IRBuilder(globalScope gScope){
-        module=new Module(gScope);
+    public IRBuilder(){
+        module=new Module();
         currentScope=null;
         calBack=null;
         labelCounter=new LabelCounter();
@@ -36,15 +38,71 @@ public class IRBuilder implements ASTVisitor {
         breakStack=new Stack<>();
     }
 
-    public Module run(programNode it){
+    public Module run(programNode it,globalScope gScope){
+        GlobalDecl(gScope);
         it.accept(this);
         return module;
+    }
+
+    private void GlobalDecl(globalScope gScope){
+        //func
+        gScope.funcs.forEach((funcName,func)->{
+            Function funcIR=new Function(funcName,trans.transType(func.retType));
+            funcIR.isBuiltin=func.builtin;
+            module.functions.put(funcName,funcIR);
+        });
+
+        //var
+        gScope.vars.forEach((varName,varE)->{
+            globalVariable variable=new globalVariable(varE.name,new IRPointerType(trans.transType(varE.type)));
+            toInit.put(variable,varE.initExpr);
+            module.globalVars.put(varName,variable);
+        });
+
+        //todo class
+    }
+
+    private void buildInitFunc(){
+        //gen initFunc
+        toInit.forEach((varE,iniNode)->{
+            if(iniNode!=null){
+                currentFunc=new Function("initForGlobalVar."+module.initFuncs.size(),new IRVoidType());
+                currentScope=new IRScopeFunc(currentScope);
+                currentBlock=new BasicBlock(new Label(currentScope.regCnt()));
+                currentFunc.buildInit((IRScopeFunc)currentScope,currentBlock);
+                iniNode.accept(this);
+                currentBlock.pushInstruction(new storeInst(calBack,varE));
+                if(currentBlock.canInsert())
+                    currentBlock.pushInstruction(currentFunc.jumpToRet());
+                currentFunc.Blocks.add(currentBlock);
+                currentBlock=currentFunc.genRetBlock(currentScope);
+                currentFunc.Blocks.add(currentBlock);
+                module.initFuncs.add(currentFunc);
+                currentBlock=null;
+                currentFunc=null;
+                currentScope=currentScope.parentsScope;
+            }
+        });
+
+        //gen head initFunc
+        Function allInitFunc=new Function("_GLOBAL_INIT",new IRVoidType());
+        allInitFunc.ExtendMsg="internal";
+        BasicBlock initBlock=new BasicBlock(new Label("init"));
+        module.initFuncs.forEach(f->{
+            initBlock.pushInstruction(new callInst(f,null,new ArrayList<>()));
+        });
+        initBlock.pushInstruction(new retInst(null));
+        allInitFunc.Blocks.add(initBlock);
+        module.initFuncs.add(allInitFunc);
     }
 
     @Override
     public void visit(programNode it){
         currentScope=new IRScopeGlobal(currentScope);
-        ((IRScopeGlobal)currentScope).insertGlobalVar();
+
+        ((IRScopeGlobal)currentScope).insertGlobalVar(module.globalVars);
+        buildInitFunc();
+
         it.programBlockList.forEach(item->{
             if(item instanceof funcBlockNode || item instanceof classBlockNode)
             item.accept(this);

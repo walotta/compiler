@@ -1,10 +1,12 @@
 package Util;
 
+import AST.exprNode;
 import Util.Type.Type;
 
 public class varEntity{
     public String name;
     public Type type;
+    public exprNode initExpr;
     public boolean isGlobal,isMember;
 
     public varEntity(String name,Type type,boolean isGlobal){

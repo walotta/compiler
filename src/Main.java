@@ -62,7 +62,7 @@ public class Main {
             if(onlySemantic)return;
 
             //run IRBuilder
-            Module module=new IRBuilder(gScope).run(ASTRoot);
+            Module module=new IRBuilder().run(ASTRoot,gScope);
             if(printIR)
                 new IRPrinter(module,IRFileName);
 

@@ -1,5 +1,8 @@
 package MIR;
 
+import MIR.IRtype.IRBaseType;
+import MIR.IRtype.IRPointerType;
+
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 
@@ -38,12 +41,24 @@ public class IRPrinter {
     }
 
     private void printInitFunc(PrintStream ps, Module module){
-        ps.println("; Function Attrs: noinline ssp uwtable");
+        /*ps.println("; Function Attrs: noinline ssp uwtable");
         ps.println("define internal void @_GLOBAL_INIT(){");
         //todo
         ps.println("    ret void");
         ps.println("}");
-        ps.println();
+        ps.println();*/
+        module.globalVars.forEach((varName,gVar)->{
+            IRBaseType baseType=((IRPointerType)gVar.type).baseType;
+            ps.println(gVar+" = global "+baseType+" "+(baseType.defaultValue()));
+        });
+        for(int i=0;i<module.initFuncs.size();i++){
+            if(i!=module.initFuncs.size()-1)
+                ps.println("; Function Attrs: noinline norecurse optnone ssp uwtable mustprogress");
+            else
+                ps.println("; Function Attrs: noinline ssp uwtable");
+            ps.println(module.initFuncs.get(i));
+            ps.println();
+        }
     }
 
     private void printModule(PrintStream ps,Module module){

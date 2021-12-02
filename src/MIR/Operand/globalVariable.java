@@ -10,6 +10,6 @@ public class globalVariable extends Register{
 
     @Override
     public String toString(){
-        return "todo globalVariable";
+        return "@"+identifier;
     }
 }

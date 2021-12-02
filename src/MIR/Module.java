@@ -8,24 +8,16 @@ import Util.error.compilerError;
 import Util.position;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 
 public class Module {
     public LinkedHashMap<String, Function> functions;
     public LinkedHashMap<String, globalVariable> globalVars;
-    private final TransTypeToIR trans=new TransTypeToIR();
+    public LinkedList<Function> initFuncs;
 
-    private void FuncDecl(globalScope gScope){
-        //todo
-        gScope.funcs.forEach((funcName,func)->{
-            Function funcIR=new Function(funcName,trans.transType(func.retType));
-            funcIR.isBuiltin=func.builtin;
-            functions.put(funcName,funcIR);
-        });
-    }
-
-    public Module(globalScope gScope){
+    public Module(){
         functions=new LinkedHashMap<>();
         globalVars=new LinkedHashMap<>();
-        FuncDecl(gScope);
+        initFuncs=new LinkedList<>();
     }
 }

@@ -116,6 +116,7 @@ public class SemanticChecker implements ASTVisitor{
                 if(it.expr.type.type!=it.var.type.type&&it.expr.type.type!= Type.types.Null)
                     errorThrower("[single var declare] varType and initExpr type is different",it);
             }
+            it.var.initExpr=it.expr;
             currentScope.defineVar(it.VarName,it.var,it.pos);
         }
     }
