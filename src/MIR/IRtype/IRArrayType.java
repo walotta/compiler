@@ -5,6 +5,12 @@ import MIR.Operand.IROperand;
 public class IRArrayType extends IRBaseType{
     //todo
 
+
+    @Override
+    public int size() {
+        return 0;
+    }
+
     @Override
     public IROperand defaultValue() {
         return null;

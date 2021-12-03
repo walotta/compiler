@@ -11,6 +11,11 @@ public class IntConstant extends IROperand {
         this.value=value;
     }
 
+    public IntConstant(int value,int width){
+        super(new IRIntType(width));
+        this.value=value;
+    }
+
     @Override
     public String toString(){
         return Integer.valueOf(value).toString();

@@ -1,6 +1,7 @@
 package MIR.IRInstruction;
 
 import MIR.IRtype.IRBaseType;
+import MIR.IRtype.IRPointerType;
 import MIR.Operand.IROperand;
 import MIR.Operand.Register;
 
@@ -15,6 +16,6 @@ public class storeInst extends Instruction{
 
     @Override
     public String toString(){
-        return "store "+source.type+" "+source+", "+target.type+" "+target;
+        return "store "+((IRPointerType)target.type).baseType+" "+source+", "+target.type+" "+target;
     }
 }

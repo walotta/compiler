@@ -7,6 +7,11 @@ import Util.position;
 public class IRCharType extends IRBaseType{
 
     @Override
+    public int size() {
+        return 8;
+    }
+
+    @Override
     public String toString() {
         return "i8";
     }

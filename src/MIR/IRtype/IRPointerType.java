@@ -11,6 +11,11 @@ public class IRPointerType extends IRBaseType{
     }
 
     @Override
+    public int size(){
+        return 4;
+    }
+
+    @Override
     public String toString(){
         return baseType.toString()+"*";
     }

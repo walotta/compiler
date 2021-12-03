@@ -21,10 +21,11 @@ public class TransTypeToIR {
         }else{
             //todo class
             switch (t.type){
-                case Int->{irType=new IRIntType();}
-                case Bool->{irType=new IRBoolType();}
-                case String->{irType=new IRStringType();}
-                case Void->{irType=new IRVoidType();}
+                case Int -> irType=new IRIntType();
+                case Bool -> irType=new IRBoolType();
+                case String -> irType=new IRStringType();
+                case Void -> irType=new IRVoidType();
+                case Null -> irType=new IRPointerType(null);
                 default -> {throw new compilerError("class type trans",new position(0,0));}
             }
         }
@@ -37,10 +38,10 @@ public class TransTypeToIR {
         IRBaseType irType;
         if(t.dim==0){
             switch (typeName){
-                case "int"->{irType=new IRIntType();}
-                case "bool"->{irType=new IRBoolType();}
-                case "string"->{irType=new IRStringType();}
-                case "void"->{irType=new IRVoidType();}
+                case "int" -> irType=new IRIntType();
+                case "bool" -> irType=new IRBoolType();
+                case "string" -> irType=new IRStringType();
+                case "void" -> irType=new IRVoidType();
                 default -> {throw new compilerError("class type trans",t.pos);}
             }
         }else{
