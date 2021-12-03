@@ -37,6 +37,10 @@ char* toString(int i){
     return str;
 }
 
+char* _bif_malloc(int size){
+    return malloc(size);
+}
+
 int _str_length(char* str){
     return strlen(str);
 }
