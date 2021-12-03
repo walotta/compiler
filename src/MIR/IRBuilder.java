@@ -186,13 +186,11 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(exprStatementNode it){
-        //todo
         it.expr.accept(this);
     }
 
     @Override
     public void visit(forNode it){
-        //todo
         currentScope=new IRScopeBase(currentScope);
 
         if(it.initExp!=null)
@@ -287,7 +285,6 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(whileNode it){
-        //todo
         currentScope=new IRScopeBase(currentScope);
 
         int whileId= IRCounter.getLabelCnt();
@@ -367,7 +364,6 @@ public class IRBuilder implements ASTVisitor {
                 default -> throw new compilerError("forbidden binary for bool",throwPos);
             }
         }else if(calType instanceof IRStringType){
-            //todo
             switch (it.op){
                 case add -> {
                     Function func=new Function("_str_addstring",new IRStringType());
@@ -496,7 +492,6 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(postfixExprNode it){
-        //todo
         boolean queryLeft=getLeftPointer;
         getLeftPointer=true;
         it.calExp.accept(this);
@@ -558,7 +553,6 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(assignExprNode it){
-        //todo
         Register left;
         IROperand right;
         boolean queryLeft=getLeftPointer;
@@ -614,14 +608,10 @@ public class IRBuilder implements ASTVisitor {
     }
 
     @Override
-    public void visit(singleTypeNode it){
-        //todo
-    }
+    public void visit(singleTypeNode it){}
 
     @Override
-    public void visit(typeNode it){
-        //todo
-    }
+    public void visit(typeNode it){}
 
     @Override
     public void visit(varNode it){
@@ -635,14 +625,10 @@ public class IRBuilder implements ASTVisitor {
     }
 
     @Override
-    public void visit(funcNode it){
-        //todo
-    }
+    public void visit(funcNode it){}
 
     @Override
-    public void visit(methodNode it){
-        //todo
-    }
+    public void visit(methodNode it){}
 
     @Override
     public void visit(lambdaExprNode it){
