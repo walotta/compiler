@@ -3,7 +3,7 @@ package AST;
 import Util.position;
 
 public class methodNode extends exprNode{
-    public exprNode father;
+    public exprNode father; //((classMemberExprNode) funcExpr).fatherExpr
     public String methodName;
 
     public methodNode(position pos,exprNode father,String methodName){

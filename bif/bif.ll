@@ -199,7 +199,7 @@ define dso_local i32 @_str_parseInt(i8* %0) #0 {
 declare i32 @sscanf(i8*, i8*, ...) #1
 
 ; Function Attrs: noinline nounwind optnone ssp uwtable
-define dso_local signext i8 @_str_ord(i8* %0, i32 %1) #0 {
+define dso_local i32 @_str_ord(i8* %0, i32 %1) #0 {
   %3 = alloca i8*, align 8
   %4 = alloca i32, align 4
   store i8* %0, i8** %3, align 8
@@ -209,7 +209,8 @@ define dso_local signext i8 @_str_ord(i8* %0, i32 %1) #0 {
   %7 = sext i32 %6 to i64
   %8 = getelementptr inbounds i8, i8* %5, i64 %7
   %9 = load i8, i8* %8, align 1
-  ret i8 %9
+  %10 = sext i8 %9 to i32
+  ret i32 %10
 }
 
 ; Function Attrs: noinline nounwind optnone ssp uwtable

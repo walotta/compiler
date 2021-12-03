@@ -65,7 +65,7 @@ int _str_parseInt(char* str){
     return ans;
 }
 
-char _str_ord(char* str,int pos){
+int _str_ord(char* str,int pos){
     return str[pos];
 }
 

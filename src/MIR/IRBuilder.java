@@ -515,9 +515,34 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(funcCallExprNode it){
-        Function toCall=module.functions.get(((funcNode)it.funcName).funcName);
+        Function toCall;
         Register retReg;
         ArrayList<IROperand> parasExp=new ArrayList<>();
+        if(it.funcName instanceof funcNode){
+            toCall=module.functions.get(((funcNode)it.funcName).funcName);
+        }else if(it.funcName instanceof methodNode){
+            ((methodNode) it.funcName).father.accept(this);
+
+            if(calBack.type instanceof IRStringType){
+                switch (((methodNode) it.funcName).methodName){
+                    case "length" -> toCall=new Function("_str_length",new IRIntType());
+                    case "substring" -> toCall=new Function("_str_substring",new IRStringType());
+                    case "parseInt" -> toCall=new Function("_str_parseInt",new IRIntType());
+                    case "ord" -> toCall=new Function("_str_ord",new IRIntType());
+                    default -> throw new compilerError("string method not find",throwPos);
+                }
+                parasExp.add(calBack);
+            }else if(calBack.type instanceof IRArrayType){
+                //todo array type
+                throw new compilerError("array method todo",throwPos);
+            }else{
+                //todo class Type
+                throw new compilerError("method todo",throwPos);
+            }
+        }else{
+            throw new compilerError("cannot build ir for obj except funcNode and methodNode",throwPos);
+        }
+
         for(var para:it.paras){
             para.accept(this);
             parasExp.add(calBack);
