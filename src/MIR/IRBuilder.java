@@ -11,10 +11,7 @@ import Util.Scope.globalScope;
 import Util.error.compilerError;
 import Util.position;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Stack;
+import java.util.*;
 
 public class IRBuilder implements ASTVisitor {
     private final Module module;
@@ -97,11 +94,27 @@ public class IRBuilder implements ASTVisitor {
 
     private void genArray(IRBaseType targetType,ArrayList<IROperand> sizeExpr){
         if(sizeExpr.size()==1){
-            Register retHeader=new Register(currentScope.regCnt(),null,new IRPointerType(new IRCharType()));
+            //cal malloc size
+            Register sizeCal=new Register(currentScope.regCnt(),null,new IRIntType());
+            currentBlock.pushInstruction(new binaryInst(binaryInst.binaryType.mul,sizeExpr.get(0),new IntConstant(targetType.size()),sizeCal));
+            Register sizeCalFinal=new Register(currentScope.regCnt(),null,new IRIntType());
+            currentBlock.pushInstruction(new binaryInst(binaryInst.binaryType.add,sizeCal,new IntConstant((new IRIntType()).size()),sizeCalFinal));
+
+            //call malloc
+            Register mallocHeader=new Register(currentScope.regCnt(),null,new IRPointerType(new IRCharType()));
             Function func=new Function("_bif_malloc",new IRPointerType(new IRCharType()));
-            currentBlock.pushInstruction(new callInst(func,retHeader,sizeExpr));
+            currentBlock.pushInstruction(new callInst(func,mallocHeader,new ArrayList<>(){{add(sizeCalFinal);}}));
+
+            //store len
+            Register lenHeader=new Register(currentScope.regCnt(),null,new IRPointerType(new IRIntType()));
+            currentBlock.pushInstruction(new bitcastInst(mallocHeader,lenHeader));
+            currentBlock.pushInstruction(new storeInst(sizeExpr.get(0),lenHeader));
+
+            //return header
+            Register trueHead=new Register(currentScope.regCnt(),null,mallocHeader.type);
+            currentBlock.pushInstruction(new getElementInst(trueHead,mallocHeader,new IntConstant((new IRIntType()).size())));
             Register header=new Register(currentScope.regCnt(),null,targetType);
-            currentBlock.pushInstruction(new bitcastInst(retHeader,header));
+            currentBlock.pushInstruction(new bitcastInst(trueHead,header));
             calBack=header;
         }else{
             //todo
@@ -550,9 +563,25 @@ public class IRBuilder implements ASTVisitor {
                     default -> throw new compilerError("string method not find",throwPos);
                 }
                 parasExp.add(calBack);
-            }else if(calBack.type instanceof IRArrayType){
+            }else if(calBack.type instanceof IRPointerType){
                 //todo array type
-                throw new compilerError("array method todo",throwPos);
+                if(Objects.equals(((methodNode) it.funcName).methodName, "size")){
+                    Register transHeader;
+                    if((((IRPointerType)calBack.type).baseType instanceof IRIntType)){
+                        transHeader=(Register) calBack;
+                    }else{
+                        transHeader=new Register(currentScope.regCnt(),null,new IRPointerType(new IRIntType()));
+                        currentBlock.pushInstruction(new bitcastInst(calBack,transHeader));
+                    }
+                    Register lenHeader=new Register(currentScope.regCnt(),null,new IRPointerType(new IRIntType()));
+                    currentBlock.pushInstruction(new getElementInst(lenHeader,transHeader,new IntConstant(-1)));
+                    Register lenReg=new Register(currentScope.regCnt(),null,new IRIntType());
+                    currentBlock.pushInstruction(new loadInst(lenReg,lenHeader));
+                    calBack=lenReg;
+                    return;
+                }else{
+                    throw new compilerError("array method name not find",throwPos);
+                }
             }else{
                 //todo class Type
                 throw new compilerError("method todo",throwPos);
@@ -600,9 +629,11 @@ public class IRBuilder implements ASTVisitor {
         boolean tmp=getLeftPointer;
         getLeftPointer=true;
         it.arrayFather.accept(this);
-        getLeftPointer=tmp;
         IROperand arrayFather=calBack;
+        getLeftPointer=false;
         it.index.accept(this);
+        getLeftPointer=tmp;
+
         IROperand index=calBack;
         Register head=new Register(currentScope.regCnt(),null,((IRPointerType)arrayFather.type).baseType);
         currentBlock.pushInstruction(new loadInst(head,(Register) arrayFather));
