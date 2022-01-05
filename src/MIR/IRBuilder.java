@@ -92,35 +92,82 @@ public class IRBuilder implements ASTVisitor {
         module.initFuncs.add(allInitFunc);
     }
 
+    private void mallocArray(IRBaseType targetType,IROperand sizeOperand){
+        //cal malloc size
+        Register sizeCal=new Register(currentScope.regCnt(),null,new IRIntType());
+        currentBlock.pushInstruction(new binaryInst(binaryInst.binaryType.mul,sizeOperand,new IntConstant(targetType.size()),sizeCal));
+        Register sizeCalFinal=new Register(currentScope.regCnt(),null,new IRIntType());
+        currentBlock.pushInstruction(new binaryInst(binaryInst.binaryType.add,sizeCal,new IntConstant((new IRIntType()).size()),sizeCalFinal));
+
+        //call malloc
+        Register mallocHeader=new Register(currentScope.regCnt(),null,new IRPointerType(new IRCharType()));
+        Function func=new Function("_bif_malloc",new IRPointerType(new IRCharType()));
+        currentBlock.pushInstruction(new callInst(func,mallocHeader,new ArrayList<>(){{add(sizeCalFinal);}}));
+
+        //store len
+        Register lenHeader=new Register(currentScope.regCnt(),null,new IRPointerType(new IRIntType()));
+        currentBlock.pushInstruction(new bitcastInst(mallocHeader,lenHeader));
+        currentBlock.pushInstruction(new storeInst(sizeOperand,lenHeader));
+
+        //return header
+        Register trueHead=new Register(currentScope.regCnt(),null,mallocHeader.type);
+        currentBlock.pushInstruction(new getElementInst(trueHead,mallocHeader,new IntConstant((new IRIntType()).size())));
+        Register header=new Register(currentScope.regCnt(),null,targetType);
+        currentBlock.pushInstruction(new bitcastInst(trueHead,header));
+        calBack=header;
+    }
+
     private void genArray(IRBaseType targetType,ArrayList<IROperand> sizeExpr){
         if(sizeExpr.size()==1){
-            //cal malloc size
-            Register sizeCal=new Register(currentScope.regCnt(),null,new IRIntType());
-            currentBlock.pushInstruction(new binaryInst(binaryInst.binaryType.mul,sizeExpr.get(0),new IntConstant(targetType.size()),sizeCal));
-            Register sizeCalFinal=new Register(currentScope.regCnt(),null,new IRIntType());
-            currentBlock.pushInstruction(new binaryInst(binaryInst.binaryType.add,sizeCal,new IntConstant((new IRIntType()).size()),sizeCalFinal));
-
-            //call malloc
-            Register mallocHeader=new Register(currentScope.regCnt(),null,new IRPointerType(new IRCharType()));
-            Function func=new Function("_bif_malloc",new IRPointerType(new IRCharType()));
-            currentBlock.pushInstruction(new callInst(func,mallocHeader,new ArrayList<>(){{add(sizeCalFinal);}}));
-
-            //store len
-            Register lenHeader=new Register(currentScope.regCnt(),null,new IRPointerType(new IRIntType()));
-            currentBlock.pushInstruction(new bitcastInst(mallocHeader,lenHeader));
-            currentBlock.pushInstruction(new storeInst(sizeExpr.get(0),lenHeader));
-
-            //return header
-            Register trueHead=new Register(currentScope.regCnt(),null,mallocHeader.type);
-            currentBlock.pushInstruction(new getElementInst(trueHead,mallocHeader,new IntConstant((new IRIntType()).size())));
-            Register header=new Register(currentScope.regCnt(),null,targetType);
-            currentBlock.pushInstruction(new bitcastInst(trueHead,header));
-            calBack=header;
+            mallocArray(targetType,sizeExpr.get(0));
         }else{
             //todo
-            //exit multi-array
+            //multi-array
             IROperand currentArrayCnt=sizeExpr.get(0);
+            sizeExpr.remove(0);
+            mallocArray(targetType,currentArrayCnt);
+            Register currentArrayHead=(Register) calBack;
+            Register memberCounter=new Register(currentScope.regCnt(),null,currentArrayCnt.type);
+            currentBlock.pushInstruction(new binaryInst(binaryInst.binaryType.sub,currentArrayCnt,new IntConstant(1),memberCounter));
+            Register memberCounterPointer=new Register(currentScope.regCnt(),null,new IRPointerType(currentArrayCnt.type));
+            currentBlock.pushInstruction(new allocaInst(memberCounterPointer));
+            currentBlock.pushInstruction(new storeInst(memberCounter,memberCounterPointer));
+            int LabelId=IRCounter.getLabelCnt();
+            Label ArraySub=new Label("ArraySub."+LabelId);
+            Label ArrayAfter=new Label("ArrayAfter."+LabelId);
+            Label ArrayCond=new Label("ArrayCond."+LabelId);
 
+            currentBlock.pushInstruction(new jumpInst(ArrayCond));
+            currentFunc.Blocks.add(currentBlock);
+            //cond
+            currentBlock=new BasicBlock(ArrayCond);
+            memberCounter=new Register(currentScope.regCnt(),null,((IRPointerType)memberCounterPointer.type).baseType);
+            currentBlock.pushInstruction(new loadInst(memberCounter,memberCounterPointer));
+            Register isZero=new Register(currentScope.regCnt(),null,new IRBoolType());
+            currentBlock.pushInstruction(new compareInst(compareInst.compareType.sge,memberCounter,new IntConstant(0),isZero));
+            currentBlock.pushInstruction(new brInst(isZero,ArraySub,ArrayAfter));
+            currentFunc.Blocks.add(currentBlock);
+            //ArraySub
+            currentBlock=new BasicBlock(ArraySub);
+            memberCounter=new Register(currentScope.regCnt(),null,((IRPointerType)memberCounterPointer.type).baseType);
+            currentBlock.pushInstruction(new loadInst(memberCounter,memberCounterPointer));
+            Register subArrayHeader=new Register(currentScope.regCnt(),null,currentArrayHead.type);
+            currentBlock.pushInstruction(new getElementInst(subArrayHeader,currentArrayHead,memberCounter));
+            genArray(((IRPointerType)targetType).baseType,sizeExpr);
+//            Register subArrayHeadValue=new Register(currentScope.regCnt(),null,((IRPointerType)currentArrayHead.type).baseType);
+//            currentBlock.pushInstruction(new loadInst(subArrayHeadValue,(Register) calBack));
+//            currentBlock.pushInstruction(new storeInst(subArrayHeadValue,subArrayHeader));
+            currentBlock.pushInstruction(new storeInst(calBack,subArrayHeader));
+            memberCounter=new Register(currentScope.regCnt(),null,((IRPointerType)memberCounterPointer.type).baseType);
+            Register memberCounterSub=new Register(currentScope.regCnt(),null,((IRPointerType)memberCounterPointer.type).baseType);
+            currentBlock.pushInstruction(new loadInst(memberCounter,memberCounterPointer));
+            currentBlock.pushInstruction(new binaryInst(binaryInst.binaryType.sub,memberCounter,new IntConstant(1),memberCounterSub));
+            currentBlock.pushInstruction(new storeInst(memberCounterSub,memberCounterPointer));
+            currentBlock.pushInstruction(new jumpInst(ArrayCond));
+            currentFunc.Blocks.add(currentBlock);
+            //ArrayAfter
+            currentBlock=new BasicBlock(ArrayAfter);
+            calBack=currentArrayHead;
         }
     }
 
