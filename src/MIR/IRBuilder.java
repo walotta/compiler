@@ -95,6 +95,22 @@ public class IRBuilder implements ASTVisitor {
         module.initFuncs.add(allInitFunc);
     }
 
+    private void genArray(IRBaseType targetType,ArrayList<IROperand> sizeExpr){
+        if(sizeExpr.size()==1){
+            Register retHeader=new Register(currentScope.regCnt(),null,new IRPointerType(new IRCharType()));
+            Function func=new Function("_bif_malloc",new IRPointerType(new IRCharType()));
+            currentBlock.pushInstruction(new callInst(func,retHeader,sizeExpr));
+            Register header=new Register(currentScope.regCnt(),null,targetType);
+            currentBlock.pushInstruction(new bitcastInst(retHeader,header));
+            calBack=header;
+        }else{
+            //todo
+            //exit multi-array
+            IROperand currentArrayCnt=sizeExpr.get(0);
+
+        }
+    }
+
     @Override
     public void visit(programNode it){
         currentScope=new IRScopeGlobal(currentScope);
@@ -278,8 +294,10 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(retNode it){
-        it.returnExp.accept(this);
-        currentBlock.pushInstruction(new storeInst(calBack,currentFunc.retReg));
+        if(it.returnExp!=null){
+            it.returnExp.accept(this);
+            currentBlock.pushInstruction(new storeInst(calBack,currentFunc.retReg));
+        }
         currentBlock.pushInstruction(currentFunc.jumpToRet());
     }
 
@@ -477,7 +495,12 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(newArrayExprNode it){
-        //todo
+        ArrayList<IROperand> sizeExpr=new ArrayList<>();
+        it.ExprList.forEach(item-> {
+            item.accept(this);
+            sizeExpr.add(calBack);
+        });
+        genArray(trans.transType(it.arrayType),sizeExpr);
     }
 
     @Override
@@ -574,6 +597,23 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(arrayMemberExprNode it){
         //todo
+        boolean tmp=getLeftPointer;
+        getLeftPointer=true;
+        it.arrayFather.accept(this);
+        getLeftPointer=tmp;
+        IROperand arrayFather=calBack;
+        it.index.accept(this);
+        IROperand index=calBack;
+        Register head=new Register(currentScope.regCnt(),null,((IRPointerType)arrayFather.type).baseType);
+        currentBlock.pushInstruction(new loadInst(head,(Register) arrayFather));
+        Register valuePointer=new Register(currentScope.regCnt(),null,head.type);
+        currentBlock.pushInstruction(new getElementInst(valuePointer,head,index));
+        if(getLeftPointer){
+            calBack=valuePointer;
+        }else{
+            calBack=new Register(currentScope.regCnt(),null,((IRPointerType)valuePointer.type).baseType);
+            currentBlock.pushInstruction(new loadInst((Register) calBack,valuePointer));
+        }
     }
 
     @Override

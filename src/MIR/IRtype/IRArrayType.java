@@ -2,13 +2,18 @@ package MIR.IRtype;
 
 import MIR.Operand.IROperand;
 
-public class IRArrayType extends IRBaseType{
-    //todo
+public class IRArrayType extends IRPointerType{
+    private final int length;
 
+    //todo remove
+    public IRArrayType(IRPointerType baseType,int length){
+        super(baseType);
+        this.length=length;
+    }
 
     @Override
     public int size() {
-        return 0;
+        return baseType.size()*length;
     }
 
     @Override
@@ -18,6 +23,6 @@ public class IRArrayType extends IRBaseType{
 
     @Override
     public String toString() {
-        return null;
+        return "["+length+" x "+baseType+"]";
     }
 }

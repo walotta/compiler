@@ -17,7 +17,10 @@ public class TransTypeToIR {
             throw new compilerError("wrong type trans",new position(0,0));
         }else if(t instanceof arrayType){
             //todo array
-            irType=null;
+            irType=transType(((arrayType)t).arrayType);
+            for(int i=0;i<((arrayType)t).dim;i++){
+                irType=new IRPointerType(irType);
+            }
         }else{
             //todo class
             switch (t.type){

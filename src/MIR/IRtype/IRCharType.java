@@ -8,7 +8,7 @@ public class IRCharType extends IRBaseType{
 
     @Override
     public int size() {
-        return 8;
+        return 1;
     }
 
     @Override
