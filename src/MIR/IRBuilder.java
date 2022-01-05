@@ -154,9 +154,6 @@ public class IRBuilder implements ASTVisitor {
             Register subArrayHeader=new Register(currentScope.regCnt(),null,currentArrayHead.type);
             currentBlock.pushInstruction(new getElementInst(subArrayHeader,currentArrayHead,memberCounter));
             genArray(((IRPointerType)targetType).baseType,sizeExpr);
-//            Register subArrayHeadValue=new Register(currentScope.regCnt(),null,((IRPointerType)currentArrayHead.type).baseType);
-//            currentBlock.pushInstruction(new loadInst(subArrayHeadValue,(Register) calBack));
-//            currentBlock.pushInstruction(new storeInst(subArrayHeadValue,subArrayHeader));
             currentBlock.pushInstruction(new storeInst(calBack,subArrayHeader));
             memberCounter=new Register(currentScope.regCnt(),null,((IRPointerType)memberCounterPointer.type).baseType);
             Register memberCounterSub=new Register(currentScope.regCnt(),null,((IRPointerType)memberCounterPointer.type).baseType);

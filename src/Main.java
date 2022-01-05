@@ -68,7 +68,7 @@ public class Main {
                 new IRPrinter(module,IRFileName);
 
             //run build program
-            System.err.println("building codegen ...");
+            System.err.println("compile finish");
         }catch (error errorPoint) {
             System.err.println(errorPoint.toString());
             throw new RuntimeException();
