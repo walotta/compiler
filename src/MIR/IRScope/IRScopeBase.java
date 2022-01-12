@@ -32,6 +32,16 @@ public class IRScopeBase {
             return ret;
     }
 
+    public String queryMember(String varName){
+        if(renameTable.containsKey(varName))
+            if(this instanceof IRScopeClass)
+                return ((IRScopeClass)this).className;
+            else return null;
+        else if(parentsScope==null)
+            return null;
+        else return parentsScope.queryMember(varName);
+    }
+
     public int regCnt(){
         int id=cnt;
         cnt++;

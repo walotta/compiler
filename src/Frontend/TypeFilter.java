@@ -47,6 +47,7 @@ public class TypeFilter implements ASTVisitor {
     public void visit(classBlockNode it) {
         classType cl=gScope.getType(it.className);
         currentScope=cl.scope;
+        it.buildFuncList.forEach(item->item.accept(this));
         it.funcList.forEach(item->item.accept(this));
         collectClassMember=true;
         it.varLists.forEach(item->item.accept(this));
@@ -63,11 +64,11 @@ public class TypeFilter implements ASTVisitor {
             it.var=v;
             if(it.var.type.type== Type.types.Void)
                 throw new semanticError("[typeFilter][class member var declare] varType is void",it.pos);
-            if(it.expr!=null){
-                it.expr.accept(this);
-                if(it.expr.type!=it.var.type&&it.var.type.type!= Type.types.Null)
-                    throw new semanticError("[typeFilter][class member var declare] varType and initExpr type is different",it.pos);
-            }
+//            if(it.expr!=null){
+//                it.expr.accept(this);
+//                if(it.expr.type!=it.var.type&&it.var.type.type!= Type.types.Null)
+//                    throw new semanticError("[typeFilter][class member var declare] varType and initExpr type is different",it.pos);
+//            }
             currentScope.defineVar(it.VarName,v,it.pos);
         }else{
             if(v.type.type== Type.types.Void)
@@ -177,6 +178,15 @@ public class TypeFilter implements ASTVisitor {
     public void visit(lambdaExprNode it) {}
 
     @Override
-    public void visit(buildFuncBlockNode it) {}
+    public void visit(buildFuncBlockNode it) {
+        funcType func=it.func;
+        if(it.retType!=null){
+            func.retType=gScope.generateType(it.retType);
+        }else func.retType=null;
+        currentScope=new funcScope(currentScope);
+        it.paras.forEach(item->item.accept(this));
+        func.scope=(funcScope) currentScope;
+        currentScope=currentScope.parentScope;
+    }
 
 }

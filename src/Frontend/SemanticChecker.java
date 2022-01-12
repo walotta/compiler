@@ -74,6 +74,13 @@ public class SemanticChecker implements ASTVisitor{
         currentClass=cl;
         currentScope=cl.scope;
         it.funcList.forEach(item->item.accept(this));
+        it.varLists.forEach(item->item.varList.forEach(i->{
+            if(i.expr!=null){
+                i.expr.accept(this);
+                if(i.expr.type!=i.var.type&&i.var.type.type!= Type.types.Null)
+                    errorThrower("varType and initExpr type is different",i);
+            }
+        }));
         if(it.buildFuncList.size()>1)
             errorThrower("[class define] have multi-constructor",it);
         it.buildFuncList.forEach(item->item.accept(this));

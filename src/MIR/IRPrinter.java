@@ -64,6 +64,12 @@ public class IRPrinter {
         module.stringConstTable.forEach((stName,st)-> ps.println(st.define()));
         ps.println();
 
+        //print class Decl
+        module.classes.forEach((className,classUnit)->{
+            ps.println(classUnit);
+            ps.println();
+        });
+
         //print func
         module.functions.forEach((funcName,funcIR)->{
             if(!funcIR.isBuiltin){

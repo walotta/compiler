@@ -11,32 +11,28 @@ import Util.position;
 public class TransTypeToIR {
 
     public IRBaseType transType(Type t){
-        //todo class Array
         IRBaseType irType;
         if(t instanceof funcType){
             throw new compilerError("wrong type trans",new position(0,0));
         }else if(t instanceof arrayType){
-            //todo array
             irType=transType(((arrayType)t).arrayType);
             for(int i=0;i<((arrayType)t).dim;i++){
                 irType=new IRPointerType(irType);
             }
         }else{
-            //todo class
             switch (t.type){
                 case Int -> irType=new IRIntType();
                 case Bool -> irType=new IRBoolType();
                 case String -> irType=new IRStringType();
                 case Void -> irType=new IRVoidType();
                 case Null -> irType=new IRPointerType(null);
-                default -> {throw new compilerError("class type trans",new position(0,0));}
+                default -> throw new compilerError("type trans not find",new position(0,0));
             }
         }
         return irType;
     }
 
     public IRBaseType transType(typeNode t){
-        //todo class
         String typeName=t.typeName;
         IRBaseType irType;
         if(t.dim==0){
@@ -45,7 +41,7 @@ public class TransTypeToIR {
                 case "bool" -> irType=new IRBoolType();
                 case "string" -> irType=new IRStringType();
                 case "void" -> irType=new IRVoidType();
-                default -> {throw new compilerError("class type trans",t.pos);}
+                default -> irType=new IRPointerType(new IRClassType(typeName));
             }
         }else{
             irType=new IRPointerType(transType(new typeNode(t.pos,t.typeName,t.dim-1)));

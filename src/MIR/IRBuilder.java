@@ -3,6 +3,7 @@ package MIR;
 import AST.*;
 import MIR.IRInstruction.*;
 import MIR.IRScope.IRScopeBase;
+import MIR.IRScope.IRScopeClass;
 import MIR.IRScope.IRScopeFunc;
 import MIR.IRScope.IRScopeGlobal;
 import MIR.IRtype.*;
@@ -26,6 +27,8 @@ public class IRBuilder implements ASTVisitor {
     private final Stack<Label> continueStack;
     private final Stack<Label> breakStack;
     private final LinkedHashMap<globalVariable,exprNode>toInit=new LinkedHashMap<>();
+    private Register thisReg;
+    private ClassUnit currentClass;
 
     public IRBuilder(){
         module=new Module();
@@ -34,6 +37,8 @@ public class IRBuilder implements ASTVisitor {
         IRCounter =new IRCounter();
         continueStack=new Stack<>();
         breakStack=new Stack<>();
+        thisReg=null;
+        currentClass=null;
     }
 
     public Module run(programNode it,globalScope gScope){
@@ -57,7 +62,6 @@ public class IRBuilder implements ASTVisitor {
             module.globalVars.put(varName,variable);
         });
 
-        //todo class
     }
 
     private void buildInitFunc(){
@@ -121,7 +125,6 @@ public class IRBuilder implements ASTVisitor {
         if(sizeExpr.size()==1){
             mallocArray(targetType,sizeExpr.get(0));
         }else{
-            //todo
             //multi-array
             IROperand currentArrayCnt=sizeExpr.get(0);
             sizeExpr.remove(0);
@@ -204,13 +207,76 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(classBlockNode it){
-        //todo
+        //class scope
+        currentScope=new IRScopeClass(currentScope,it.className);
+        currentClass=new ClassUnit(it.className);
+        IRPointerType ClassPointer=new IRPointerType(new IRClassType(it.className));
+
+        if(!it.varLists.isEmpty()){
+            for(var singleVar:it.varLists){
+                IRBaseType irType=trans.transType(singleVar.type);
+                for(var vNode:singleVar.varList){
+                    currentClass.memberVars.put(vNode.VarName,new IRMember(irType,currentClass.memberVars.size()));
+                    currentScope.renameTable.put(vNode.VarName,null);
+                }
+            }
+        }
+
+        //initFunc scope
+        currentFunc=new Function("class.init."+it.className,new IRVoidType());
+        currentScope=new IRScopeFunc(currentScope);
+        thisReg=new Register(currentScope.regCnt(),"class.this",ClassPointer);
+        currentFunc.paras.add(thisReg);
+        if(!it.buildFuncList.isEmpty())
+            it.buildFuncList.get(0).paras.forEach(parasNode-> currentFunc.paras.add(new Register(currentScope.regCnt(),parasNode.VarName,trans.transType(parasNode.type))));
+        currentBlock=new BasicBlock(new Label(currentScope.regCnt()));
+        currentFunc.buildInit((IRScopeFunc) currentScope,currentBlock);
+
+        if(!it.varLists.isEmpty()){
+            it.varLists.forEach(item-> item.accept(this));
+        }
+
+        if(!it.buildFuncList.isEmpty())
+            visit(it.buildFuncList.get(0).funcStatementLists);
+        if(currentBlock.canInsert())
+            currentBlock.pushInstruction(currentFunc.jumpToRet());
+        currentFunc.Blocks.add(currentBlock);
+        currentBlock=currentFunc.genRetBlock(currentScope);
+        currentFunc.Blocks.add(currentBlock);
+        currentClass.initFunc=currentFunc;
+        currentBlock=null;
+        currentFunc=null;
+        thisReg=null;
+        currentScope=currentScope.parentsScope;
+
+        for(var method:it.funcList){
+            currentFunc=new Function(it.className+"."+method.funcName,trans.transType(method.retType));
+            currentScope=new IRScopeFunc(currentScope);
+            thisReg=new Register(currentScope.regCnt(),"class.this",ClassPointer);
+            currentFunc.paras.add(thisReg);
+            method.paras.forEach(parasNode-> currentFunc.paras.add(new Register(currentScope.regCnt(),parasNode.VarName,trans.transType(parasNode.type))));
+            currentBlock=new BasicBlock(new Label(currentScope.regCnt()));
+            currentFunc.buildInit((IRScopeFunc) currentScope,currentBlock);
+            visit(method.funcStatementLists);
+            if(currentBlock.canInsert())
+                currentBlock.pushInstruction(currentFunc.jumpToRet());
+            currentFunc.Blocks.add(currentBlock);
+            currentBlock=currentFunc.genRetBlock(currentScope);
+            currentFunc.Blocks.add(currentBlock);
+            currentClass.methods.put(method.funcName,currentFunc);
+            currentBlock=null;
+            currentFunc=null;
+            thisReg=null;
+            currentScope=currentScope.parentsScope;
+        }
+
+        currentScope=currentScope.parentsScope;
+        module.classes.put(it.className,currentClass);
+        currentClass=null;
     }
 
     @Override
-    public void visit(buildFuncBlockNode it){
-        //todo
-    }
+    public void visit(buildFuncBlockNode it){}
 
     @Override
     public void visit(singleVarBlockNode it){
@@ -220,8 +286,12 @@ public class IRBuilder implements ASTVisitor {
             it.expr.accept(this);
         IRBaseType irType=trans.transType(it.type);
         Register reg=new Register(currentScope.regCnt(),it.VarName,new IRPointerType(irType));
-        currentScope.renameTable.put(it.VarName,reg);
-        currentBlock.pushInstruction(new allocaInst(reg));
+        if(currentScope.queryMember(it.VarName)!=null)
+            currentBlock.pushInstruction(new getElementInst(reg,thisReg,currentClass.queryMember(it.VarName)));
+        else{
+            currentScope.renameTable.put(it.VarName,reg);
+            currentBlock.pushInstruction(new allocaInst(reg));
+        }
         if(calBack==null)
             currentBlock.pushInstruction(new storeInst(irType.defaultValue(),reg));
         else
@@ -470,9 +540,12 @@ public class IRBuilder implements ASTVisitor {
                 }
                 default -> throw new compilerError("forbidden binary for string",throwPos);
             }
-        }else if(calType instanceof IRClassType){
-            //todo
-            throw new compilerError("binary Class todo",throwPos);
+        }else if(calType instanceof IRPointerType){
+            if(((IRPointerType)calType).baseType instanceof IRClassType){
+                //equal for class
+                inst=new compareInst(compareInst.compareType.eq,left,right,target);
+            }else
+                throw new compilerError("binary Class todo",throwPos);
         }else{
             throw new compilerError("binary for forbidden type",throwPos);
         }
@@ -562,12 +635,40 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(newInitObjectExprNode it){
-        //todo
+        String className=it.objectType.typeName;
+        IRPointerType pointerType=module.queryClassPointer(className);
+        Function mallocFunc=new Function("_bif_malloc",new IRPointerType(new IRCharType()));
+        Register header=new Register(currentScope.regCnt(),null,new IRPointerType(new IRCharType()));
+        callInst toCall=new callInst(mallocFunc,header,new ArrayList<>(){{add(new IntConstant(pointerType.baseType.size()));}});
+        Register trueHead=new Register(currentScope.regCnt(),null,pointerType);
+        currentBlock.pushInstruction(toCall);
+        currentBlock.pushInstruction(new bitcastInst(header,trueHead));
+        Function initFunc=module.classes.get(className).initFunc;
+        ArrayList<IROperand> argvs=new ArrayList<>();
+        argvs.add(trueHead);
+        it.exprList.forEach(item->{
+            item.accept(this);
+            argvs.add(calBack);
+        });
+        currentBlock.pushInstruction(new callInst(initFunc,null,argvs));
+        calBack=trueHead;
     }
 
     @Override
     public void visit(newObjectExprNode it){
-        //todo
+        String className=it.objectType.typeName;
+        IRPointerType pointerType=module.queryClassPointer(className);
+        Function mallocFunc=new Function("_bif_malloc",new IRPointerType(new IRCharType()));
+        Register header=new Register(currentScope.regCnt(),null,new IRPointerType(new IRCharType()));
+        callInst toCall=new callInst(mallocFunc,header,new ArrayList<>(){{add(new IntConstant(pointerType.baseType.size()));}});
+        Register trueHead=new Register(currentScope.regCnt(),null,pointerType);
+        currentBlock.pushInstruction(toCall);
+        currentBlock.pushInstruction(new bitcastInst(header,trueHead));
+        Function initFunc=module.classes.get(className).initFunc;
+        ArrayList<IROperand> argvs=new ArrayList<>();
+        argvs.add(trueHead);
+        currentBlock.pushInstruction(new callInst(initFunc,null,argvs));
+        calBack=trueHead;
     }
 
     @Override
@@ -608,7 +709,6 @@ public class IRBuilder implements ASTVisitor {
                 }
                 parasExp.add(calBack);
             }else if(calBack.type instanceof IRPointerType){
-                //todo array type
                 if(Objects.equals(((methodNode) it.funcName).methodName, "size")){
                     Register transHeader;
                     if((((IRPointerType)calBack.type).baseType instanceof IRIntType)){
@@ -623,12 +723,15 @@ public class IRBuilder implements ASTVisitor {
                     currentBlock.pushInstruction(new loadInst(lenReg,lenHeader));
                     calBack=lenReg;
                     return;
+                }else if((((IRPointerType)calBack.type).baseType instanceof IRClassType)){
+                    String className=((IRClassType)((IRPointerType) calBack.type).baseType).name;
+                    toCall=module.classes.get(className).methods.get(((methodNode) it.funcName).methodName);
+                    parasExp.add(calBack);
                 }else{
                     throw new compilerError("array method name not find",throwPos);
                 }
             }else{
-                //todo class Type
-                throw new compilerError("method todo",throwPos);
+                throw new compilerError("func call not fit",throwPos);
             }
         }else{
             throw new compilerError("cannot build ir for obj except funcNode and methodNode",throwPos);
@@ -664,12 +767,35 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(classMemberExprNode it){
-        //todo care for left value access
+        boolean tmp=getLeftPointer;
+        getLeftPointer=false;
+        it.fatherExpr.accept(this);
+        getLeftPointer=tmp;
+        if(!(((IRPointerType)calBack.type).baseType instanceof IRClassType))
+            throw new compilerError("classMemberAccess but return is not classTypePointer",throwPos);
+        IRBaseType irType;
+        IntConstant index;
+        String className=((IRClassType)((IRPointerType)calBack.type).baseType).name;
+        if(currentClass!=null&&className.equals(currentClass.className)){
+            irType=currentClass.memberVars.get(it.memberName).memberType();
+            index=currentClass.queryMember(it.memberName);
+        }else{
+            irType=module.classes.get(className).memberVars.get(it.memberName).memberType();
+            index=module.classes.get(className).queryMember(it.memberName);
+        }
+        Register Pointer=new Register(currentScope.regCnt(),null,new IRPointerType(irType));
+        currentBlock.pushInstruction(new getElementInst(Pointer,calBack,index));
+        if(getLeftPointer)
+            calBack=Pointer;
+        else{
+            Register value=new Register(currentScope.regCnt(),null,irType);
+            currentBlock.pushInstruction(new loadInst(value,Pointer));
+            calBack=value;
+        }
     }
 
     @Override
     public void visit(arrayMemberExprNode it){
-        //todo
         boolean tmp=getLeftPointer;
         getLeftPointer=true;
         it.arrayFather.accept(this);
@@ -693,7 +819,9 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(thisExprNode it){
-        //todo
+        if(thisReg==null)
+            throw new compilerError("not call in method!",throwPos);
+        calBack=thisReg;
     }
 
     @Override
@@ -730,12 +858,28 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(varNode it){
-        Register Addr=(Register) currentScope.queryRename(it.name);
-        if(getLeftPointer){
-            calBack=Addr;
+        String fatherClassName=currentScope.queryMember(it.name);
+        if(fatherClassName!=null){
+            if(thisReg==null)
+                throw new compilerError("call member but has no this",throwPos);
+            IntConstant index=currentClass.queryMember(it.name);
+            IRBaseType irType=currentClass.memberVars.get(it.name).memberType();
+            Register memberPointer=new Register(currentScope.regCnt(),null,new IRPointerType(irType));
+            currentBlock.pushInstruction(new getElementInst(memberPointer,thisReg,index));
+            if(getLeftPointer){
+                calBack=memberPointer;
+            }else{
+                calBack=new Register(currentScope.regCnt(),null,((IRPointerType)memberPointer.type).baseType);
+                currentBlock.pushInstruction(new loadInst((Register) calBack,memberPointer));
+            }
         }else{
-            calBack=new Register(currentScope.regCnt(),null,((IRPointerType)Addr.type).baseType);
-            currentBlock.pushInstruction(new loadInst((Register) calBack,Addr));
+            Register Addr=(Register) currentScope.queryRename(it.name);
+            if(getLeftPointer){
+                calBack=Addr;
+            }else{
+                calBack=new Register(currentScope.regCnt(),null,((IRPointerType)Addr.type).baseType);
+                currentBlock.pushInstruction(new loadInst((Register) calBack,Addr));
+            }
         }
     }
 
