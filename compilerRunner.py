@@ -118,7 +118,7 @@ else:
     for testId in range(len(testcase.judge_list)):
         testPath=testcase.judge_list[testId]
         testName=os.path.basename(testPath)
-        if(testName==sys.argv[1]+'.mx'):
+        if(testName==sys.argv[1]+'.mx' or testName==sys.argv[1]+'.mt'):
             input,std=testcase.getJudge(testPath)
             os.system('cp {} src.mx'.format(testPath))
             with open('src.in','w') as f:
