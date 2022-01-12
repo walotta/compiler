@@ -100,7 +100,7 @@ elif sys.argv[1]=='-test':
         compile()
         link()
         run()
-        ret, val = subprocess.getstatusoutput('diff -b src.std src.out')
+        ret, val = subprocess.getstatusoutput('diff -w -B src.std src.out')
         if val!='':
             print(fail.format(testName))
             errorcase.append(testPath)
@@ -128,4 +128,9 @@ else:
             compile()
             link()
             printRet(run)
+            ret, val = subprocess.getstatusoutput('diff -w -B src.std src.out')
+            if val!='':
+                print(fail.format(testName))
+            else:
+                print(success.format(testName))
         
