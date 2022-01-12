@@ -126,10 +126,5 @@ else:
                 f.write(std)
             compile()
             link()
-            run()
-            ret, val = subprocess.getstatusoutput('diff -w -B src.std src.out')
-            if val!='':
-                print(fail.format(testName))
-            else:
-                print(success.format(testName))
+            printRet(run)
         
