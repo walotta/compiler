@@ -111,6 +111,7 @@ elif sys.argv[1]=='-test':
         f.write("\n".join(errorcase))
         if len(errorcase)==0:
             f.write('all passed')
+    os.system('code errorcase.txt')
 else:
     success="\033[32m[Success] : in {} \033[0m"
     fail="\033[31m[Failed] : in {} \033[0m"
