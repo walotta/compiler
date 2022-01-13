@@ -62,6 +62,22 @@ public class IRBuilder implements ASTVisitor {
             module.globalVars.put(varName,variable);
         });
 
+        //class
+        gScope.classes.forEach((className,classE)->{
+            if(!classE.isBuiltin){
+                ClassUnit classUnit=new ClassUnit(className);
+                classE.scope.vars.forEach((varName,varE)->{
+                    classUnit.memberVars.put(varName,new IRMember(trans.transType(varE.type),classUnit.memberVars.size()));
+                });
+                classE.scope.funcs.forEach((funcName,func)->{
+                    if(!funcName.equals(className)){
+                        Function method=new Function(className+"."+func.funcName, trans.transType(func.retType));
+                        classUnit.methods.put(funcName,method);
+                    }
+                });
+                module.classes.put(className,classUnit);
+            }
+        });
     }
 
     private void buildInitFunc(){
@@ -209,24 +225,25 @@ public class IRBuilder implements ASTVisitor {
     public void visit(classBlockNode it){
         //class scope
         currentScope=new IRScopeClass(currentScope,it.className);
-        currentClass=new ClassUnit(it.className);
+//        currentClass=new ClassUnit(it.className);
+        currentClass=module.classes.get(it.className);
         IRPointerType ClassPointer=new IRPointerType(new IRClassType(it.className));
 
         if(!it.varLists.isEmpty()){
             for(var singleVar:it.varLists){
                 IRBaseType irType=trans.transType(singleVar.type);
                 for(var vNode:singleVar.varList){
-                    currentClass.memberVars.put(vNode.VarName,new IRMember(irType,currentClass.memberVars.size()));
+//                    currentClass.memberVars.put(vNode.VarName,new IRMember(irType,currentClass.memberVars.size()));
                     currentScope.renameTable.put(vNode.VarName,null);
                 }
             }
         }
 
         //insert method
-        it.funcList.forEach(func->{
-            Function method=new Function(currentClass.className+"."+func.funcName, trans.transType(func.retType));
-            currentClass.methods.put(func.funcName,method);
-        });
+//        it.funcList.forEach(func->{
+//            Function method=new Function(currentClass.className+"."+func.funcName, trans.transType(func.retType));
+//            currentClass.methods.put(func.funcName,method);
+//        });
 
         //initFunc scope
         currentFunc=new Function("class.init."+it.className,new IRVoidType());

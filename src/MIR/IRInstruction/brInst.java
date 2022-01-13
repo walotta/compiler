@@ -1,5 +1,6 @@
 package MIR.IRInstruction;
 
+import MIR.IRVisitor;
 import MIR.Operand.IROperand;
 import MIR.Operand.Label;
 import MIR.Operand.Register;
@@ -22,5 +23,10 @@ public class brInst extends Instruction{
             return "br i1 "+cond+", "+trueLabel.type+" "+trueLabel+", "+falseLabel.type+" "+falseLabel;
         else
             return "br i1 "+cond+", "+trueLabel.type+" "+trueLabel;
+    }
+
+    @Override
+    public void accept(IRVisitor visitor){
+        visitor.visit(this);
     }
 }

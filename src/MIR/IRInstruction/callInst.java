@@ -1,6 +1,7 @@
 package MIR.IRInstruction;
 
 import MIR.Function;
+import MIR.IRVisitor;
 import MIR.IRtype.IRVoidType;
 import MIR.Operand.IROperand;
 import MIR.Operand.Register;
@@ -31,5 +32,10 @@ public class callInst extends Instruction{
         argvs.forEach(argv->{argvJoiner.add(argv.type+" "+argv);});
         builder.append("call ").append(toCall.retType).append(" @").append(toCall.funcName).append(argvJoiner);
         return builder.toString();
+    }
+
+    @Override
+    public void accept(IRVisitor visitor){
+        visitor.visit(this);
     }
 }

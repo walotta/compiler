@@ -1,5 +1,6 @@
 package MIR.Operand;
 
+import MIR.IRVisitor;
 import MIR.IRtype.IRBaseType;
 
 public class globalVariable extends Register{
@@ -13,5 +14,9 @@ public class globalVariable extends Register{
     @Override
     public String toString(){
         return "@"+identifier;
+    }
+
+    public void accept(IRVisitor visitor){
+        visitor.visit(this);
     }
 }

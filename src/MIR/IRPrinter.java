@@ -7,7 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintStream;
 
 public class IRPrinter {
-    private void printHeader(PrintStream ps,String FileName){
+    private void printHeader(PrintStream ps){
         String declareText="""
         declare void @print(i8*)
         declare void @println(i8*)
@@ -29,7 +29,7 @@ public class IRPrinter {
         declare i1 @_str_gt(i8*,i8*)
         declare i1 @_str_ge(i8*,i8*)
         """;
-        ps.println("; llvm-link "+FileName+" bif/bif.ll -S -o link.ll");
+        ps.println("; llvm-link bif/bif.ll -S -o link.ll");
         ps.println("target triple = \"x86_64-apple-macosx12.0.0\"");
         ps.println();
         ps.println(declareText);
@@ -80,9 +80,8 @@ public class IRPrinter {
         });
     }
 
-    public IRPrinter(Module module, String FileName) throws FileNotFoundException {
-        PrintStream ps=new PrintStream(FileName);
-        printHeader(ps,FileName);
+    public IRPrinter(Module module, PrintStream ps) throws FileNotFoundException {
+        printHeader(ps);
         printModule(ps,module);
         printInitFunc(ps,module);
         printTail(ps);

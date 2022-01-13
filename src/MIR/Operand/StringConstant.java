@@ -1,5 +1,6 @@
 package MIR.Operand;
 
+import MIR.IRVisitor;
 import MIR.IRtype.IRStringType;
 
 public class StringConstant extends IROperand{
@@ -30,5 +31,9 @@ public class StringConstant extends IROperand{
 
     public String define(){
         return "@"+name+" = private unnamed_addr constant [ "+len+" x i8 ] c\""+value+"\\00\"";
+    }
+
+    public void accept(IRVisitor visitor){
+        visitor.visit(this);
     }
 }

@@ -34,4 +34,8 @@ public class Module {
         }else
             throw new compilerError("class name not find",new position(0,0));
     }
+
+    public void accept(IRVisitor visitor){
+        visitor.visit(this);
+    }
 }

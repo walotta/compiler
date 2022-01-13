@@ -1,5 +1,6 @@
 package MIR.IRInstruction;
 
+import MIR.IRVisitor;
 import MIR.Operand.IROperand;
 
 public class retInst extends Instruction{
@@ -16,5 +17,10 @@ public class retInst extends Instruction{
             return "ret void";
         else
             return "ret "+toRet.type+" "+toRet;
+    }
+
+    @Override
+    public void accept(IRVisitor visitor){
+        visitor.visit(this);
     }
 }

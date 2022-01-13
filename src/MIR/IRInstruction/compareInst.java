@@ -1,5 +1,6 @@
 package MIR.IRInstruction;
 
+import MIR.IRVisitor;
 import MIR.Operand.IROperand;
 import MIR.Operand.Register;
 
@@ -28,5 +29,10 @@ public class compareInst extends Instruction{
     @Override
     public String toString() {
         return target+" = icmp "+type+" "+leftOperand.type+" "+leftOperand+", "+rightOperand;
+    }
+
+    @Override
+    public void accept(IRVisitor visitor){
+        visitor.visit(this);
     }
 }

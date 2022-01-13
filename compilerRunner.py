@@ -21,7 +21,7 @@ def javac():
     return ret, val
 
 def compile():
-    ret, val = subprocess.getstatusoutput('java -cp ./lib/antlr-4.9-complete.jar:./runContain Main -emit-llvm <src.mx')
+    ret, val = subprocess.getstatusoutput('java -cp ./lib/antlr-4.9-complete.jar:./runContain Main -emit-llvm -file <src.mx')
     return ret, val
 
 def Slink():
@@ -48,11 +48,16 @@ def run(detail=True):
     return task.returncode, task.stdout
 
 def compile_std():
-    ret, val = subprocess.getstatusoutput('clang src.c -o src.run')
+    # ret, val = subprocess.getstatusoutput('clang -emit-llvm -S src.cpp -o src.ll --target=riscv32')
+    ret, val = subprocess.getstatusoutput('llc src.ll -o src.s -march=riscv32')
     return ret, val
 
 def run_std():
     ret, val = subprocess.getstatusoutput('./src.run <src.in >src.out')
+    return ret, val
+
+def ravel():
+    ret, val = subprocess.getstatusoutput('ravel --input-file=src.in --output-file=src.out src.s bif/bif.s')
     return ret, val
 
 testcase=judger()
@@ -69,7 +74,6 @@ elif sys.argv[1]=='-reload':
     os.system('cat src.out')
 elif sys.argv[1]=='-std':
     printRet(compile_std)
-    printRet(run_std)
 elif sys.argv[1]=='-S':
     printRet(javac)
     printRet(compile)
@@ -117,6 +121,9 @@ elif sys.argv[1]=='-test':
         if len(errorcase)==0:
             f.write('all passed')
     os.system('code errorcase.txt')
+elif sys.argv[1]=='-ravel':
+    printRet(ravel)
+    os.system('cat src.out')
 else:
     success="\033[32m[Success] : in {} \033[0m"
     fail="\033[31m[Failed] : in {} \033[0m"

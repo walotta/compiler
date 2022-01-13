@@ -1,5 +1,6 @@
 package MIR.IRInstruction;
 
+import MIR.IRVisitor;
 import MIR.IRtype.IRArrayType;
 import MIR.IRtype.IRClassType;
 import MIR.IRtype.IRPointerType;
@@ -27,5 +28,10 @@ public class getElementInst extends Instruction{
                 return target+" = getelementptr inbounds "+((IRPointerType)header.type).baseType+", "+header.type+" "+header+", "+index.type+" "+index;
         else
             throw new compilerError("getElementPtr header is not a pointer",new position(0,0));
+    }
+
+    @Override
+    public void accept(IRVisitor visitor){
+        visitor.visit(this);
     }
 }

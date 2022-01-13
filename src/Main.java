@@ -1,4 +1,7 @@
 import AST.*;
+import Backend.ASMModule;
+import Backend.ASMPrinter;
+import Backend.InstSelect;
 import MIR.IRBuilder;
 import MIR.IRForwarder;
 import MIR.IRPrinter;
@@ -18,6 +21,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.FileInputStream;
+import java.io.PrintStream;
 
 public class Main {
 
@@ -26,6 +30,11 @@ public class Main {
         boolean printIR=false;
         int pointSize=4;
         String IRFileName="src.ll";
+        String ASMFileName="src.s";
+        boolean toFile=false;
+
+        var input=System.in;
+        var output=System.out;
         if(args.length!=0){
             for(String item:args){
                 if(item.equals("-semantic")){
@@ -35,13 +44,17 @@ public class Main {
                     printIR=true;
                     if(item.length()>10&&item.charAt(10)=='=')
                         IRFileName=item.substring(11);
+                }else if(item.contains("-file")){
+                    toFile=true;
                 }
             }
         }
-
-        var input=System.in;
-        //var input=new FileInputStream("src.mx");
-        //var input=new FileInputStream("testcases/sema/lambda-package/lambda-1.mx");
+        if(toFile){
+            if(printIR)
+                output=new PrintStream(IRFileName);
+            else
+                output=new PrintStream(ASMFileName);
+        }
 
         try {
             programNode ASTRoot;
@@ -71,7 +84,9 @@ public class Main {
             Module module=new IRBuilder().run(ASTRoot,gScope);
             module=new IRForwarder(module).forward();
             if(printIR)
-                new IRPrinter(module,IRFileName);
+                new IRPrinter(module,output);
+            ASMModule asmModule=new InstSelect().run();
+            new ASMPrinter(output).print();
 
             //run build program
             System.err.println("compile finish");

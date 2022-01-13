@@ -45,4 +45,7 @@ public class ClassUnit {
         return builder.toString();
     }
 
+    public void accept(IRVisitor visitor){
+        visitor.visit(this);
+    }
 }

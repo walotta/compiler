@@ -21,26 +21,31 @@ public class globalScope extends Scope {
         classType intType=new classType("int");
         intType.type= Type.types.Int;
         intType.scope=new Scope(this);
+        intType.isBuiltin=true;
         classes.put("int",intType);
 
         classType boolType=new classType("bool");
         boolType.type= Type.types.Bool;
         boolType.scope=new Scope(this);
+        boolType.isBuiltin=true;
         classes.put("bool",boolType);
 
         classType stringType=new classType("string");
         stringType.type= Type.types.String;
         stringType.scope=new Scope(this);
+        stringType.isBuiltin=true;
         classes.put("string",stringType);
 
         classType voidType=new classType("void");
         voidType.type= Type.types.Void;
         voidType.scope=new Scope(this);
+        voidType.isBuiltin=true;
         classes.put("void",voidType);
 
         classType nullType=new classType("null");
         nullType.type= Type.types.Null;
         nullType.scope=new Scope(this);
+        nullType.isBuiltin=true;
         classes.put("null",nullType);
 
 

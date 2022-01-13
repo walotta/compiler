@@ -36,4 +36,7 @@ public class BasicBlock {
         return builder.toString();
     }
 
+    public void accept(IRVisitor visitor){
+        visitor.visit(this);
+    }
 }

@@ -79,4 +79,8 @@ public class Function {
         builder.append("\n}");
         return builder.toString();
     }
+
+    public void accept(IRVisitor visitor){
+        visitor.visit(this);
+    }
 }

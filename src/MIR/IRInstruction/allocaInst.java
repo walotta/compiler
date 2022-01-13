@@ -1,5 +1,6 @@
 package MIR.IRInstruction;
 
+import MIR.IRVisitor;
 import MIR.IRtype.IRPointerType;
 import MIR.Operand.Register;
 
@@ -28,5 +29,10 @@ public class allocaInst extends Instruction{
         if(target.identifier!=null)
             ret=ret+"        ; "+target.identifier;
         return ret;
+    }
+
+    @Override
+    public void accept(IRVisitor visitor){
+        visitor.visit(this);
     }
 }
