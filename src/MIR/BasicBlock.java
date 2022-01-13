@@ -10,7 +10,7 @@ import java.util.StringJoiner;
 
 public class BasicBlock {
     public Label label;
-    private final LinkedList<Instruction> instructions;
+    public LinkedList<Instruction> instructions;
 
     public void pushInstruction(Instruction inst){
         if(!instructions.isEmpty()&&instructions.getLast().blockFinish)

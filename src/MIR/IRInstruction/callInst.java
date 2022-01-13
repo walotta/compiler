@@ -11,7 +11,7 @@ import java.util.StringJoiner;
 public class callInst extends Instruction{
     public Function toCall;
     public ArrayList<IROperand> argvs;
-    Register retReg;
+    public Register retReg;
 
     public callInst(Function toCall,Register retReg,ArrayList<IROperand> argvs){
         this.toCall=toCall;

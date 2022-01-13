@@ -6,8 +6,8 @@ import MIR.Operand.IROperand;
 import MIR.Operand.Register;
 
 public class storeInst extends Instruction{
-    IROperand source;
-    Register target;
+    public IROperand source;
+    public Register target;
 
     public storeInst(IROperand source, Register target){
         this.source=source;

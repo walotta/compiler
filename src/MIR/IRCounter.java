@@ -1,20 +1,16 @@
 package MIR;
 
 public class IRCounter {
-    private int labelCnt;
-    private int StringCnt;
+    private final IRBaseCounter labelCounter;
+    private final IRBaseCounter stringCounter;
     public IRCounter(){
-        labelCnt=0;
-        StringCnt=0;
+        labelCounter=new IRBaseCounter();
+        stringCounter=new IRBaseCounter();
     }
     public int getLabelCnt(){
-        int ret=labelCnt;
-        labelCnt++;
-        return ret;
+        return labelCounter.count();
     }
     public int getStringConstCnt(){
-        int ret=StringCnt;
-        StringCnt++;
-        return ret;
+        return stringCounter.count();
     }
 }

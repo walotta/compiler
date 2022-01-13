@@ -5,9 +5,9 @@ import MIR.Operand.Label;
 import MIR.Operand.Register;
 
 public class brInst extends Instruction{
-    IROperand cond;
-    Label trueLabel;
-    Label falseLabel;
+    public IROperand cond;
+    public Label trueLabel;
+    public Label falseLabel;
 
     public brInst(IROperand cond,Label trueLabel,Label falseLabel){
         this.cond=cond;

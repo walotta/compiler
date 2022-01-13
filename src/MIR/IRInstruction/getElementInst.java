@@ -9,9 +9,9 @@ import Util.error.compilerError;
 import Util.position;
 
 public class getElementInst extends Instruction{
-    Register target;
-    IROperand header;
-    IROperand index;
+    public Register target;
+    public IROperand header;
+    public IROperand index;
 
     public getElementInst(Register target,IROperand header,IROperand index){
         this.target=target;

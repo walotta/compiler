@@ -34,4 +34,12 @@ public class Label extends IROperand{
             return id+":";
         }
     }
+
+    public String getLabel(){
+        if(id==-1){
+            return name;
+        }else{
+            return Integer.toString(id);
+        }
+    }
 }

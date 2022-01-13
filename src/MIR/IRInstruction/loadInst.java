@@ -3,8 +3,8 @@ package MIR.IRInstruction;
 import MIR.Operand.Register;
 
 public class loadInst extends Instruction{
-    Register target;
-    Register source;
+    public Register target;
+    public Register source;
 
     public loadInst(Register target,Register source){
         this.target=target;

@@ -222,6 +222,12 @@ public class IRBuilder implements ASTVisitor {
             }
         }
 
+        //insert method
+        it.funcList.forEach(func->{
+            Function method=new Function(currentClass.className+"."+func.funcName, trans.transType(func.retType));
+            currentClass.methods.put(func.funcName,method);
+        });
+
         //initFunc scope
         currentFunc=new Function("class.init."+it.className,new IRVoidType());
         currentScope=new IRScopeFunc(currentScope);
@@ -250,7 +256,7 @@ public class IRBuilder implements ASTVisitor {
         currentScope=currentScope.parentsScope;
 
         for(var method:it.funcList){
-            currentFunc=new Function(it.className+"."+method.funcName,trans.transType(method.retType));
+            currentFunc=currentClass.methods.get(method.funcName);
             currentScope=new IRScopeFunc(currentScope);
             thisReg=new Register(currentScope.regCnt(),"class.this",ClassPointer);
             currentFunc.paras.add(thisReg);
@@ -695,7 +701,14 @@ public class IRBuilder implements ASTVisitor {
         Register retReg;
         ArrayList<IROperand> parasExp=new ArrayList<>();
         if(it.funcName instanceof funcNode){
-            toCall=module.functions.get(((funcNode)it.funcName).funcName);
+            if(currentClass!=null) {
+                toCall = currentClass.methods.get(((funcNode) it.funcName).funcName);
+                if(toCall!=null)parasExp.add(thisReg);
+            }else
+                toCall=module.functions.get(((funcNode)it.funcName).funcName);
+            if(toCall==null){
+                toCall=module.functions.get(((funcNode)it.funcName).funcName);
+            }
         }else if(it.funcName instanceof methodNode){
             ((methodNode) it.funcName).father.accept(this);
 
@@ -709,7 +722,11 @@ public class IRBuilder implements ASTVisitor {
                 }
                 parasExp.add(calBack);
             }else if(calBack.type instanceof IRPointerType){
-                if(Objects.equals(((methodNode) it.funcName).methodName, "size")){
+                if((((IRPointerType)calBack.type).baseType instanceof IRClassType)){
+                    String className=((IRClassType)((IRPointerType) calBack.type).baseType).name;
+                    toCall=module.classes.get(className).methods.get(((methodNode) it.funcName).methodName);
+                    parasExp.add(calBack);
+                }else if(Objects.equals(((methodNode) it.funcName).methodName, "size")){
                     Register transHeader;
                     if((((IRPointerType)calBack.type).baseType instanceof IRIntType)){
                         transHeader=(Register) calBack;
@@ -723,10 +740,6 @@ public class IRBuilder implements ASTVisitor {
                     currentBlock.pushInstruction(new loadInst(lenReg,lenHeader));
                     calBack=lenReg;
                     return;
-                }else if((((IRPointerType)calBack.type).baseType instanceof IRClassType)){
-                    String className=((IRClassType)((IRPointerType) calBack.type).baseType).name;
-                    toCall=module.classes.get(className).methods.get(((methodNode) it.funcName).methodName);
-                    parasExp.add(calBack);
                 }else{
                     throw new compilerError("array method name not find",throwPos);
                 }

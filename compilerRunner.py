@@ -3,7 +3,7 @@ import sys
 import os
 from irSplit import judger
 from rich.progress import track
-import filecmp
+import time
 
 def printRet(func):
     print("\033[36m{}\033[0m".format('call: {}'.format(func.__name__)))
@@ -36,9 +36,13 @@ def link():
     ret, val = subprocess.getstatusoutput('clang src.ll bif/bif.ll -o src.run')
     return ret, val
 
-def run():
-    ret, val = subprocess.getstatusoutput('./src.run <src.in >src.out')
-    return ret, val
+def run(detail=False):
+    os.system('rm src.out')
+    os.system('touch src.out')
+    task=subprocess.run('./src.run <src.in >src.out',shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,encoding="utf-8",timeout=5)
+    if task.stderr!='' and detail:
+        print(task.stderr,end='')
+    return task.returncode, task.stdout
 
 def compile_std():
     ret, val = subprocess.getstatusoutput('clang src.c -o src.run')
@@ -81,8 +85,6 @@ elif sys.argv[1]=='-v':
     print("compiler runner version 1.0")
     print("use \033[36m{}\033[0m to get some help".format('-h'))
     print("@Copyright by walotta")
-elif sys.argv[1]=='-llvm-test':
-    print('now running llvm test')
 elif sys.argv[1]=='-test':
     printRet(javac)
     success="\033[32m[Success] : in {} \033[0m"
@@ -127,7 +129,7 @@ else:
                 f.write(std)
             compile()
             link()
-            printRet(run)
+            run(detail=True)
             ret, val = subprocess.getstatusoutput('diff -w -B src.std src.out')
             if val!='':
                 print(fail.format(testName))

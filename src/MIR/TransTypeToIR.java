@@ -4,6 +4,7 @@ import AST.typeNode;
 import MIR.IRtype.*;
 import Util.Type.Type;
 import Util.Type.arrayType;
+import Util.Type.classType;
 import Util.Type.funcType;
 import Util.error.compilerError;
 import Util.position;
@@ -19,6 +20,8 @@ public class TransTypeToIR {
             for(int i=0;i<((arrayType)t).dim;i++){
                 irType=new IRPointerType(irType);
             }
+        }else if(t instanceof classType && t.type== Type.types.Class){
+            irType=new IRPointerType(new IRClassType(((classType)t).className));
         }else{
             switch (t.type){
                 case Int -> irType=new IRIntType();

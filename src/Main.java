@@ -1,5 +1,6 @@
 import AST.*;
 import MIR.IRBuilder;
+import MIR.IRForwarder;
 import MIR.IRPrinter;
 import MIR.Module;
 import Frontend.ASTBuilder;
@@ -64,6 +65,7 @@ public class Main {
 
             //run IRBuilder
             Module module=new IRBuilder().run(ASTRoot,gScope);
+            module=new IRForwarder(module).forward();
             if(printIR)
                 new IRPrinter(module,IRFileName);
 

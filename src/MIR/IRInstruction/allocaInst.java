@@ -4,8 +4,8 @@ import MIR.IRtype.IRPointerType;
 import MIR.Operand.Register;
 
 public class allocaInst extends Instruction{
-    Register target;
-    int number;
+    public Register target;
+    public int number;
 
     public allocaInst(Register target){
         this.target=target;

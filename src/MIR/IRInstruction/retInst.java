@@ -3,7 +3,7 @@ package MIR.IRInstruction;
 import MIR.Operand.IROperand;
 
 public class retInst extends Instruction{
-    IROperand toRet;
+    public IROperand toRet;
 
     public retInst(IROperand toRet){
         this.toRet=toRet;

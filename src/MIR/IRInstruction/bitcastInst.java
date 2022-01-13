@@ -4,8 +4,8 @@ import MIR.Operand.IROperand;
 import MIR.Operand.Register;
 
 public class bitcastInst extends Instruction{
-    Register target;
-    IROperand source;
+    public Register target;
+    public IROperand source;
 
     public bitcastInst(IROperand source,Register target){
         this.source=source;
