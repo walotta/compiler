@@ -472,6 +472,40 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(binaryExprNode it){
+        if(it.op== binaryExprNode.opType.logicAnd || it.op== binaryExprNode.opType.logicOr){
+            Register ansReg=new Register(currentScope.regCnt(),null,new IRPointerType(new IRBoolType()));
+            currentBlock.pushInstruction(new allocaInst(ansReg));
+            int LabelId=IRCounter.getLabelCnt();
+            Label scCal=new Label("scCal."+LabelId);
+            Label scPass=new Label("scPass."+LabelId);
+            BoolConstant passCondValue;
+            if(it.op== binaryExprNode.opType.logicAnd)
+                passCondValue=new BoolConstant(false);
+            else
+                passCondValue=new BoolConstant(true);
+            it.leftExp.accept(this);
+            IROperand leftValue=calBack;
+            currentBlock.pushInstruction(new storeInst(calBack,ansReg));
+            Register equalPassReg=new Register(currentScope.regCnt(),null,new IRBoolType());
+            currentBlock.pushInstruction(new compareInst(compareInst.compareType.eq,leftValue,passCondValue,equalPassReg));
+            currentBlock.pushInstruction(new brInst(equalPassReg,scPass,scCal));
+            currentFunc.Blocks.add(currentBlock);
+            currentBlock=new BasicBlock(scCal);
+            it.rightExp.accept(this);
+            Register calFinishVal=new Register(currentScope.regCnt(),null,new IRBoolType());
+            if(it.op== binaryExprNode.opType.logicAnd)
+                currentBlock.pushInstruction(new binaryInst(binaryInst.binaryType.and,leftValue,calBack,calFinishVal));
+            else
+                currentBlock.pushInstruction(new binaryInst(binaryInst.binaryType.or,leftValue,calBack,calFinishVal));
+            currentBlock.pushInstruction(new storeInst(calFinishVal,ansReg));
+            currentBlock.pushInstruction(new jumpInst(scPass));
+            currentFunc.Blocks.add(currentBlock);
+            currentBlock=new BasicBlock(scPass);
+            Register ansVal=new Register(currentScope.regCnt(),null,new IRBoolType());
+            currentBlock.pushInstruction(new loadInst(ansVal,ansReg));
+            calBack=ansVal;
+            return;
+        }
         IRBaseType irType=trans.transType(it.type);
         IRBaseType calType=trans.transType(it.leftExp.type);
         IROperand left,right;
@@ -508,10 +542,6 @@ public class IRBuilder implements ASTVisitor {
                 case bitAnd -> inst=new binaryInst(binaryInst.binaryType.and,left,right,target);
                 case bitXor -> inst=new binaryInst(binaryInst.binaryType.xor,left,right,target);
                 case bitOr -> inst=new binaryInst(binaryInst.binaryType.or,left,right,target);
-                case logicAnd -> //todo short circuit
-                        inst=new binaryInst(binaryInst.binaryType.and,left,right,target);
-                case logicOr -> //todo short circuit
-                        inst=new binaryInst(binaryInst.binaryType.or,left,right,target);
                 default -> throw new compilerError("forbidden binary for bool",throwPos);
             }
         }else if(calType instanceof IRStringType){
@@ -547,11 +577,7 @@ public class IRBuilder implements ASTVisitor {
                 default -> throw new compilerError("forbidden binary for string",throwPos);
             }
         }else if(calType instanceof IRPointerType){
-            if(((IRPointerType)calType).baseType instanceof IRClassType){
-                //equal for class
-                inst=new compareInst(compareInst.compareType.eq,left,right,target);
-            }else
-                throw new compilerError("binary Class todo",throwPos);
+            inst=new compareInst(compareInst.compareType.eq,left,right,target);
         }else{
             throw new compilerError("binary for forbidden type",throwPos);
         }
@@ -642,14 +668,24 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(newInitObjectExprNode it){
         String className=it.objectType.typeName;
-        IRPointerType pointerType=module.queryClassPointer(className);
+        IRPointerType pointerType;
+        if(currentClass!=null && currentClass.className.equals(className)){
+            IRClassType queryClassType=new IRClassType(className);
+            queryClassType.calSize(currentClass);
+            pointerType=new IRPointerType(queryClassType);
+        }else
+            pointerType=module.queryClassPointer(className);
         Function mallocFunc=new Function("_bif_malloc",new IRPointerType(new IRCharType()));
         Register header=new Register(currentScope.regCnt(),null,new IRPointerType(new IRCharType()));
         callInst toCall=new callInst(mallocFunc,header,new ArrayList<>(){{add(new IntConstant(pointerType.baseType.size()));}});
         Register trueHead=new Register(currentScope.regCnt(),null,pointerType);
         currentBlock.pushInstruction(toCall);
         currentBlock.pushInstruction(new bitcastInst(header,trueHead));
-        Function initFunc=module.classes.get(className).initFunc;
+        Function initFunc;
+        if(currentClass!=null && className.equals(currentClass.className))
+            initFunc=currentClass.initFunc;
+        else
+            initFunc=module.classes.get(className).initFunc;
         ArrayList<IROperand> argvs=new ArrayList<>();
         argvs.add(trueHead);
         it.exprList.forEach(item->{
@@ -663,14 +699,24 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(newObjectExprNode it){
         String className=it.objectType.typeName;
-        IRPointerType pointerType=module.queryClassPointer(className);
+        IRPointerType pointerType;
+        if(currentClass!=null && currentClass.className.equals(className)){
+            IRClassType queryClassType=new IRClassType(className);
+            queryClassType.calSize(currentClass);
+            pointerType=new IRPointerType(queryClassType);
+        }else
+            pointerType=module.queryClassPointer(className);
         Function mallocFunc=new Function("_bif_malloc",new IRPointerType(new IRCharType()));
         Register header=new Register(currentScope.regCnt(),null,new IRPointerType(new IRCharType()));
         callInst toCall=new callInst(mallocFunc,header,new ArrayList<>(){{add(new IntConstant(pointerType.baseType.size()));}});
         Register trueHead=new Register(currentScope.regCnt(),null,pointerType);
         currentBlock.pushInstruction(toCall);
         currentBlock.pushInstruction(new bitcastInst(header,trueHead));
-        Function initFunc=module.classes.get(className).initFunc;
+        Function initFunc;
+        if(currentClass!=null && className.equals(currentClass.className))
+            initFunc=currentClass.initFunc;
+        else
+            initFunc=module.classes.get(className).initFunc;
         ArrayList<IROperand> argvs=new ArrayList<>();
         argvs.add(trueHead);
         currentBlock.pushInstruction(new callInst(initFunc,null,argvs));
@@ -724,7 +770,10 @@ public class IRBuilder implements ASTVisitor {
             }else if(calBack.type instanceof IRPointerType){
                 if((((IRPointerType)calBack.type).baseType instanceof IRClassType)){
                     String className=((IRClassType)((IRPointerType) calBack.type).baseType).name;
-                    toCall=module.classes.get(className).methods.get(((methodNode) it.funcName).methodName);
+                    if(currentClass!=null && className.equals(currentClass.className))
+                        toCall=currentClass.methods.get(((methodNode) it.funcName).methodName);
+                    else
+                        toCall=module.classes.get(className).methods.get(((methodNode) it.funcName).methodName);
                     parasExp.add(calBack);
                 }else if(Objects.equals(((methodNode) it.funcName).methodName, "size")){
                     Register transHeader;

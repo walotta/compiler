@@ -36,10 +36,13 @@ def link():
     ret, val = subprocess.getstatusoutput('clang src.ll bif/bif.ll -o src.run')
     return ret, val
 
-def run(detail=False):
+def run(detail=True):
     os.system('rm src.out')
     os.system('touch src.out')
-    task=subprocess.run('./src.run <src.in >src.out',shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,encoding="utf-8",timeout=5)
+    try:
+        task=subprocess.run('./src.run <src.in >src.out',shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,encoding="utf-8",timeout=5)
+    except:
+        return 62,'time out'
     if task.stderr!='' and detail:
         print(task.stderr,end='')
     return task.returncode, task.stdout
@@ -101,13 +104,13 @@ elif sys.argv[1]=='-test':
             f.write(std)
         compile()
         link()
-        run()
+        run(detail=False)
         ret, val = subprocess.getstatusoutput('diff -w -B src.std src.out')
         if val!='':
-            print(fail.format(testName))
             errorcase.append(testPath)
+            print(fail.format(testName),'{}/{}'.format(testId-len(errorcase)+1,testId+1))
         else:
-            print(success.format(testName))
+            print(success.format(testName),'{}/{}'.format(testId-len(errorcase)+1,testId+1))
     print("\033[36m{}\033[0m".format('pass: {}/{}'.format(len(testcase.judge_list)-len(errorcase),len(testcase.judge_list))))
     with open('errorcase.txt','w') as f:
         f.write("\n".join(errorcase))
@@ -129,7 +132,7 @@ else:
                 f.write(std)
             compile()
             link()
-            run(detail=True)
+            run()
             ret, val = subprocess.getstatusoutput('diff -w -B src.std src.out')
             if val!='':
                 print(fail.format(testName))

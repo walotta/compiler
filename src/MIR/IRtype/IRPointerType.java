@@ -12,7 +12,9 @@ public class IRPointerType extends IRBaseType{
 
     @Override
     public int size(){
-        return 4;
+        //8 for IR
+        return 8;
+        //! 4 for codegen
     }
 
     @Override

@@ -2,6 +2,7 @@ import AST.*;
 import MIR.IRBuilder;
 import MIR.IRForwarder;
 import MIR.IRPrinter;
+import MIR.IRtype.IRBaseType;
 import MIR.Module;
 import Frontend.ASTBuilder;
 import Frontend.SemanticChecker;
@@ -23,12 +24,14 @@ public class Main {
     public static void main(String[] args) throws Exception {
         boolean onlySemantic=false;
         boolean printIR=false;
+        int pointSize=4;
         String IRFileName="src.ll";
         if(args.length!=0){
             for(String item:args){
                 if(item.equals("-semantic")){
                     onlySemantic=true;
                 }else if(item.contains("-emit-llvm")){
+                    pointSize=8;
                     printIR=true;
                     if(item.length()>10&&item.charAt(10)=='=')
                         IRFileName=item.substring(11);
@@ -64,6 +67,7 @@ public class Main {
             if(onlySemantic)return;
 
             //run IRBuilder
+            IRBaseType.pointSize=pointSize;
             Module module=new IRBuilder().run(ASTRoot,gScope);
             module=new IRForwarder(module).forward();
             if(printIR)
