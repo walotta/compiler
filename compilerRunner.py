@@ -77,7 +77,7 @@ def ravel():
 
 testcase=judger()
 if len(sys.argv)==1:
-    print(llvm)
+    printRet(llvm)
     printRet(compile)
     printRet(link)
     printRet(run)
