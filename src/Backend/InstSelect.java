@@ -32,7 +32,9 @@ public class InstSelect implements IRVisitor {
             else
                 return new PhysicalReg(0);
         }else if(irOperand instanceof globalVariable){
-            throw new compilerError("globalVariable todo",new position(0,0));
+            ASMReg ret=currentFunc.getTmpReg();
+            currentBlock.insts.add(new ASMLaInst(ret,new ASMGloVar(((globalVariable) irOperand).identifier)));
+            return ret;
         }else if(irOperand instanceof IntConstant){
             ASMReg ret=currentFunc.getTmpReg();
             currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.li,ret,new Immediate(((IntConstant)irOperand).value)));
@@ -42,7 +44,9 @@ public class InstSelect implements IRVisitor {
         }else if(irOperand instanceof Register){
             return currentFunc.getReg((Register) irOperand);
         }else if(irOperand instanceof StringConstant){
-            throw new compilerError("String todo",new position(0,0));
+            ASMReg ret=currentFunc.getTmpReg();
+            currentBlock.insts.add(new ASMLaInst(ret,new ASMGloString(((StringConstant) irOperand).name,((StringConstant) irOperand).value)));
+            return ret;
         }else{
             throw new compilerError("cannot deal with Label",new position(0,0));
         }
@@ -67,6 +71,12 @@ public class InstSelect implements IRVisitor {
 
     @Override
     public Object visit(Module it){
+        it.globalVars.forEach((varName,v)->{
+            asmModule.globalVars.put(varName,new ASMGloVar(varName));
+        });
+        it.stringConstTable.forEach((stringName,st)->{
+            asmModule.globalVars.put(stringName,new ASMGloString(st.name,st.value));
+        });
         it.functions.forEach((funcName,irFunc)->{
             if(!irFunc.isBuiltin){
                 ASMFunction genFunc=(ASMFunction) irFunc.accept(this);
@@ -85,14 +95,14 @@ public class InstSelect implements IRVisitor {
                 asmModule.funcs.put(genFunc.funcName,genFunc);
             });
         });
-        //todo globalVars
-        //todo stringConst
         if(!it.initFuncs.isEmpty()) {
             ArrayList<ASMFunction> initFuncs=new ArrayList<>();
             it.initFuncs.forEach(func -> {
-                ASMFunction genFunc = (ASMFunction) func.accept(this);
-                asmModule.funcs.put(genFunc.funcName,genFunc);
-                initFuncs.add(genFunc);
+                if(!func.funcName.equals("_GLOBAL_INIT")) {
+                    ASMFunction genFunc = (ASMFunction) func.accept(this);
+                    asmModule.funcs.put(genFunc.funcName, genFunc);
+                    initFuncs.add(genFunc);
+                }
             });
             ASMBlock callInitFuncBlock = new ASMBlock(new ASMLabel(asmModule.funcs.get("main"), "callGlobalInit"));
             initFuncs.forEach(func->{

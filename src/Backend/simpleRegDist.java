@@ -48,6 +48,7 @@ public class simpleRegDist {
 
     public ASMModule run(){
         ASMModule retModule=new ASMModule();
+        retModule.globalVars=oriModule.globalVars;
         oriModule.funcs.forEach((funcName,func)->{
             retModule.funcs.put(funcName,visit(func));
         });
