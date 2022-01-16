@@ -83,8 +83,9 @@ public class InstSelect implements IRVisitor {
     @Override
     public Object visit(Function it){
         currentFunc=new ASMFunction(it.funcName,getFuncCnt());
-        ASMBlock loadParasBlock=new ASMBlock(new ASMLabel(currentFunc,"loadParas"));
+        ASMBlock loadParasBlock=new ASMBlock(new ASMLabel(currentFunc,"FuncInit"));
 
+        loadParasBlock.insts.add(new ASMCalInst(ASMCalInst.op.addi,new PhysicalReg(2),new PhysicalReg(2),new FuncStackSize(it.funcName,0,false)));
         //define or load paras
         for(int i=0;i<it.paras.size();i++){
             if(i<8){
@@ -96,7 +97,9 @@ public class InstSelect implements IRVisitor {
                 loadParasBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,vR,stackHeaderReg,new Immediate(4*i)));
             }
         }
-        loadParasBlock.insts.add(new ASMCalInst(ASMCalInst.op.addi,new PhysicalReg(2),new PhysicalReg(2),new FuncStackSize(it.funcName,0)));
+        int callerAddr=currentFunc.stackManager.alloca(4);
+        currentFunc.callerAddr=callerAddr;
+        loadParasBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.sw,new PhysicalReg(1),stackHeaderReg,new Immediate(callerAddr)));
         currentFunc.blocks.add(loadParasBlock);
         //translate blocks
         it.Blocks.forEach(block->{
@@ -182,7 +185,7 @@ public class InstSelect implements IRVisitor {
             if(i<8){
                 currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.mv,new PhysicalReg(10+i),transIROperand(it.argvs.get(i)),null));
             }else{
-                currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.sw,transIROperand(it.argvs.get(i)),stackHeaderReg,new FuncStackSize(it.toCall.funcName,sumSize)));
+                currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.sw,transIROperand(it.argvs.get(i)),stackHeaderReg,new FuncStackSize(it.toCall.funcName,sumSize,false)));
                 sumSize+=it.argvs.get(i).type.size();
             }
         }
@@ -266,8 +269,12 @@ public class InstSelect implements IRVisitor {
 
     @Override
     public Object visit(retInst it){
-        ASMReg val=transIROperand(it.toRet);
-        currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.mv,new PhysicalReg(10),val,null));
+        if(it.toRet!=null){
+            ASMReg val=transIROperand(it.toRet);
+            currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.mv,new PhysicalReg(10),val,null));
+        }
+        currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,new PhysicalReg(1),stackHeaderReg,new Immediate(currentFunc.callerAddr)));
+        currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.addi,new PhysicalReg(2),new PhysicalReg(2),new FuncStackSize(currentFunc.funcName,0,true)));
         currentBlock.insts.add(new ASMRetInst());
         return null;
     }

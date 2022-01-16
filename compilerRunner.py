@@ -81,6 +81,7 @@ if len(sys.argv)==1:
     printRet(compile)
     printRet(link)
     printRet(run)
+    print("\033[36m{}\033[0m".format('output: '))
     os.system('cat src.out')
 elif sys.argv[1]=='-reload':
     printRet(javac)
@@ -88,6 +89,7 @@ elif sys.argv[1]=='-reload':
     printRet(compile)
     printRet(link)
     printRet(run)
+    print("\033[36m{}\033[0m".format('output: '))
     os.system('cat src.out')
 elif sys.argv[1]=='-std':
     printRet(compile_std)

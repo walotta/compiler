@@ -2,6 +2,8 @@ package Backend;
 
 import Backend.ASMOperand.ASMReg;
 import Backend.ASMOperand.VirtualReg;
+import Util.error.compilerError;
+import Util.position;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -20,6 +22,7 @@ public class StackManager {
     public int alloca(int size){
         int addr=currentHeader;
         currentHeader+=size;
+        allocaMap.put(addr,size);
         return addr;
     }
 

@@ -17,6 +17,7 @@ public class ASMFunction {
     HashMap<Register, ASMReg> renameTable;
     ArrayList<VirtualReg> tmpReg;
     StackManager stackManager;
+    int callerAddr;
 
     public void defineReg(Register irReg,ASMReg newReg){
         renameTable.put(irReg,newReg);

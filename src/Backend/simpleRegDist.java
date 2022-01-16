@@ -12,6 +12,7 @@ public class simpleRegDist {
     PhysicalReg rdReg=new PhysicalReg(5);
     PhysicalReg rs1Reg=new PhysicalReg(6);
     PhysicalReg rs2Reg=new PhysicalReg(7);
+    private final PhysicalReg stackHeaderReg=new PhysicalReg(2);
     HashMap<PhysicalReg,VirtualReg> regDict=new HashMap<>();
 
     public simpleRegDist(ASMModule oriModule){
@@ -26,7 +27,7 @@ public class simpleRegDist {
             }else{
                 addr=currentFunction.stackManager.assignReg((VirtualReg) ori);
             }
-            currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,target,new PhysicalReg(0),new Immediate(addr)));
+            currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,target,stackHeaderReg,new Immediate(addr)));
             regDict.put(target,(VirtualReg) ori);
             return target;
         }else {
@@ -40,7 +41,7 @@ public class simpleRegDist {
             VirtualReg source=regDict.get(target);
             if(source!=null){
                 int addr=currentFunction.stackManager.RegMap.get(source);
-                currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.sw,(PhysicalReg)target,new PhysicalReg(0),new Immediate(addr)));
+                currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.sw,(PhysicalReg)target,stackHeaderReg,new Immediate(addr)));
             }
         }
     }
@@ -59,13 +60,13 @@ public class simpleRegDist {
             for(var block:func.blocks){
                 for(var inst:block.insts){
                     if(inst.rd instanceof FuncStackSize){
-                        ((FuncStackSize) inst.rd).resize(-funcSizeMap.get(((FuncStackSize) inst.rd).funcName));
+                        ((FuncStackSize) inst.rd).resize(funcSizeMap.get(((FuncStackSize) inst.rd).funcName));
                     }
                     if(inst.rs1 instanceof FuncStackSize){
-                        ((FuncStackSize) inst.rs1).resize(-funcSizeMap.get(((FuncStackSize) inst.rs1).funcName));
+                        ((FuncStackSize) inst.rs1).resize(funcSizeMap.get(((FuncStackSize) inst.rs1).funcName));
                     }
                     if(inst.rs2 instanceof FuncStackSize){
-                        ((FuncStackSize) inst.rs2).resize(-funcSizeMap.get(((FuncStackSize) inst.rs2).funcName));
+                        ((FuncStackSize) inst.rs2).resize(funcSizeMap.get(((FuncStackSize) inst.rs2).funcName));
                     }
                 }
             }
