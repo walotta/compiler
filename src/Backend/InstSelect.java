@@ -190,6 +190,10 @@ public class InstSelect implements IRVisitor {
             }
         }
         currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.call,it.toCall.funcName));
+        if(it.retReg!=null) {
+            ASMReg retReg = transIROperand(it.retReg);
+            currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.mv, retReg, new PhysicalReg(10), null));
+        }
         return null;
     }
 
