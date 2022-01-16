@@ -88,12 +88,14 @@ public class InstSelect implements IRVisitor {
         //todo globalVars
         //todo stringConst
         if(!it.initFuncs.isEmpty()) {
+            ArrayList<ASMFunction> initFuncs=new ArrayList<>();
             it.initFuncs.forEach(func -> {
                 ASMFunction genFunc = (ASMFunction) func.accept(this);
-                asmModule.initFuncs.add(genFunc);
+                asmModule.funcs.put(genFunc.funcName,genFunc);
+                initFuncs.add(genFunc);
             });
             ASMBlock callInitFuncBlock = new ASMBlock(new ASMLabel(asmModule.funcs.get("main"), "callGlobalInit"));
-            asmModule.initFuncs.forEach(func->{
+            initFuncs.forEach(func->{
                 callInitFuncBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.call,func.funcName));
             });
             asmModule.funcs.get("main").blocks.add(0,callInitFuncBlock);
