@@ -48,15 +48,15 @@ public class simpleRegDist {
 
     public ASMModule run(){
         ASMModule retModule=new ASMModule();
-        oriModule.funcs.forEach(func->{
-            retModule.funcs.add(visit(func));
+        oriModule.funcs.forEach((funcName,func)->{
+            retModule.funcs.put(funcName,visit(func));
         });
         //deal with FuncStackSize
         HashMap<String,Integer> funcSizeMap=new HashMap<>();
-        for(var func:retModule.funcs){
+        for(var func:retModule.funcs.values()){
             funcSizeMap.put(func.funcName,func.stackManager.calSize());
         }
-        for(var func:retModule.funcs){
+        for(var func:retModule.funcs.values()){
             for(var block:func.blocks){
                 for(var inst:block.insts){
                     if(inst.rd instanceof FuncStackSize){
