@@ -33,7 +33,7 @@ public class StringConstant extends IROperand{
         return "@"+name+" = private unnamed_addr constant [ "+len+" x i8 ] c\""+value+"\\00\"";
     }
 
-    public void accept(IRVisitor visitor){
-        visitor.visit(this);
+    public Object accept(IRVisitor visitor){
+        return visitor.visit(this);
     }
 }

@@ -1,0 +1,65 @@
+package Backend;
+
+import Backend.ASMOperand.ASMOperandBase;
+import Backend.ASMOperand.ASMReg;
+import Backend.ASMOperand.VirtualReg;
+import MIR.Operand.IROperand;
+import MIR.Operand.Register;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.StringJoiner;
+
+public class ASMFunction {
+    String funcName;
+    int funcId;
+    ArrayList<ASMBlock> blocks;
+    HashMap<Register, ASMReg> renameTable;
+    ArrayList<VirtualReg> tmpReg;
+    StackManager stackManager;
+
+    public void defineReg(Register irReg,ASMReg newReg){
+        renameTable.put(irReg,newReg);
+    }
+
+    public ASMReg getReg(Register irReg){
+        if(renameTable.containsKey(irReg))
+            return renameTable.get(irReg);
+        else{
+            VirtualReg newReg=new VirtualReg(irReg.renameId);
+            renameTable.put(irReg,newReg);
+            return newReg;
+        }
+    }
+
+    public ASMReg getTmpReg(){
+        VirtualReg newReg=new VirtualReg(-1);
+        tmpReg.add(newReg);
+        return newReg;
+    }
+
+    ASMFunction(String funcName,int funcId){
+        this.funcName=funcName;
+        this.funcId=funcId;
+        this.blocks=new ArrayList<>();
+        this.stackManager=new StackManager();
+        this.renameTable=new HashMap<>();
+        this.tmpReg=new ArrayList<>();
+    }
+
+    @Override
+    public String toString(){
+        StringBuilder builder=new StringBuilder();
+        builder.append("\t.globl\t").append(funcName).append("\t# -- Begin function\t").append(funcName).append('\n');
+        builder.append("\t.type\t").append(funcName).append(",@function\n");
+        builder.append(funcName).append(":\t# ").append(funcName).append('\n');
+        StringJoiner joiner=new StringJoiner("\n");
+        blocks.forEach(item->joiner.add(item.toString()));
+        builder.append(joiner);
+        builder.append('\n');
+        builder.append(".Lfunc_end").append(funcId).append(":\n");
+        builder.append("\t.size\t").append(funcName).append(", .Lfunc_end").append(funcId).append("-").append(funcName).append('\n');
+        builder.append("\t# -- End function");
+        return builder.toString();
+    }
+}

@@ -20,8 +20,12 @@ def javac():
     ret, val = subprocess.getstatusoutput('find ./src -name "*.java" -print0|xargs -0 javac -d runContain -cp ./lib/*.jar')
     return ret, val
 
-def compile():
+def llvm():
     ret, val = subprocess.getstatusoutput('java -cp ./lib/antlr-4.9-complete.jar:./runContain Main -emit-llvm -file <src.mx')
+    return ret, val
+
+def compile():
+    ret, val = subprocess.getstatusoutput('java -cp ./lib/antlr-4.9-complete.jar:./runContain Main -file <src.mx')
     return ret, val
 
 def Slink():
@@ -36,7 +40,7 @@ def link():
     ret, val = subprocess.getstatusoutput('clang src.ll bif/bif.ll -o src.run')
     return ret, val
 
-def run(detail=True):
+def runllvm(detail=True):
     os.system('rm src.out')
     os.system('touch src.out')
     try:
@@ -46,6 +50,17 @@ def run(detail=True):
     if task.stderr!='' and detail:
         print(task.stderr,end='')
     return task.returncode, task.stdout
+
+def run():
+    os.system('rm src.out')
+    os.system('touch src.out')
+    ret, val = subprocess.getstatusoutput('ravel --input-file=src.in --output-file=src.out src.s bif/bif.s')
+    val=val.split('\n')
+    newVal=''
+    for v in val:
+        if('Ignoring directive:' not in v):
+            newVal=newVal+v+'\n'
+    return ret, newVal
 
 def compile_std():
     # ret, val = subprocess.getstatusoutput('clang -emit-llvm -S src.cpp -o src.ll --target=riscv32')
@@ -62,12 +77,14 @@ def ravel():
 
 testcase=judger()
 if len(sys.argv)==1:
+    print(llvm)
     printRet(compile)
     printRet(link)
     printRet(run)
     os.system('cat src.out')
 elif sys.argv[1]=='-reload':
     printRet(javac)
+    printRet(llvm)
     printRet(compile)
     printRet(link)
     printRet(run)

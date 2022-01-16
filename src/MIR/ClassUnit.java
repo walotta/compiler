@@ -26,6 +26,16 @@ public class ClassUnit {
         return new IntConstant(index);
     }
 
+    public int queryOffset(int id){
+        int ret=0;
+        int i=0;
+        for(var v:memberVars.values()){
+            if(i>=id)break;
+            ret+=v.size();
+        }
+        return ret;
+    }
+
     @Override
     public String toString(){
         StringBuilder builder=new StringBuilder();
@@ -45,7 +55,7 @@ public class ClassUnit {
         return builder.toString();
     }
 
-    public void accept(IRVisitor visitor){
-        visitor.visit(this);
+    public Object accept(IRVisitor visitor){
+        return visitor.visit(this);
     }
 }

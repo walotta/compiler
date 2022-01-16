@@ -10,8 +10,7 @@ public class binaryInst extends Instruction{
         mul,sdiv,srem,          // *  /  %
         add,sub,                // +  -
         shl,ashr,               // << >>
-        and,xor,or,             // &  ^  |
-        logicAnd,logicOr        // && ||
+        and,xor,or              // &  ^  |
     }
 
     public binaryType type;
@@ -31,7 +30,7 @@ public class binaryInst extends Instruction{
     }
 
     @Override
-    public void accept(IRVisitor visitor){
-        visitor.visit(this);
+    public Object accept(IRVisitor visitor){
+        return visitor.visit(this);
     }
 }

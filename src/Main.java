@@ -2,6 +2,7 @@ import AST.*;
 import Backend.ASMModule;
 import Backend.ASMPrinter;
 import Backend.InstSelect;
+import Backend.simpleRegDist;
 import MIR.IRBuilder;
 import MIR.IRForwarder;
 import MIR.IRPrinter;
@@ -83,10 +84,13 @@ public class Main {
             IRBaseType.pointSize=pointSize;
             Module module=new IRBuilder().run(ASTRoot,gScope);
             module=new IRForwarder(module).forward();
-            if(printIR)
-                new IRPrinter(module,output);
-            ASMModule asmModule=new InstSelect().run();
-            new ASMPrinter(output).print();
+            if(printIR) {
+                new IRPrinter(module, output);
+                return;
+            }
+            ASMModule asmModule=new InstSelect().run(module);
+            asmModule=new simpleRegDist(asmModule).run();
+            new ASMPrinter(output).print(asmModule);
 
             //run build program
             System.err.println("compile finish");
