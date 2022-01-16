@@ -70,13 +70,35 @@ public class InstSelect implements IRVisitor {
         it.functions.forEach((funcName,irFunc)->{
             if(!irFunc.isBuiltin){
                 ASMFunction genFunc=(ASMFunction) irFunc.accept(this);
-                asmModule.funcs.add(genFunc);
+                asmModule.funcs.put(funcName,genFunc);
             }
         });
-        //todo classes
+        it.classes.forEach((className,classU)->{
+            if(classU.initFunc!=null){
+                ASMFunction genFunc=(ASMFunction) classU.initFunc.accept(this);
+                genFunc.funcName=className+"."+classU.initFunc.funcName;
+                asmModule.funcs.put(genFunc.funcName,genFunc);
+            }
+            classU.methods.forEach((methodName,method)->{
+                ASMFunction genFunc=(ASMFunction) method.accept(this);
+                genFunc.funcName=className+"."+methodName;
+                asmModule.funcs.put(genFunc.funcName,genFunc);
+            });
+        });
         //todo globalVars
         //todo stringConst
-        //todo initFuncs
+        if(!it.initFuncs.isEmpty()) {
+            it.initFuncs.forEach(func -> {
+                ASMFunction genFunc = (ASMFunction) func.accept(this);
+                asmModule.initFuncs.add(genFunc);
+            });
+            ASMBlock callInitFuncBlock = new ASMBlock(new ASMLabel(asmModule.funcs.get("main"), "callGlobalInit"));
+            asmModule.initFuncs.forEach(func->{
+                callInitFuncBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.call,func.funcName));
+            });
+            asmModule.funcs.get("main").blocks.add(0,callInitFuncBlock);
+        }
+
         return null;
     }
 
