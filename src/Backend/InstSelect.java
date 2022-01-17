@@ -248,13 +248,14 @@ public class InstSelect implements IRVisitor {
             case sgt -> {
                 currentBlock.insts.add(new ASMCompareInst(ASMCompareInst.op.slt,target,left,right));
                 currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.xori,target,target,new Immediate(1)));
+                ASMReg equAns= currentFunc.getTmpReg();
+                currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.sub,equAns,left,right));
+                currentBlock.insts.add(new ASMCompareInst(ASMCompareInst.op.snez,equAns,equAns,null));
+                currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.and,target,target,equAns));
             }
             case sge -> {
                 currentBlock.insts.add(new ASMCompareInst(ASMCompareInst.op.slt,target,left,right));
                 currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.xori,target,target,new Immediate(1)));
-                ASMReg equAns= currentFunc.getTmpReg();
-                currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.sub,equAns,left,right));
-                currentBlock.insts.add(new ASMCompareInst(ASMCompareInst.op.seqz,equAns,equAns,null));
             }
             case slt -> currentBlock.insts.add(new ASMCompareInst(ASMCompareInst.op.slt,target,left,right));
             case sle -> {
