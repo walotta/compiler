@@ -16,6 +16,18 @@ def printRet(func):
             print("\033[37m{}\033[0m".format(val))
             quit()
 
+def removeEmptyLine():
+    lines=[]
+    with open('src.out','r') as f:
+        lines=f.readlines()
+    if len(lines)==0:
+        return
+    while lines[-1]=='\n':
+        lines.pop()
+    with open('src.out','w') as f:
+        for l in lines:
+            f.write(l)
+
 def javac():
     ret, val = subprocess.getstatusoutput('find ./src -name "*.java" -print0|xargs -0 javac -d runContain -cp ./lib/*.jar')
     return ret, val
@@ -132,7 +144,8 @@ elif sys.argv[1]=='-testllvm':
         llvm()
         link()
         runllvm(detail=False)
-        ret, val = subprocess.getstatusoutput('diff -w -B src.std src.out')
+        removeEmptyLine()
+        ret, val = subprocess.getstatusoutput('diff -w src.std src.out')
         if val!='':
             errorcase.append(testPath)
             print(fail.format(testName),'{}/{}'.format(testId-len(errorcase)+1,testId+1))
@@ -158,14 +171,19 @@ elif sys.argv[1]=='-test':
             f.write(input)
         with open('src.std','w') as f:
             f.write(std)
-        compile()
-        run()
-        ret, val = subprocess.getstatusoutput('diff -w -B src.std src.out')
-        if val!='':
+        ret, val=compile()
+        if ret!=0:
             errorcase.append(testPath)
             print(fail.format(testName),'{}/{}'.format(testId-len(errorcase)+1,testId+1))
         else:
-            print(success.format(testName),'{}/{}'.format(testId-len(errorcase)+1,testId+1))
+            run()
+            removeEmptyLine()
+            ret, val = subprocess.getstatusoutput('diff -w src.std src.out')
+            if val!='':
+                errorcase.append(testPath)
+                print(fail.format(testName),'{}/{}'.format(testId-len(errorcase)+1,testId+1))
+            else:
+                print(success.format(testName),'{}/{}'.format(testId-len(errorcase)+1,testId+1))
     print("\033[36m{}\033[0m".format('pass: {}/{}'.format(len(testcase.judge_list)-len(errorcase),len(testcase.judge_list))))
     with open('errorcase.txt','w') as f:
         f.write("\n".join(errorcase))
