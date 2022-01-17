@@ -31,6 +31,7 @@ public class ClassUnit {
         int i=0;
         for(var v:memberVars.values()){
             if(i>=id)break;
+            i+=1;
             ret+=v.size();
         }
         return ret;
