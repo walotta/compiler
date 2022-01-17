@@ -119,12 +119,15 @@ public class InstSelect implements IRVisitor {
         currentFunc=new ASMFunction(it.funcName,getFuncCnt());
         ASMBlock loadParasBlock=new ASMBlock(new ASMLabel(currentFunc,"FuncInit"));
 
-        loadParasBlock.insts.add(new ASMCalInst(ASMCalInst.op.addi,new PhysicalReg(2),new PhysicalReg(2),new FuncStackSize(it.funcName,0,false)));
+        loadParasBlock.insts.add(new ASMCalInst(ASMCalInst.op.addi,stackHeaderReg,stackHeaderReg,new FuncStackSize(it.funcName,0,false)));
         //define or load paras
         for(int i=0;i<it.paras.size();i++){
             if(i<8){
                 //x10-x17
                 currentFunc.defineReg(it.paras.get(i),new PhysicalReg(10+i));
+//                ASMReg argv=currentFunc.getTmpReg();
+//                currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.mv,argv,new PhysicalReg(i+10),null));
+//                currentFunc
             }else{
                 currentFunc.stackManager.alloca(4);
                 ASMReg vR=transIROperand(it.paras.get(i));
@@ -282,7 +285,9 @@ public class InstSelect implements IRVisitor {
         }else{
             //gep array
             Immediate size=new Immediate(((IRPointerType)it.header.type).baseType.size());
-            currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.muli,target,index,size));
+            ASMReg sizeReg=currentFunc.getTmpReg();
+            currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.li,sizeReg,size));
+            currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.mul,target,index,sizeReg));
             ASMReg tmp= currentFunc.getTmpReg();
             currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.add,tmp,header,target));
             currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,target,tmp,new Immediate(0)));
