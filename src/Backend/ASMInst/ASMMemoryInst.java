@@ -12,6 +12,12 @@ public class ASMMemoryInst extends ASMInstBase{
     op InstOpt;
     //info->rd addr->rs1 offset->rs2
 
+    public ASMMemoryInst(op InstOpt,ASMReg info,ASMReg addr,Immediate offset,String comment){
+        super(info,addr,offset);
+        this.InstOpt=InstOpt;
+        this.comment=comment;
+    }
+
     public ASMMemoryInst(op InstOpt,ASMReg info,ASMReg addr,Immediate offset){
         super(info,addr,offset);
         this.InstOpt=InstOpt;
@@ -19,6 +25,6 @@ public class ASMMemoryInst extends ASMInstBase{
 
     @Override
     public String toString(){
-        return InstOpt+" "+rd+", "+rs2+"("+rs1+")";
+        return InstOpt+" "+rd+", "+rs2+"("+rs1+")"+printComment();
     }
 }

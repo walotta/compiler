@@ -19,11 +19,17 @@ public class ASMCalInst extends ASMInstBase{
         this.InstOpt=InstOpt;
     }
 
+    public ASMCalInst(op InstOpt,ASMReg rd,ASMReg rs1,ASMOperandBase rs2,String comment){
+        super(rd,rs1,rs2);
+        this.InstOpt=InstOpt;
+        this.comment=comment;
+    }
+
     @Override
     public String toString(){
         if(rs2!=null)
-            return InstOpt+" "+rd+", "+rs1+", "+rs2;
+            return InstOpt+" "+rd+", "+rs1+", "+rs2+printComment();
         else
-            return InstOpt+" "+rd+", "+rs1;
+            return InstOpt+" "+rd+", "+rs1+printComment();
     }
 }

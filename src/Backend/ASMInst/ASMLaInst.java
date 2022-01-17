@@ -10,6 +10,6 @@ public class ASMLaInst extends ASMInstBase{
 
     @Override
     public String toString(){
-        return "la "+rd+", "+rs1;
+        return "la "+rd+", "+rs1+printComment();
     }
 }

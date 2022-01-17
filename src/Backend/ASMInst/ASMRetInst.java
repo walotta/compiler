@@ -8,6 +8,6 @@ public class ASMRetInst extends ASMInstBase{
 
     @Override
     public String toString(){
-        return "ret";
+        return "ret"+printComment();
     }
 }

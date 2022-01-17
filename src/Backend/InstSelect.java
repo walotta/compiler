@@ -170,7 +170,7 @@ public class InstSelect implements IRVisitor {
         int size=((IRPointerType)it.target.type).baseType.size()*it.number;
         int allocaAddr=currentFunc.stackManager.alloca(size);
         ASMReg reg=transIROperand(it.target);
-        currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.li,reg,new Immediate(allocaAddr)));
+        currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.addi,reg,stackHeaderReg,new Immediate(allocaAddr)));
         return null;
     }
 
@@ -278,16 +278,18 @@ public class InstSelect implements IRVisitor {
             int id=((IntConstant)it.index).value;
             String className=((IRClassType)((IRPointerType)it.header.type).baseType).name;
             int offset=oriModule.classes.get(className).queryOffset(id);
-            currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,target,header,new Immediate(offset)));
+//            currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,target,header,new Immediate(offset),it.toString()));
+            currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.addi,target,header,new Immediate(offset),it.toString()));
         }else{
             //gep array
             Immediate size=new Immediate(((IRPointerType)it.header.type).baseType.size());
             ASMReg sizeReg=currentFunc.getTmpReg();
             currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.li,sizeReg,size));
             currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.mul,target,index,sizeReg));
-            ASMReg tmp= currentFunc.getTmpReg();
-            currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.add,tmp,header,target));
-            currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,target,tmp,new Immediate(0)));
+//            ASMReg tmp= currentFunc.getTmpReg();
+//            currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.add,tmp,header,target));
+//            currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,target,tmp,new Immediate(0),it.toString()));
+            currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.add,target,header,target,it.toString()));
         }
         return null;
     }
@@ -303,7 +305,7 @@ public class InstSelect implements IRVisitor {
     public Object visit(loadInst it){
         ASMReg target=transIROperand(it.target);
         ASMReg addr=transIROperand(it.source);
-        currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,target,addr,new Immediate(0)));
+        currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,target,addr,new Immediate(0),it.toString()));
         return null;
     }
 
@@ -323,7 +325,7 @@ public class InstSelect implements IRVisitor {
     public Object visit(storeInst it){
         ASMReg addr=transIROperand(it.target);
         ASMReg val=transIROperand(it.source);
-        currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.sw,val,addr,new Immediate(0)));
+        currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.sw,val,addr,new Immediate(0),it.toString()));
         return null;
     }
 }

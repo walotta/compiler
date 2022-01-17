@@ -42,15 +42,15 @@ public class ASMFakeInst extends ASMInstBase{
     @Override
     public String toString(){
         if(InstOpt==op.li)
-            return InstOpt+" "+rd+", "+rs1;
+            return InstOpt+" "+rd+", "+rs1+printComment();
         else if(InstOpt==op.mv)
-            return InstOpt+" "+rd+", "+rs1;
+            return InstOpt+" "+rd+", "+rs1+printComment();
         else if(InstOpt==op.bnez)
-            return InstOpt+" "+rs1+", "+targetLabel;
+            return InstOpt+" "+rs1+", "+targetLabel+printComment();
         else if(InstOpt==op.j)
-            return InstOpt+" "+targetLabel;
+            return InstOpt+" "+targetLabel+printComment();
         else if(InstOpt==op.call)
-            return InstOpt+" "+FuncName;
+            return InstOpt+" "+FuncName+printComment();
         else return null;
     }
 }

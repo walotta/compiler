@@ -224,6 +224,7 @@ else:
                 f.write(input)
             with open('src.std','w') as f:
                 f.write(std)
+            printRet(llvm)
             printRet(compile)
             printRet(link)
             printRet(ravel)
