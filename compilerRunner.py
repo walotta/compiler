@@ -164,6 +164,7 @@ elif sys.argv[1]=='-test':
     timeOut="\033[31m[Time out] : in {} \033[0m"
     re="\033[31m[RE] : in {} \033[0m"
     errorcase=[]
+    errorCommit=[]
     for testId in track(range(len(testcase.judge_list))):
         testPath=testcase.judge_list[testId]
         testName=os.path.basename(testPath)
@@ -176,6 +177,7 @@ elif sys.argv[1]=='-test':
         ret, val=compile()
         if ret!=0:
             errorcase.append(testPath)
+            errorCommit.append('compile error')
             print(fail.format(testName),'{}/{}'.format(testId-len(errorcase)+1,testId+1))
         else:
             ret, val=run()
@@ -187,16 +189,22 @@ elif sys.argv[1]=='-test':
             if ret!=0:
                 errorcase.append(testPath)
                 if ret == 62:
+                    errorCommit.append('time out')
                     print(timeOut.format(testName),'{}/{}'.format(testId-len(errorcase)+1,testId+1))
                 elif ret==-1:
+                    errorCommit.append('run time error')
                     print(re.format(testName),'{}/{}'.format(testId-len(errorcase)+1,testId+1))
                 else:
+                    errorCommit.append('wrong answer')
                     print(fail.format(testName),'{}/{}'.format(testId-len(errorcase)+1,testId+1))
             else:
                 print(success.format(testName),'{}/{}'.format(testId-len(errorcase)+1,testId+1))
     print("\033[36m{}\033[0m".format('pass: {}/{}'.format(len(testcase.judge_list)-len(errorcase),len(testcase.judge_list))))
     with open('errorcase.txt','w') as f:
-        f.write("\n".join(errorcase))
+        errorInfo=[]
+        for i in range(len(errorcase)):
+            errorInfo.append(errorcase[i]+"\t|\t"+errorCommit[i])
+        f.write("\n".join(errorInfo))
         if len(errorcase)==0:
             f.write('all passed')
     os.system('code errorcase.txt')
@@ -216,18 +224,8 @@ else:
                 f.write(input)
             with open('src.std','w') as f:
                 f.write(std)
-            ret, val=compile()
-            if ret!=0:
-                print(fail.format(testName))
-            else:
-                ret, val=run()
-                if ret==0:
-                    removeEmptyLine()
-                    ret, val = subprocess.getstatusoutput('diff -w src.std src.out')
-                    if val!='':
-                        print(fail.format(testName))
-                    else:
-                        print(success.format(testName))
-                else:
-                    print(fail.format(testName))
-        
+            printRet(compile)
+            printRet(link)
+            printRet(ravel)
+            print("\033[36m{}\033[0m".format('output: '))
+            os.system('cat src.out')

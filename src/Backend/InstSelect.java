@@ -10,7 +10,6 @@ import MIR.Module;
 import MIR.Operand.*;
 import Util.error.compilerError;
 import Util.position;
-import com.sun.jdi.ClassType;
 
 import java.util.ArrayList;
 
@@ -86,12 +85,10 @@ public class InstSelect implements IRVisitor {
         it.classes.forEach((className,classU)->{
             if(classU.initFunc!=null){
                 ASMFunction genFunc=(ASMFunction) classU.initFunc.accept(this);
-                genFunc.funcName=className+"."+classU.initFunc.funcName;
                 asmModule.funcs.put(genFunc.funcName,genFunc);
             }
             classU.methods.forEach((methodName,method)->{
                 ASMFunction genFunc=(ASMFunction) method.accept(this);
-                genFunc.funcName=className+"."+methodName;
                 asmModule.funcs.put(genFunc.funcName,genFunc);
             });
         });
@@ -119,7 +116,7 @@ public class InstSelect implements IRVisitor {
         currentFunc=new ASMFunction(it.funcName,getFuncCnt());
         ASMBlock loadParasBlock=new ASMBlock(new ASMLabel(currentFunc,"FuncInit"));
 
-        loadParasBlock.insts.add(new ASMCalInst(ASMCalInst.op.addi,stackHeaderReg,stackHeaderReg,new FuncStackSize(it.funcName,0,false)));
+        loadParasBlock.insts.add(new ASMCalInst(ASMCalInst.op.addi,stackHeaderReg,stackHeaderReg,new FuncStackSize(currentFunc.funcName,0,false)));
         //define or load paras
         for(int i=0;i<it.paras.size();i++){
             if(i<8){
@@ -279,7 +276,7 @@ public class InstSelect implements IRVisitor {
         if(((IRPointerType)it.header.type).baseType instanceof IRClassType){
             //gep class
             int id=((IntConstant)it.index).value;
-            String className=((ClassType)((IRPointerType)it.header.type).baseType).name();
+            String className=((IRClassType)((IRPointerType)it.header.type).baseType).name;
             int offset=oriModule.classes.get(className).queryOffset(id);
             currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,target,header,new Immediate(offset)));
         }else{
