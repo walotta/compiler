@@ -121,10 +121,9 @@ public class InstSelect implements IRVisitor {
         for(int i=0;i<it.paras.size();i++){
             if(i<8){
                 //x10-x17
-                currentFunc.defineReg(it.paras.get(i),new PhysicalReg(10+i));
-//                ASMReg argv=currentFunc.getTmpReg();
-//                currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.mv,argv,new PhysicalReg(i+10),null));
-//                currentFunc
+//                currentFunc.defineReg(it.paras.get(i),new PhysicalReg(10+i));
+                ASMReg argv=transIROperand(it.paras.get(i));
+                currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.mv,argv,new PhysicalReg(i+10),null));
             }else{
                 currentFunc.stackManager.alloca(4);
                 ASMReg vR=transIROperand(it.paras.get(i));
