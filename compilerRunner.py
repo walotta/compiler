@@ -161,6 +161,7 @@ elif sys.argv[1]=='-test':
     printRet(javac)
     success="\033[32m[Success] : in {} \033[0m"
     fail="\033[31m[Failed] : in {} \033[0m"
+    timeOut="\033[31m[Time out] : in {} \033[0m"
     errorcase=[]
     for testId in track(range(len(testcase.judge_list))):
         testPath=testcase.judge_list[testId]
@@ -182,7 +183,10 @@ elif sys.argv[1]=='-test':
                 ret, val = subprocess.getstatusoutput('diff -w src.std src.out')
             if ret!=0:
                 errorcase.append(testPath)
-                print(fail.format(testName),'{}/{}'.format(testId-len(errorcase)+1,testId+1))
+                if ret == 62:
+                    print(timeOut.format(testName),'{}/{}'.format(testId-len(errorcase)+1,testId+1))
+                else:
+                    print(fail.format(testName),'{}/{}'.format(testId-len(errorcase)+1,testId+1))
             else:
                 print(success.format(testName),'{}/{}'.format(testId-len(errorcase)+1,testId+1))
     print("\033[36m{}\033[0m".format('pass: {}/{}'.format(len(testcase.judge_list)-len(errorcase),len(testcase.judge_list))))
