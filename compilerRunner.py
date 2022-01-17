@@ -188,6 +188,7 @@ else:
                 f.write(input)
             with open('src.std','w') as f:
                 f.write(std)
+            llvm()
             compile()
             run()
             ret, val = subprocess.getstatusoutput('diff -w -B src.std src.out')
