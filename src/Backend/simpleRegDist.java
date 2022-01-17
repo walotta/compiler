@@ -1,5 +1,7 @@
 package Backend;
 
+import Backend.ASMInst.ASMCalInst;
+import Backend.ASMInst.ASMFakeInst;
 import Backend.ASMInst.ASMMemoryInst;
 import Backend.ASMOperand.*;
 
@@ -15,6 +17,8 @@ public class simpleRegDist {
     PhysicalReg rs2Reg=new PhysicalReg(7);
     private final PhysicalReg stackHeaderReg=new PhysicalReg(2);
     LinkedHashMap<PhysicalReg,VirtualReg> regDict=new LinkedHashMap<>();
+    private final int immMax=2047;
+    private final PhysicalReg immOverFlowReg=new PhysicalReg(31);
 
     public simpleRegDist(ASMModule oriModule){
         this.oriModule=oriModule;
@@ -28,7 +32,12 @@ public class simpleRegDist {
             }else{
                 addr=currentFunction.stackManager.assignReg((VirtualReg) ori);
             }
-            currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,target,stackHeaderReg,new Immediate(addr)));
+            if(addr>immMax){
+                currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.li,immOverFlowReg,new Immediate(addr)));
+                currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.add,immOverFlowReg,immOverFlowReg,stackHeaderReg));
+                currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,target,immOverFlowReg,new Immediate(0)));
+            }else
+                currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,target,stackHeaderReg,new Immediate(addr)));
             regDict.put(target,(VirtualReg) ori);
             return target;
         }else {
@@ -42,7 +51,12 @@ public class simpleRegDist {
             VirtualReg source=regDict.get(target);
             if(source!=null){
                 int addr=currentFunction.stackManager.RegMap.get(source);
-                currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.sw,(PhysicalReg)target,stackHeaderReg,new Immediate(addr)));
+                if(addr>immMax){
+                    currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.li,immOverFlowReg,new Immediate(addr)));
+                    currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.add,immOverFlowReg,immOverFlowReg,stackHeaderReg));
+                    currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.sw,(PhysicalReg)target,immOverFlowReg,new Immediate(0)));
+                }else
+                    currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.sw,(PhysicalReg)target,stackHeaderReg,new Immediate(addr)));
             }
         }
     }
