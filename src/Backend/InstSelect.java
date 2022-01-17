@@ -44,7 +44,7 @@ public class InstSelect implements IRVisitor {
             return currentFunc.getReg((Register) irOperand);
         }else if(irOperand instanceof StringConstant){
             ASMReg ret=currentFunc.getTmpReg();
-            currentBlock.insts.add(new ASMLaInst(ret,new ASMGloString(((StringConstant) irOperand).name,((StringConstant) irOperand).value)));
+            currentBlock.insts.add(new ASMLaInst(ret,new ASMGloString(((StringConstant) irOperand).name,((StringConstant) irOperand).oriValue)));
             return ret;
         }else{
             throw new compilerError("cannot deal with Label",new position(0,0));
@@ -74,7 +74,7 @@ public class InstSelect implements IRVisitor {
             asmModule.globalVars.put(varName,new ASMGloVar(varName));
         });
         it.stringConstTable.forEach((stringName,st)->{
-            asmModule.globalVars.put(stringName,new ASMGloString(st.name,st.value));
+            asmModule.globalVars.put(stringName,new ASMGloString(st.name,st.oriValue));
         });
         it.functions.forEach((funcName,irFunc)->{
             if(!irFunc.isBuiltin){

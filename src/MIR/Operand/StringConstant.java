@@ -5,6 +5,7 @@ import MIR.IRtype.IRStringType;
 
 public class StringConstant extends IROperand{
     public final String value;
+    public final String oriValue;
     public final String name;
     public final int len;
 
@@ -12,6 +13,7 @@ public class StringConstant extends IROperand{
         super(new IRStringType());
         this.name=".str."+id;
         String vv=value.substring(1,value.length()-1);
+        this.oriValue=vv;
         vv=vv.replace("\\\\", "\\")
              .replace("\\n", "\n")
              .replace("\\t", "\t")
