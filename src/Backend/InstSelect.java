@@ -331,7 +331,10 @@ public class InstSelect implements IRVisitor {
     public Object visit(loadInst it){
         ASMReg target=transIROperand(it.target);
         ASMReg addr=transIROperand(it.source);
-        currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,target,addr,new Immediate(0),it.toString()));
+        if(it.target.type.size()==1)
+            currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lb,target,addr,new Immediate(0),it.toString()));
+        else
+            currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,target,addr,new Immediate(0),it.toString()));
         return null;
     }
 
@@ -358,7 +361,10 @@ public class InstSelect implements IRVisitor {
     public Object visit(storeInst it){
         ASMReg addr=transIROperand(it.target);
         ASMReg val=transIROperand(it.source);
-        currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.sw,val,addr,new Immediate(0),it.toString()));
+        if(it.source.type.size()==1)
+            currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.sb,val,addr,new Immediate(0),it.toString()));
+        else
+            currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.sw,val,addr,new Immediate(0),it.toString()));
         return null;
     }
 }
