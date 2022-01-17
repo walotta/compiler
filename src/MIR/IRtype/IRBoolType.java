@@ -7,7 +7,7 @@ public class IRBoolType extends IRBaseType{
 
     @Override
     public int size() {
-        return 1;
+        return 4;
     }
 
     @Override

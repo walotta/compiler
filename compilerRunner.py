@@ -22,7 +22,7 @@ def removeEmptyLine():
         lines=f.readlines()
     if len(lines)==0:
         return
-    while lines[-1]=='\n':
+    while len(lines)==0 or lines[-1]=='\n':
         lines.pop()
     with open('src.out','w') as f:
         for l in lines:
