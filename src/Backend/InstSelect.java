@@ -20,6 +20,8 @@ public class InstSelect implements IRVisitor {
     private ASMBlock currentBlock;
     private final PhysicalReg stackHeaderReg=new PhysicalReg(2);
     private Module oriModule;
+    private final int immMax=2047;
+    private final PhysicalReg immOverFlowReg=new PhysicalReg(31);
 
     private ASMReg transIROperand(IROperand irOperand){
         if(irOperand instanceof BoolConstant){
@@ -115,8 +117,8 @@ public class InstSelect implements IRVisitor {
     public Object visit(Function it){
         currentFunc=new ASMFunction(it.funcName,getFuncCnt());
         ASMBlock loadParasBlock=new ASMBlock(new ASMLabel(currentFunc,"FuncInit"));
-
-        loadParasBlock.insts.add(new ASMCalInst(ASMCalInst.op.addi,stackHeaderReg,stackHeaderReg,new FuncStackSize(currentFunc.funcName,0,false)));
+        loadParasBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.li,immOverFlowReg,new FuncStackSize(currentFunc.funcName,0,false)));
+        loadParasBlock.insts.add(new ASMCalInst(ASMCalInst.op.add,stackHeaderReg,stackHeaderReg,immOverFlowReg));
         //define or load paras
         for(int i=0;i<it.paras.size();i++){
             if(i<8){
@@ -127,12 +129,24 @@ public class InstSelect implements IRVisitor {
             }else{
                 currentFunc.stackManager.alloca(4);
                 ASMReg vR=transIROperand(it.paras.get(i));
-                loadParasBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,vR,stackHeaderReg,new Immediate(4*i)));
+                if(4*i>immMax){
+                    loadParasBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.li,immOverFlowReg,new Immediate(4*i)));
+                    loadParasBlock.insts.add(new ASMCalInst(ASMCalInst.op.add,immOverFlowReg,immOverFlowReg,stackHeaderReg));
+                    loadParasBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,vR,immOverFlowReg,new Immediate(0)));
+                }else{
+                    loadParasBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,vR,stackHeaderReg,new Immediate(4*i)));
+                }
             }
         }
         int callerAddr=currentFunc.stackManager.alloca(4);
         currentFunc.callerAddr=callerAddr;
-        loadParasBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.sw,new PhysicalReg(1),stackHeaderReg,new Immediate(callerAddr)));
+        if(callerAddr>immMax){
+            loadParasBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.li,immOverFlowReg,new Immediate(callerAddr)));
+            loadParasBlock.insts.add(new ASMCalInst(ASMCalInst.op.add,immOverFlowReg,immOverFlowReg,stackHeaderReg));
+            loadParasBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.sw,new PhysicalReg(1),immOverFlowReg,new Immediate(0)));
+        }else{
+            loadParasBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.sw,new PhysicalReg(1),stackHeaderReg,new Immediate(callerAddr)));
+        }
         currentFunc.blocks.add(loadParasBlock);
         //translate blocks
         it.Blocks.forEach(block->{
@@ -169,7 +183,12 @@ public class InstSelect implements IRVisitor {
         int size=((IRPointerType)it.target.type).baseType.size()*it.number;
         int allocaAddr=currentFunc.stackManager.alloca(size);
         ASMReg reg=transIROperand(it.target);
-        currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.addi,reg,stackHeaderReg,new Immediate(allocaAddr)));
+        if(allocaAddr>immMax){
+            currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.li,immOverFlowReg,new Immediate(allocaAddr)));
+            currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.add,reg,stackHeaderReg,immOverFlowReg));
+        }else{
+            currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.addi,reg,stackHeaderReg,new Immediate(allocaAddr)));
+        }
         return null;
     }
 
@@ -218,7 +237,9 @@ public class InstSelect implements IRVisitor {
             if(i<8){
                 currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.mv,new PhysicalReg(10+i),transIROperand(it.argvs.get(i)),null));
             }else{
-                currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.sw,transIROperand(it.argvs.get(i)),stackHeaderReg,new FuncStackSize(it.toCall.funcName,sumSize,false)));
+                currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.li,immOverFlowReg,new FuncStackSize(it.toCall.funcName,sumSize,false)));
+                currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.add,immOverFlowReg,immOverFlowReg,stackHeaderReg));
+                currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.sw,transIROperand(it.argvs.get(i)),immOverFlowReg,new Immediate(0)));
                 sumSize+=it.argvs.get(i).type.size();
             }
         }
@@ -279,7 +300,12 @@ public class InstSelect implements IRVisitor {
             String className=((IRClassType)((IRPointerType)it.header.type).baseType).name;
             int offset=oriModule.classes.get(className).queryOffset(id);
 //            currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,target,header,new Immediate(offset),it.toString()));
-            currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.addi,target,header,new Immediate(offset),it.toString()));
+            if(offset>immMax){
+                currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.li,immOverFlowReg,new Immediate(offset)));
+                currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.add,target,header,immOverFlowReg,it.toString()));
+            }else{
+                currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.addi,target,header,new Immediate(offset),it.toString()));
+            }
         }else{
             //gep array
             Immediate size=new Immediate(((IRPointerType)it.header.type).baseType.size());
@@ -315,8 +341,15 @@ public class InstSelect implements IRVisitor {
             ASMReg val=transIROperand(it.toRet);
             currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.mv,new PhysicalReg(10),val,null));
         }
-        currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,new PhysicalReg(1),stackHeaderReg,new Immediate(currentFunc.callerAddr)));
-        currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.addi,new PhysicalReg(2),new PhysicalReg(2),new FuncStackSize(currentFunc.funcName,0,true)));
+        if(currentFunc.callerAddr>immMax){
+            currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.li,immOverFlowReg,new Immediate(currentFunc.callerAddr)));
+            currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.add,immOverFlowReg,immOverFlowReg,stackHeaderReg));
+            currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,new PhysicalReg(1),immOverFlowReg,new Immediate(0)));
+        }else{
+            currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,new PhysicalReg(1),stackHeaderReg,new Immediate(currentFunc.callerAddr)));
+        }
+        currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.li,immOverFlowReg,new FuncStackSize(currentFunc.funcName,0,true)));
+        currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.add,new PhysicalReg(2),new PhysicalReg(2),immOverFlowReg));
         currentBlock.insts.add(new ASMRetInst());
         return null;
     }
