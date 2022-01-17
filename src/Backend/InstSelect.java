@@ -282,7 +282,7 @@ public class InstSelect implements IRVisitor {
         }else{
             //gep array
             Immediate size=new Immediate(((IRPointerType)it.header.type).baseType.size());
-            currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.mul,target,index,size));
+            currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.muli,target,index,size));
             ASMReg tmp= currentFunc.getTmpReg();
             currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.add,tmp,header,target));
             currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,target,tmp,new Immediate(0)));

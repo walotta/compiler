@@ -5,6 +5,7 @@ import Backend.ASMOperand.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class simpleRegDist {
     ASMModule oriModule;
@@ -13,7 +14,7 @@ public class simpleRegDist {
     PhysicalReg rs1Reg=new PhysicalReg(6);
     PhysicalReg rs2Reg=new PhysicalReg(7);
     private final PhysicalReg stackHeaderReg=new PhysicalReg(2);
-    HashMap<PhysicalReg,VirtualReg> regDict=new HashMap<>();
+    LinkedHashMap<PhysicalReg,VirtualReg> regDict=new LinkedHashMap<>();
 
     public simpleRegDist(ASMModule oriModule){
         this.oriModule=oriModule;

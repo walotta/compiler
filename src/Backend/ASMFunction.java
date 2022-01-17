@@ -8,13 +8,14 @@ import MIR.Operand.Register;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.StringJoiner;
 
 public class ASMFunction {
     String funcName;
     int funcId;
     ArrayList<ASMBlock> blocks;
-    HashMap<Register, ASMReg> renameTable;
+    LinkedHashMap<Register, ASMReg> renameTable;
     ArrayList<VirtualReg> tmpReg;
     StackManager stackManager;
     int callerAddr;
@@ -44,7 +45,7 @@ public class ASMFunction {
         this.funcId=funcId;
         this.blocks=new ArrayList<>();
         this.stackManager=new StackManager();
-        this.renameTable=new HashMap<>();
+        this.renameTable=new LinkedHashMap<>();
         this.tmpReg=new ArrayList<>();
     }
 

@@ -9,7 +9,6 @@ public class ASMFakeInst extends ASMInstBase{
         li, mv, bnez, j, call
     }
     op InstOpt;
-    Immediate imm;
     ASMLabel targetLabel;
     String FuncName;
     public ASMFakeInst(op InstOpt,ASMReg rd,Immediate imm){
