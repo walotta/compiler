@@ -6,7 +6,7 @@ import Backend.ASMOperand.Immediate;
 
 public class ASMCalInst extends ASMInstBase{
     public enum op{
-        add, addi, sub,  lui,  auipc, mul, sdiv, srem,
+        add, addi, sub,  lui,  auipc, mul, div, rem,
         xor, xori, or,   ori,  and,   andi,
         sll, slli, srl,  srli, sra,   srai,
         slt, slti, sltu, sltiu

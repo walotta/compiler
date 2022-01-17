@@ -184,8 +184,8 @@ public class InstSelect implements IRVisitor {
         ASMReg target= transIROperand(it.target);
         switch (it.type){
             case mul -> currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.mul,target,left,right));
-            case sdiv -> currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.sdiv,target,left,right));
-            case srem -> currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.srem,target,left,right));
+            case sdiv -> currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.div,target,left,right));
+            case srem -> currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.rem,target,left,right));
             case add -> currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.add,target,left,right));
             case sub -> currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.sub,target,left,right));
             case shl -> currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.sll,target,left,right));
