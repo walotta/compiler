@@ -54,7 +54,11 @@ def runllvm(detail=True):
 def run():
     os.system('rm src.out')
     os.system('touch src.out')
-    ret, val = subprocess.getstatusoutput('ravel --input-file=src.in --output-file=src.out src.s bif/bif.s')
+    try:
+        task=subprocess.run('ravel --input-file=src.in --output-file=src.out src.s bif/bif.s',shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,encoding="utf-8",timeout=5)
+    except:
+        return 62,'time out'
+    ret, val=task.returncode, task.stdout
     val=val.split('\n')
     newVal=''
     for v in val:
@@ -111,6 +115,35 @@ elif sys.argv[1]=='-v':
     print("compiler runner version 1.0")
     print("use \033[36m{}\033[0m to get some help".format('-h'))
     print("@Copyright by walotta")
+elif sys.argv[1]=='-testllvm':
+    printRet(javac)
+    success="\033[32m[Success] : in {} \033[0m"
+    fail="\033[31m[Failed] : in {} \033[0m"
+    errorcase=[]
+    for testId in track(range(len(testcase.judge_list))):
+        testPath=testcase.judge_list[testId]
+        testName=os.path.basename(testPath)
+        input,std=testcase.getJudge(testPath)
+        os.system('cp {} src.mx'.format(testPath))
+        with open('src.in','w') as f:
+            f.write(input)
+        with open('src.std','w') as f:
+            f.write(std)
+        llvm()
+        link()
+        runllvm(detail=False)
+        ret, val = subprocess.getstatusoutput('diff -w -B src.std src.out')
+        if val!='':
+            errorcase.append(testPath)
+            print(fail.format(testName),'{}/{}'.format(testId-len(errorcase)+1,testId+1))
+        else:
+            print(success.format(testName),'{}/{}'.format(testId-len(errorcase)+1,testId+1))
+    print("\033[36m{}\033[0m".format('pass: {}/{}'.format(len(testcase.judge_list)-len(errorcase),len(testcase.judge_list))))
+    with open('errorcase.txt','w') as f:
+        f.write("\n".join(errorcase))
+        if len(errorcase)==0:
+            f.write('all passed')
+    os.system('code errorcase.txt')
 elif sys.argv[1]=='-test':
     printRet(javac)
     success="\033[32m[Success] : in {} \033[0m"
@@ -126,8 +159,7 @@ elif sys.argv[1]=='-test':
         with open('src.std','w') as f:
             f.write(std)
         compile()
-        link()
-        run(detail=False)
+        run()
         ret, val = subprocess.getstatusoutput('diff -w -B src.std src.out')
         if val!='':
             errorcase.append(testPath)
@@ -157,7 +189,6 @@ else:
             with open('src.std','w') as f:
                 f.write(std)
             compile()
-            link()
             run()
             ret, val = subprocess.getstatusoutput('diff -w -B src.std src.out')
             if val!='':
