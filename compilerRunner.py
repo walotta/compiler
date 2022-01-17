@@ -176,10 +176,11 @@ elif sys.argv[1]=='-test':
             errorcase.append(testPath)
             print(fail.format(testName),'{}/{}'.format(testId-len(errorcase)+1,testId+1))
         else:
-            run()
-            removeEmptyLine()
-            ret, val = subprocess.getstatusoutput('diff -w src.std src.out')
-            if val!='':
+            ret, val=run()
+            if ret==0:
+                removeEmptyLine()
+                ret, val = subprocess.getstatusoutput('diff -w src.std src.out')
+            if ret!=0:
                 errorcase.append(testPath)
                 print(fail.format(testName),'{}/{}'.format(testId-len(errorcase)+1,testId+1))
             else:
@@ -206,12 +207,18 @@ else:
                 f.write(input)
             with open('src.std','w') as f:
                 f.write(std)
-            llvm()
-            compile()
-            run()
-            ret, val = subprocess.getstatusoutput('diff -w -B src.std src.out')
-            if val!='':
+            ret, val=compile()
+            if ret!=0:
                 print(fail.format(testName))
             else:
-                print(success.format(testName))
+                ret, val=run()
+                if ret==0:
+                    removeEmptyLine()
+                    ret, val = subprocess.getstatusoutput('diff -w src.std src.out')
+                    if val!='':
+                        print(fail.format(testName))
+                    else:
+                        print(success.format(testName))
+                else:
+                    print(fail.format(testName))
         
