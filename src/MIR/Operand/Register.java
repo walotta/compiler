@@ -19,17 +19,4 @@ public class Register extends IROperand{
     public String toString(){
         return "%"+renameId;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Register register = (Register) o;
-        return renameId == register.renameId;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(renameId);
-    }
 }

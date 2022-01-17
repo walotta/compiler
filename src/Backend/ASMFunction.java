@@ -15,21 +15,21 @@ public class ASMFunction {
     String funcName;
     int funcId;
     ArrayList<ASMBlock> blocks;
-    LinkedHashMap<Register, ASMReg> renameTable;
+    LinkedHashMap<Integer, ASMReg> renameTable;
     ArrayList<VirtualReg> tmpReg;
     StackManager stackManager;
     int callerAddr;
 
     public void defineReg(Register irReg,ASMReg newReg){
-        renameTable.put(irReg,newReg);
+        renameTable.put(irReg.renameId,newReg);
     }
 
     public ASMReg getReg(Register irReg){
-        if(renameTable.containsKey(irReg))
-            return renameTable.get(irReg);
+        if(renameTable.containsKey(irReg.renameId))
+            return renameTable.get(irReg.renameId);
         else{
             VirtualReg newReg=new VirtualReg(irReg.renameId);
-            renameTable.put(irReg,newReg);
+            renameTable.put(irReg.renameId,newReg);
             return newReg;
         }
     }
