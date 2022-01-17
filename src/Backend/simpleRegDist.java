@@ -94,8 +94,6 @@ public class simpleRegDist {
             inst.rs2=loadToPhyReg(inst.rs2,retBlock,rs2Reg);
             retBlock.insts.add(inst);
             saveToMemory(inst.rd,retBlock);
-            saveToMemory(inst.rs1,retBlock);
-            saveToMemory(inst.rs2,retBlock);
         });
         return retBlock;
     }
