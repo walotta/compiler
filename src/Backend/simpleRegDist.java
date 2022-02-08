@@ -111,12 +111,6 @@ public class simpleRegDist {
                     if(!currentFunction.stackManager.RegMap.containsKey(inst.rd)){
                         currentFunction.stackManager.assignReg((VirtualReg) inst.rd);
                     }
-//                    if(addr>immMax){
-//                        retBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.li,immOverFlowReg,new Immediate(addr)));
-//                        retBlock.insts.add(new ASMCalInst(ASMCalInst.op.add,immOverFlowReg,immOverFlowReg,stackHeaderReg));
-//                        retBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,rdReg,immOverFlowReg,new Immediate(0)));
-//                    }else
-//                        retBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,rdReg,stackHeaderReg,new Immediate(addr)));
                     regDict.put(rdReg,(VirtualReg) inst.rd);
                     inst.rd=rdReg;
                 }else {
