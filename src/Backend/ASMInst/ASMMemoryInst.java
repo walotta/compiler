@@ -23,6 +23,10 @@ public class ASMMemoryInst extends ASMInstBase{
         this.InstOpt=InstOpt;
     }
 
+    public boolean isSave(){
+        return InstOpt.toString().getBytes()[0]=='s';
+    }
+
     @Override
     public String toString(){
         return InstOpt+" "+rd+", "+rs2+"("+rs1+")"+printComment();

@@ -104,7 +104,25 @@ public class simpleRegDist {
         //deal with VirtualReg
         ASMBlock retBlock=new ASMBlock(oriBlock.label);
         oriBlock.insts.forEach(inst->{
-            inst.rd=loadToPhyReg(inst.rd,retBlock,rdReg);
+            if(inst instanceof ASMMemoryInst && ((ASMMemoryInst) inst).isSave())
+                inst.rd=loadToPhyReg(inst.rd,retBlock,rdReg);
+            else{
+                if(inst.rd instanceof VirtualReg){
+                    if(!currentFunction.stackManager.RegMap.containsKey(inst.rd)){
+                        currentFunction.stackManager.assignReg((VirtualReg) inst.rd);
+                    }
+//                    if(addr>immMax){
+//                        retBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.li,immOverFlowReg,new Immediate(addr)));
+//                        retBlock.insts.add(new ASMCalInst(ASMCalInst.op.add,immOverFlowReg,immOverFlowReg,stackHeaderReg));
+//                        retBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,rdReg,immOverFlowReg,new Immediate(0)));
+//                    }else
+//                        retBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,rdReg,stackHeaderReg,new Immediate(addr)));
+                    regDict.put(rdReg,(VirtualReg) inst.rd);
+                    inst.rd=rdReg;
+                }else {
+                    regDict.put(rdReg,null);
+                }
+            }
             inst.rs1=loadToPhyReg(inst.rs1,retBlock,rs1Reg);
             inst.rs2=loadToPhyReg(inst.rs2,retBlock,rs2Reg);
             retBlock.insts.add(inst);
