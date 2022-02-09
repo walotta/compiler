@@ -6,7 +6,7 @@ import Backend.ASMOperand.Immediate;
 
 public class ASMFakeInst extends ASMInstBase{
     public enum op{
-        li, mv, bnez, j, call
+        li, bnez, j, call
     }
     op InstOpt;
     ASMLabel targetLabel;
@@ -42,8 +42,6 @@ public class ASMFakeInst extends ASMInstBase{
     @Override
     public String toString(){
         if(InstOpt==op.li)
-            return InstOpt+" "+rd+", "+rs1+printComment();
-        else if(InstOpt==op.mv)
             return InstOpt+" "+rd+", "+rs1+printComment();
         else if(InstOpt==op.bnez)
             return InstOpt+" "+rs1+", "+targetLabel+printComment();

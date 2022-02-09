@@ -125,7 +125,7 @@ public class InstSelect implements IRVisitor {
                 //x10-x17
 //                currentFunc.defineReg(it.paras.get(i),new PhysicalReg(10+i));
                 ASMReg argv=transIROperand(it.paras.get(i));
-                loadParasBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.mv,argv,new PhysicalReg(i+10),null));
+                loadParasBlock.insts.add(new ASMMvInst(argv,new PhysicalReg(i+10)));
             }else{
                 currentFunc.stackManager.alloca(4);
                 ASMReg vR=transIROperand(it.paras.get(i));
@@ -216,7 +216,7 @@ public class InstSelect implements IRVisitor {
     public Object visit(bitcastInst it){
         ASMReg target=transIROperand(it.target);
         ASMReg source=transIROperand(it.source);
-        currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.mv,target,source,null));
+        currentBlock.insts.add(new ASMMvInst(target,source));
         return null;
     }
 
@@ -235,7 +235,7 @@ public class InstSelect implements IRVisitor {
         int sumSize=0;
         for(int i=0;i<it.argvs.size();i++){
             if(i<8){
-                currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.mv,new PhysicalReg(10+i),transIROperand(it.argvs.get(i)),null));
+                currentBlock.insts.add(new ASMMvInst(new PhysicalReg(10+i),transIROperand(it.argvs.get(i))));
             }else{
                 currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.li,immOverFlowReg,new FuncStackSize(it.toCall.funcName,sumSize,false)));
                 currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.add,immOverFlowReg,immOverFlowReg,stackHeaderReg));
@@ -246,7 +246,7 @@ public class InstSelect implements IRVisitor {
         currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.call,it.toCall.funcName));
         if(it.retReg!=null) {
             ASMReg retReg = transIROperand(it.retReg);
-            currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.mv, retReg, new PhysicalReg(10), null));
+            currentBlock.insts.add(new ASMMvInst( retReg, new PhysicalReg(10)));
         }
         return null;
     }
@@ -342,7 +342,7 @@ public class InstSelect implements IRVisitor {
     public Object visit(retInst it){
         if(it.toRet!=null){
             ASMReg val=transIROperand(it.toRet);
-            currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.mv,new PhysicalReg(10),val,null));
+            currentBlock.insts.add(new ASMMvInst(new PhysicalReg(10),val));
         }
         if(currentFunc.callerAddr>immMax){
             currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.li,immOverFlowReg,new Immediate(currentFunc.callerAddr)));
