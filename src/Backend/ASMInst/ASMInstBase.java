@@ -3,7 +3,9 @@ package Backend.ASMInst;
 import Backend.ASMOperand.ASMOperandBase;
 import Backend.ASMOperand.ASMReg;
 
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 
 abstract public class ASMInstBase {
     public ASMOperandBase rd;
@@ -11,8 +13,10 @@ abstract public class ASMInstBase {
     public ASMOperandBase rs2;
     public LinkedList<ASMInstBase> pred;
     public LinkedList<ASMInstBase> succ;
-    public LinkedList<ASMReg> use;
-    public LinkedList<ASMReg> def;
+    public HashSet<ASMReg> use;
+    public HashSet<ASMReg> def;
+    public HashSet<ASMReg> in;
+    public HashSet<ASMReg> out;
 
     public ASMInstBase(ASMOperandBase rd,ASMOperandBase rs1,ASMOperandBase rs2){
         this.rd=rd;
@@ -20,8 +24,10 @@ abstract public class ASMInstBase {
         this.rs2=rs2;
         this.pred=new LinkedList<>();
         this.succ=new LinkedList<>();
-        this.use=new LinkedList<>();
-        this.def=new LinkedList<>();
+        this.use=new HashSet<>();
+        this.def=new HashSet<>();
+        this.in=new HashSet<>();
+        this.out=new HashSet<>();
     }
 
     public void saveToUse(ASMOperandBase reg){

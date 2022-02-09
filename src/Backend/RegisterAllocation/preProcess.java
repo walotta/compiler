@@ -1,5 +1,6 @@
 package Backend.RegisterAllocation;
 
+import Backend.ASMFunction;
 import Backend.ASMInst.*;
 import Backend.ASMModule;
 
@@ -40,16 +41,20 @@ public class preProcess {
                             func.blocks.get(jumpId).insts.get(0).pred.push(inst);
                         }
                         case call -> {
-                            inst.succ.push(module.funcs.get(((ASMJumpInst) inst).FuncName).blocks.get(0).insts.get(0));
-                            module.funcs.get(((ASMJumpInst) inst).FuncName).blocks.get(0).insts.get(0).pred.push(inst);
-                            if(i+1!=block.insts.size()){
-                                module.funcs.get(((ASMJumpInst) inst).FuncName).retToInst.add(block.insts.get(i+1));
+                            if(module.funcs.containsKey(((ASMJumpInst) inst).FuncName)) {
+                                inst.succ.push(module.funcs.get(((ASMJumpInst) inst).FuncName).blocks.get(0).insts.get(0));
+                                module.funcs.get(((ASMJumpInst) inst).FuncName).blocks.get(0).insts.get(0).pred.push(inst);
+                                if (i + 1 != block.insts.size()) {
+                                    module.funcs.get(((ASMJumpInst) inst).FuncName).retToInst.add(block.insts.get(i + 1));
+                                }
                             }
                         }
                     }
                 }else if(!(inst instanceof ASMRetInst)){
-                    inst.succ.push(block.insts.get(i+1));
-                    block.insts.get(i+1).pred.push(inst);
+                    if(i+1!=block.insts.size()) {
+                        inst.succ.push(block.insts.get(i + 1));
+                        block.insts.get(i + 1).pred.push(inst);
+                    }
                 }
             }
         }));
@@ -74,7 +79,7 @@ public class preProcess {
                     else
                         inst.saveToDef(inst.rd);
                     inst.saveToUse(inst.rs1);
-                    inst.saveToDef(inst.rs2);
+                    inst.saveToUse(inst.rs2);
         })));
     }
 }

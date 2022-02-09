@@ -2,6 +2,7 @@ import AST.*;
 import Backend.ASMModule;
 import Backend.ASMPrinter;
 import Backend.InstSelect;
+import Backend.RegisterAllocation.livenessAnalysis;
 import Backend.RegisterAllocation.preProcess;
 import Backend.RegisterAllocation.simpleRegDist;
 import MIR.IRBuilder;
@@ -96,6 +97,7 @@ public class Main {
                 asmModule=new simpleRegDist(asmModule).run();
             else{
                 asmModule=new preProcess(asmModule).run();
+                asmModule=new livenessAnalysis(asmModule).run();
 
             }
             new ASMPrinter(output).print(asmModule);
