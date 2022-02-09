@@ -2,6 +2,8 @@ import AST.*;
 import Backend.ASMModule;
 import Backend.ASMPrinter;
 import Backend.InstSelect;
+import Backend.RegisterAllocation.interferenceGraph.graph.graphBase;
+import Backend.RegisterAllocation.interferenceGraph.interferenceGraphBuilder;
 import Backend.RegisterAllocation.livenessAnalysis;
 import Backend.RegisterAllocation.preProcess;
 import Backend.RegisterAllocation.simpleRegDist;
@@ -98,6 +100,7 @@ public class Main {
             else{
                 asmModule=new preProcess(asmModule).run();
                 asmModule=new livenessAnalysis(asmModule).run();
+                graphBase interGraph=new interferenceGraphBuilder().run(asmModule);
 
             }
             new ASMPrinter(output).print(asmModule);

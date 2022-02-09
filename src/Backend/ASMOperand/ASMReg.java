@@ -1,4 +1,4 @@
 package Backend.ASMOperand;
 
-public class ASMReg extends ASMOperandBase{
+abstract public class ASMReg extends ASMOperandBase{
 }

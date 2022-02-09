@@ -1,10 +1,28 @@
 package Backend.ASMOperand;
 
+import Backend.ASMLabel;
+
 public class PhysicalReg extends ASMReg{
     int phyId;
 
     public PhysicalReg(int phyId){
         this.phyId=phyId;
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        return phyId==((PhysicalReg) obj).phyId;
+    }
+
+    @Override
+    public int hashCode(){
+        return phyId;
     }
 
     @Override
