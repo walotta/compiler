@@ -4,36 +4,30 @@ import Backend.ASMLabel;
 import Backend.ASMOperand.ASMReg;
 import Backend.ASMOperand.Immediate;
 
-public class ASMFakeInst extends ASMInstBase{
+public class ASMJumpInst extends ASMInstBase{
     public enum op{
-        li, bnez, j, call
+        bnez, j, call
     }
-    op InstOpt;
-    ASMLabel targetLabel;
-    String FuncName;
-    public ASMFakeInst(op InstOpt,ASMReg rd,Immediate imm){
-        super(rd,imm,null);
-        this.InstOpt=InstOpt;
-    }
+    public op InstOpt;
+    public ASMLabel targetLabel;
+    public String FuncName;
 
-    public ASMFakeInst(op InstOpt,ASMReg rd,ASMReg rs1,ASMReg rs2){
-        super(rd,rs1,rs2);
-        this.InstOpt=InstOpt;
-    }
-
-    public ASMFakeInst(op InstOpt,ASMReg rs1,ASMLabel targetLabel){
+    //bnez
+    public ASMJumpInst(op InstOpt, ASMReg rs1, ASMLabel targetLabel){
         super(null,rs1,null);
         this.InstOpt=InstOpt;
         this.targetLabel=targetLabel;
     }
 
-    public ASMFakeInst(op instOpt,ASMLabel targetLabel){
+    //j
+    public ASMJumpInst(op instOpt, ASMLabel targetLabel){
         super(null,null,null);
         this.InstOpt=instOpt;
         this.targetLabel=targetLabel;
     }
 
-    public ASMFakeInst(op instOpt,String funcName){
+    //call
+    public ASMJumpInst(op instOpt, String funcName){
         super(null,null,null);
         this.InstOpt=instOpt;
         this.FuncName=funcName;
@@ -41,9 +35,7 @@ public class ASMFakeInst extends ASMInstBase{
 
     @Override
     public String toString(){
-        if(InstOpt==op.li)
-            return InstOpt+" "+rd+", "+rs1+printComment();
-        else if(InstOpt==op.bnez)
+        if(InstOpt==op.bnez)
             return InstOpt+" "+rs1+", "+targetLabel+printComment();
         else if(InstOpt==op.j)
             return InstOpt+" "+targetLabel+printComment();

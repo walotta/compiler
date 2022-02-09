@@ -2,7 +2,8 @@ import AST.*;
 import Backend.ASMModule;
 import Backend.ASMPrinter;
 import Backend.InstSelect;
-import Backend.simpleRegDist;
+import Backend.RegisterAllocation.preProcess;
+import Backend.RegisterAllocation.simpleRegDist;
 import MIR.IRBuilder;
 import MIR.IRForwarder;
 import MIR.IRPrinter;
@@ -21,7 +22,6 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import java.io.FileInputStream;
 import java.io.PrintStream;
 
 public class Main {
@@ -33,6 +33,7 @@ public class Main {
         String IRFileName="src.ll";
         String ASMFileName="src.s";
         boolean toFile=false;
+        boolean noOpt=false;
 
         var input=System.in;
         var output=System.out;
@@ -47,6 +48,8 @@ public class Main {
                         IRFileName=item.substring(11);
                 }else if(item.contains("-file")){
                     toFile=true;
+                }else if(item.contains("-O0")){
+                    noOpt=true;
                 }
             }
         }
@@ -89,7 +92,12 @@ public class Main {
                 return;
             }
             ASMModule asmModule=new InstSelect().run(module);
-            asmModule=new simpleRegDist(asmModule).run();
+            if(noOpt)
+                asmModule=new simpleRegDist(asmModule).run();
+            else{
+                asmModule=new preProcess(asmModule).run();
+
+            }
             new ASMPrinter(output).print(asmModule);
 
             //run build program

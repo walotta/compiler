@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.StringJoiner;
 
 public class ASMBlock {
-    ASMLabel label;
-    ArrayList<ASMInstBase> insts;
+    public ASMLabel label;
+    public ArrayList<ASMInstBase> insts;
 
     public ASMBlock(ASMLabel label){
         this.label=label;

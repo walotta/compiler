@@ -14,12 +14,6 @@ public class ASMCompareInst extends ASMInstBase{
         this.instOpt=instOpt;
     }
 
-    public ASMCompareInst(op instOpt,ASMReg rd,ASMReg rs1,ASMReg rs2,String comment){
-        super(rd,rs1,rs2);
-        this.instOpt=instOpt;
-        this.comment=comment;
-    }
-
     @Override
     public String toString(){
         if(rs2!=null)

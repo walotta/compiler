@@ -1,8 +1,11 @@
-package Backend;
+package Backend.RegisterAllocation;
 
+import Backend.ASMBlock;
+import Backend.ASMFunction;
 import Backend.ASMInst.ASMCalInst;
-import Backend.ASMInst.ASMFakeInst;
+import Backend.ASMInst.ASMLiInst;
 import Backend.ASMInst.ASMMemoryInst;
+import Backend.ASMModule;
 import Backend.ASMOperand.*;
 
 import java.util.ArrayList;
@@ -24,7 +27,7 @@ public class simpleRegDist {
         this.oriModule=oriModule;
     }
 
-    private ASMOperandBase loadToPhyReg(ASMOperandBase ori,ASMBlock currentBlock,PhysicalReg target){
+    private ASMOperandBase loadToPhyReg(ASMOperandBase ori, ASMBlock currentBlock, PhysicalReg target){
         if(ori instanceof VirtualReg){
             int addr;
             if(currentFunction.stackManager.RegMap.containsKey(ori)){
@@ -33,7 +36,7 @@ public class simpleRegDist {
                 addr=currentFunction.stackManager.assignReg((VirtualReg) ori);
             }
             if(addr>immMax){
-                currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.li,immOverFlowReg,new Immediate(addr)));
+                currentBlock.insts.add(new ASMLiInst(immOverFlowReg,new Immediate(addr)));
                 currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.add,immOverFlowReg,immOverFlowReg,stackHeaderReg));
                 currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.lw,target,immOverFlowReg,new Immediate(0)));
             }else
@@ -52,7 +55,7 @@ public class simpleRegDist {
             if(source!=null){
                 int addr=currentFunction.stackManager.RegMap.get(source);
                 if(addr>immMax){
-                    currentBlock.insts.add(new ASMFakeInst(ASMFakeInst.op.li,immOverFlowReg,new Immediate(addr)));
+                    currentBlock.insts.add(new ASMLiInst(immOverFlowReg,new Immediate(addr)));
                     currentBlock.insts.add(new ASMCalInst(ASMCalInst.op.add,immOverFlowReg,immOverFlowReg,stackHeaderReg));
                     currentBlock.insts.add(new ASMMemoryInst(ASMMemoryInst.op.sw,(PhysicalReg)target,immOverFlowReg,new Immediate(0)));
                 }else

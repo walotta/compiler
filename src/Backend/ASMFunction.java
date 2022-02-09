@@ -1,9 +1,8 @@
 package Backend;
 
-import Backend.ASMOperand.ASMOperandBase;
+import Backend.ASMInst.ASMInstBase;
 import Backend.ASMOperand.ASMReg;
 import Backend.ASMOperand.VirtualReg;
-import MIR.Operand.IROperand;
 import MIR.Operand.Register;
 
 import java.util.ArrayList;
@@ -12,12 +11,13 @@ import java.util.LinkedHashMap;
 import java.util.StringJoiner;
 
 public class ASMFunction {
-    String funcName;
+    public String funcName;
     int funcId;
-    ArrayList<ASMBlock> blocks;
+    public ArrayList<ASMBlock> blocks;
+    public HashMap<ASMLabel,Integer> blocksMap;
+    public ArrayList<ASMInstBase> retToInst;
     LinkedHashMap<Integer, ASMReg> renameTable;
-    ArrayList<VirtualReg> tmpReg;
-    StackManager stackManager;
+    public StackManager stackManager;
     int callerAddr;
 
     public void defineReg(Register irReg,ASMReg newReg){
@@ -35,18 +35,17 @@ public class ASMFunction {
     }
 
     public ASMReg getTmpReg(){
-        VirtualReg newReg=new VirtualReg(-1);
-        tmpReg.add(newReg);
-        return newReg;
+        return new VirtualReg(-1);
     }
 
     ASMFunction(String funcName,int funcId){
         this.funcName=funcName;
         this.funcId=funcId;
         this.blocks=new ArrayList<>();
+        this.blocksMap=new HashMap<>();
+        this.retToInst =new ArrayList<>();
         this.stackManager=new StackManager();
         this.renameTable=new LinkedHashMap<>();
-        this.tmpReg=new ArrayList<>();
     }
 
     @Override
