@@ -3,7 +3,6 @@ import sys
 import os
 from irSplit import judger
 from rich.progress import track
-import time
 
 def printRet(func):
     print("\033[36m{}\033[0m".format('call: {}'.format(func.__name__)))
@@ -67,7 +66,7 @@ def run():
     os.system('rm src.out')
     os.system('touch src.out')
     try:
-        task=subprocess.run('ravel --input-file=src.in --output-file=src.out src.s bif/bif.s',shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,encoding="utf-8",timeout=5)
+        task=subprocess.run('ravel --input-file=src.in --output-file=src.out src.s bif/bif.s',shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,encoding="utf-8",timeout=80)
     except:
         return 62,'time out'
     ret, val=task.returncode, task.stdout
